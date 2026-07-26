@@ -1,5 +1,5 @@
 // Master PostgreSQL Prisma Schema for Baher Silver ERP System
-// Enterprise Numbering & Configuration Engine (Phase 19)
+// Production Master Data Foundation (Phase 20)
 
 datasource db {
   provider = "postgresql"
@@ -87,7 +87,12 @@ model StorageLocation {
   binCode      String   @unique
   locationName String
   fullPathAr   String
-  qrCode       String?
+  cabinet      String?  @default("CAB-01")
+  shelf        String?  @default("SHF-01")
+  drawer       String?  @default("DRW-01")
+  box          String?  @default("BOX-01")
+  bag          String?  @default("BAG-01")
+  qrCode       String?  @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -270,4 +275,82 @@ model SystemConfig {
   updatedAt   DateTime @updatedAt
 
   @@map("system_configurations")
+}
+
+model LotBatch {
+  id              String    @id @default(uuid())
+  batchNumber     String    @unique
+  entityType      String
+  entityId        String
+  manufactureDate DateTime  @default(now())
+  expiryDate      DateTime?
+  initialQuantity Float
+  remainingQty    Float
+  unitCost        Float
+  purityGrade     String?
+  supplierId      String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lot_batches")
+}
+
+model Attachment {
+  id         String   @id @default(uuid())
+  entityType String
+  entityId   String
+  fileName   String
+  fileUrl    String
+  fileType   String
+  fileSize   Int?
+  uploadedBy String   @default("SYSTEM")
+  createdAt  DateTime @default(now())
+
+  @@map("entity_attachments")
+}
+
+model Certificate {
+  id               String    @id @default(uuid())
+  certificateNo    String    @unique
+  entityType       String
+  entityId         String
+  issuer           String
+  issueDate        DateTime  @default(now())
+  expiryDate       DateTime?
+  certificateType  String
+  documentUrl      String?
+  verificationCode String?
+  createdAt        DateTime  @default(now())
+
+  @@map("certificates")
+}
+
+model PricingHistory {
+  id         String   @id @default(uuid())
+  entityType String
+  entityId   String
+  priceType  String
+  oldPrice   Float
+  newPrice   Float
+  currency   String   @default("EGP")
+  reason     String?
+  changedBy  String   @default("SYSTEM")
+  createdAt  DateTime @default(now())
+
+  @@map("pricing_histories")
+}
+
+model StockHistory {
+  id            String   @id @default(uuid())
+  entityType    String
+  entityId      String
+  previousStock Float
+  changeQty     Float
+  newStock      Float
+  changeReason  String
+  performedBy   String   @default("SYSTEM")
+  createdAt     DateTime @default(now())
+
+  @@map("stock_histories")
 }
