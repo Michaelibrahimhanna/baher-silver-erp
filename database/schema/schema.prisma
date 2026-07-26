@@ -1,5 +1,5 @@
 // Master PostgreSQL Prisma Schema for Baher Silver ERP System
-// Data Governance & Security Engine (Phase 18)
+// Enterprise Numbering & Configuration Engine (Phase 19)
 
 datasource db {
   provider = "postgresql"
@@ -241,4 +241,33 @@ model AuditLog {
   createdAt  DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+model NumberingSequence {
+  id             String   @id @default(uuid())
+  entityType     String   @unique
+  prefix         String
+  useYear        Boolean  @default(true)
+  companyCode    String?  @default("BS")
+  branchCode     String?  @default("HQ")
+  sequenceLength Int      @default(6)
+  currentSeq     Int      @default(1)
+  resetPolicy    String   @default("YEARLY")
+  lastResetYear  Int?     @default(2026)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("numbering_sequences")
+}
+
+model SystemConfig {
+  id          String   @id @default(uuid())
+  configKey   String   @unique
+  configValue String
+  category    String   @default("GENERAL")
+  description String?
+  updatedBy   String   @default("SYSTEM")
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_configurations")
 }

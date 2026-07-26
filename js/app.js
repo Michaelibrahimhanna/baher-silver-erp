@@ -130,7 +130,79 @@ function archiveRecord(entityType, id) {
     logAuditEvent('ARCHIVE_RECORD', entityType, id, oldVal, target);
     renderApp();
     showToast(`تم أرشفة الصنف بنجاح (Soft Delete Policy - Zero Data Loss)!`);
+}
+
+// ENTERPRISE CONFIGURATION ENGINE (Phase 19)
+const SYSTEM_CONFIGURATIONS = {
+  COMPANY_NAME: 'شركة مصنع باهر سيلفر للسبائك والمجوهرات',
+  CURRENCY_SYMBOL: 'ج.م',
+  BARCODE_PREFIX: '62910',
+  QR_PREFIX: 'QR-BAHER',
+  WAREHOUSE_PREFIX: 'WH',
+  INVOICE_PREFIX: 'IV',
+  PURCHASE_PREFIX: 'PO',
+  PRODUCTION_PREFIX: 'WO',
+  TAX_PERCENTAGE: '14',
+  DATE_FORMAT: 'yyyy-MM-dd HH:mm:ss',
+  DEFAULT_LANGUAGE: 'ar',
+  SILVER_PURITY_DEFAULT: '999'
+};
+
+function getSystemConfig(key, defaultFallback = '') {
+  if (state.systemConfigs && state.systemConfigs[key]) return state.systemConfigs[key];
+  return SYSTEM_CONFIGURATIONS[key] || defaultFallback;
+}
+
+// ENTERPRISE CENTRALIZED NUMBERING ENGINE (Phase 19)
+const NUMBERING_SEQUENCES = {
+  STN:  { prefix: 'STN',  useYear: false, length: 6, currentSeq: 126040, resetPolicy: 'NEVER',   lastYear: 2026 },
+  SIL:  { prefix: 'SIL',  useYear: false, length: 6, currentSeq: 101,    resetPolicy: 'NEVER',   lastYear: 2026 },
+  RAW:  { prefix: 'RAW',  useYear: false, length: 6, currentSeq: 123320, resetPolicy: 'NEVER',   lastYear: 2026 },
+  COMP: { prefix: 'COMP', useYear: false, length: 6, currentSeq: 501,    resetPolicy: 'NEVER',   lastYear: 2026 },
+  SEMI: { prefix: 'SEMI', useYear: false, length: 6, currentSeq: 801,    resetPolicy: 'NEVER',   lastYear: 2026 },
+  FG:   { prefix: 'FG',   useYear: false, length: 6, currentSeq: 901,    resetPolicy: 'NEVER',   lastYear: 2026 },
+  SUP:  { prefix: 'SUP',  useYear: false, length: 6, currentSeq: 201,    resetPolicy: 'NEVER',   lastYear: 2026 },
+  CUS:  { prefix: 'CUS',  useYear: false, length: 6, currentSeq: 301,    resetPolicy: 'NEVER',   lastYear: 2026 },
+  WH:   { prefix: 'WH',   useYear: false, length: 6, currentSeq: 8,      resetPolicy: 'NEVER',   lastYear: 2026 },
+  PO:   { prefix: 'PO',   useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  GRN:  { prefix: 'GRN',  useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  IV:   { prefix: 'IV',   useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  WO:   { prefix: 'WO',   useYear: true,  length: 6, currentSeq: 992,    resetPolicy: 'YEARLY',  lastYear: 2026 },
+  SO:   { prefix: 'SO',   useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  INV:  { prefix: 'INV',  useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  PAY:  { prefix: 'PAY',  useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  JV:   { prefix: 'JV',   useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 },
+  AUD:  { prefix: 'AUD',  useYear: true,  length: 6, currentSeq: 1,      resetPolicy: 'YEARLY',  lastYear: 2026 }
+};
+
+function generateNextNumber(entityType, manualOverride = null) {
+  if (manualOverride && (state.currentUserRole === 'SYSTEM_ADMIN' || state.currentUserRole === 'FACTORY_MANAGER')) {
+    logAuditEvent('MANUAL_NUMBER_OVERRIDE', entityType, manualOverride, null, { override: manualOverride });
+    return manualOverride;
   }
+
+  const seq = NUMBERING_SEQUENCES[entityType] || { prefix: entityType, useYear: false, length: 6, currentSeq: 1, resetPolicy: 'NEVER', lastYear: 2026 };
+  const currentYear = new Date().getFullYear();
+
+  // Automatic Reset Policy Check
+  if (seq.resetPolicy === 'YEARLY' && seq.lastYear !== currentYear) {
+    seq.currentSeq = 1;
+    seq.lastYear = currentYear;
+  }
+
+  const paddedSeq = String(seq.currentSeq).padStart(seq.length, '0');
+  const numberResult = seq.useYear ? `${seq.prefix}-${currentYear}-${paddedSeq}` : `${seq.prefix}-${paddedSeq}`;
+
+  seq.currentSeq += 1;
+  return numberResult;
+}
+
+function previewNextNumber(entityType) {
+  const seq = NUMBERING_SEQUENCES[entityType] || { prefix: entityType, useYear: false, length: 6, currentSeq: 1, resetPolicy: 'NEVER', lastYear: 2026 };
+  const currentYear = new Date().getFullYear();
+  const nextSeq = (seq.resetPolicy === 'YEARLY' && seq.lastYear !== currentYear) ? 1 : seq.currentSeq;
+  const paddedSeq = String(nextSeq).padStart(seq.length, '0');
+  return seq.useYear ? `${seq.prefix}-${currentYear}-${paddedSeq}` : `${seq.prefix}-${paddedSeq}`;
 }
 
 // Master Data Modules Definition
