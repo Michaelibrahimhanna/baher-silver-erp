@@ -1,0 +1,65 @@
+<!-- SHARED SIDEBAR — paste this into each page after <body> -->
+<!-- This file is a reference; each page includes the sidebar inline -->
+
+<div id="sidebar-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;backdrop-filter:blur(2px)"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <a class="brand-logo" href="dashboard.html">
+      <div class="brand-icon">💎</div>
+      <div class="brand-text">
+        <span class="brand-name">Baher Silver</span>
+        <span class="brand-subtitle">Gemstone ERP</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-label" data-i18n="main_menu">MAIN MENU</div>
+    <a class="nav-item" href="dashboard.html">
+      <span class="nav-icon">📊</span>
+      <span data-i18n="dashboard">Dashboard</span>
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <span class="nav-icon">💎</span>
+      <span data-i18n="inventory">Gemstone Inventory</span>
+    </a>
+    <a class="nav-item" href="movements.html">
+      <span class="nav-icon">📦</span>
+      <span data-i18n="movements">Stock Movement</span>
+      <span class="nav-badge hidden" id="low-stock-badge">0</span>
+    </a>
+    <a class="nav-item" href="search.html">
+      <span class="nav-icon">🔍</span>
+      <span data-i18n="search">Advanced Search</span>
+    </a>
+
+    <div class="nav-section-label" style="margin-top:8px">MANAGEMENT</div>
+    <a class="nav-item" href="suppliers.html">
+      <span class="nav-icon">🏢</span>
+      <span data-i18n="suppliers">Suppliers</span>
+    </a>
+    <a class="nav-item" href="barcode.html">
+      <span class="nav-icon">🔷</span>
+      <span data-i18n="barcode">Barcode & QR</span>
+    </a>
+    <a class="nav-item" href="reports.html">
+      <span class="nav-icon">📈</span>
+      <span data-i18n="reports">Reports</span>
+    </a>
+    <a class="nav-item" href="settings.html">
+      <span class="nav-icon">⚙️</span>
+      <span data-i18n="settings">Settings</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en">🇺🇸 EN</button>
+      <button class="lang-btn" data-lang="ar">🇸🇦 عربي</button>
+    </div>
+    <div style="margin-top:8px;text-align:center;font-size:11px;color:var(--text-muted)">
+      Baher Silver v1.0 &copy; 2026
+    </div>
+  </div>
+</nav>

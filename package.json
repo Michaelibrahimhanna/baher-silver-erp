@@ -1,0 +1,15 @@
+{
+  "name": "baher-silver-erp",
+  "version": "4.0.0",
+  "description": "Baher Silver Manufacturing ERP Enterprise System",
+  "scripts": {
+    "dev:backend": "cd apps/api-backend && npm run dev",
+    "dev:frontend": "npx serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.3.0"
+  }
+}

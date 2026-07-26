@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <!-- Background -->
+  <rect width="500" height="500" fill="#C4B49E"/>
+  
+  <!-- White Outer Square Frame -->
+  <rect x="35" y="35" width="430" height="430" fill="none" stroke="#FFFFFF" stroke-width="10"/>
+
+  <!-- Center Content Container -->
+  <g transform="translate(0, 0)">
+    <!-- Main Black 'B' Shape -->
+    <path d="M 195 70 L 255 70 C 290 70 310 88 310 118 C 310 140 295 156 275 163 C 300 170 315 188 315 215 C 315 248 288 266 250 266 L 195 266 Z" fill="#000000"/>
+    
+    <!-- White Circle Ring Cutout in Lower Loop of B -->
+    <circle cx="250" cy="214" r="35" fill="none" stroke="#FFFFFF" stroke-width="9"/>
+    
+    <!-- White Diamond Icon above Ring -->
+    <g transform="translate(250, 114) scale(0.85)">
+      <!-- Diamond Facets -->
+      <polygon points="0,-28 -28,0 28,0" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linejoin="round"/>
+      <polyline points="-28,0 -16,-28 16,-28 28,0" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+      <line x1="0" y1="-28" x2="0" y2="0" stroke="#FFFFFF" stroke-width="4"/>
+      <line x1="-16" y1="-28" x2="-10" y2="0" stroke="#FFFFFF" stroke-width="3"/>
+      <line x1="16" y1="-28" x2="10" y2="0" stroke="#FFFFFF" stroke-width="3"/>
+    </g>
+    <!-- Solid black cover for upper hole in B -->
+    <circle cx="250" cy="118" r="16" fill="#000000"/>
+  </g>
+
+  <!-- BAHER Text -->
+  <text x="250" y="340" text-anchor="middle" font-family="'Times New Roman', Georgia, serif" font-size="54" font-weight="900" letter-spacing="18" fill="#000000">BAHER</text>
+
+  <!-- SILVER Text -->
+  <text x="250" y="405" text-anchor="middle" font-family="'Times New Roman', Georgia, serif" font-size="36" font-weight="700" letter-spacing="20" fill="#000000">SILVER</text>
+</svg>

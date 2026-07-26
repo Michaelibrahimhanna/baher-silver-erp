@@ -1,0 +1,201 @@
+// Master PostgreSQL Prisma Schema for Baher Silver ERP System
+// Multi-Environment Configuration: Development, Testing, Production
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum WarehouseType {
+  STONES
+  SILVER
+  RAW_MATERIALS
+  CHEMICALS
+  COMPONENTS
+  SEMI_FINISHED
+  FINISHED_GOODS
+}
+
+enum AccountCategory {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum BalanceType {
+  DEBIT
+  CREDIT
+}
+
+enum MovementTxType {
+  RECEIVE
+  ISSUE
+  RECEIVE_SILVER
+  ISSUE_SILVER
+  RECEIVE_RAW
+  ISSUE_RAW
+  TRANSFER
+  ADJUSTMENT
+}
+
+model Warehouse {
+  id            String        @id @default(uuid())
+  code          String        @unique
+  nameAr        String
+  nameEn        String
+  type          WarehouseType
+  securityLevel Int           @default(3)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  stones       Stone[]
+  rawMaterials RawMaterial[]
+  silverItems  SilverItem[]
+
+  @@map("warehouses")
+}
+
+model StorageLocation {
+  id           String   @id @default(uuid())
+  binCode      String   @unique
+  locationName String
+  fullPathAr   String
+  qrCode       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("storage_locations")
+}
+
+model Stone {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  nameAr        String
+  nameEn        String?
+  category      String
+  stoneType     String
+  origin        String    @default("محلي")
+  color         String    @default("طبيعي")
+  shape         String    @default("افتراضي")
+  size          String    @default("قياسي")
+  quality       String    @default("AAA")
+  imageUrl      String?
+  weightGrams   Float
+  quantity      Int
+  purchasePrice Float
+  sellingPrice  Float
+  supplierName  String?
+  invoiceNumber String?
+  barcode       String?   @unique
+  qrCode        String?   @unique
+  warehouseId   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  warehouse Warehouse  @relation(fields: [warehouseId], references: [id])
+  movements Movement[]
+
+  @@map("stones")
+}
+
+model SilverItem {
+  id             String   @id @default(uuid())
+  itemCode       String   @unique
+  nameAr         String
+  nameEn         String?
+  category       String   @default("عيار 999 نقي")
+  availableStock Float    @default(0)
+  unitOfMeasure  String   @default("جرام (g)")
+  unitCost       Float    @default(65)
+  supplierName   String?
+  barcode        String?  @unique
+  qrCode         String?  @unique
+  warehouseId    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@map("silver_items")
+}
+
+model RawMaterial {
+  id             String   @id @default(uuid())
+  itemCode       String   @unique
+  nameAr         String
+  nameEn         String?
+  category       String
+  availableStock Float    @default(0)
+  unitOfMeasure  String   @default("جم")
+  unitCost       Float    @default(50)
+  supplierName   String?
+  warehouseId    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@map("raw_materials")
+}
+
+model Account {
+  id          String          @id @default(uuid())
+  code        String          @unique
+  nameAr      String
+  nameEn      String
+  category    AccountCategory
+  balanceType BalanceType
+  balance     Float           @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  debitEntries  JournalEntry[] @relation("DebitAccount")
+  creditEntries JournalEntry[] @relation("CreditAccount")
+
+  @@map("chart_of_accounts")
+}
+
+model JournalEntry {
+  id               String   @id @default(uuid())
+  entryNo          String   @unique
+  referenceNo      String
+  debitAccountCode String
+  creditAccountCode String
+  amount           Float
+  description      String
+  createdAt        DateTime @default(now())
+
+  debitAccount  Account @relation("DebitAccount", fields: [debitAccountCode], references: [code])
+  creditAccount Account @relation("CreditAccount", fields: [creditAccountCode], references: [code])
+
+  @@map("journal_entries")
+}
+
+model Movement {
+  id                String         @id @default(uuid())
+  itemCode          String
+  itemName          String
+  stoneCategory     String?
+  txType            MovementTxType
+  typeLabel         String
+  quantity          Float
+  weightGrams       Float?
+  balanceBefore     String
+  balanceAfter      String
+  recipientEmployee String?
+  userName          String         @default("مسؤول المخزن")
+  orderNo           String?
+  notes             String?
+  createdAt         DateTime       @default(now())
+  stoneId           String?
+
+  stone Stone? @relation(fields: [stoneId], references: [id])
+
+  @@map("inventory_movements")
+}

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Credentials
+.env
+.env.development
+.env.testing
+.env.production
+*.env.local
+
+# Database & SQLite SQLite/Dev Artifacts
+apps/api-backend/prisma/dev.db
+apps/api-backend/prisma/dev.db-journal
+*.db
+database/backup/*.bak
+database/backup/*.sql
+
+# Build Outputs & Temporary Files
+dist/
+build/
+coverage/
+.DS_Store
+Thumbs.db
+scratch/
+
+# IDE Configuration
+.vscode/
+.idea/
+*.swp
+*.swo

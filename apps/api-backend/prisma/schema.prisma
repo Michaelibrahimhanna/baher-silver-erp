@@ -1,0 +1,347 @@
+// =============================================================================
+// BAHER SILVER MANUFACTURING ERP — PRISMA SCHEMA
+// Specialized exclusively for Baher Silver Factory (NO GOLD)
+// Primary Weight: GRAMS (g) | Secondary Weight: CARATS (ct - display only)
+// Phase 15: Relational & Configurable Master Data Hierarchy
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// -----------------------------------------------------------------------------
+// 1. RELATIONAL MASTER DATA HIERARCHY & DEPENDENCIES
+// -----------------------------------------------------------------------------
+
+model MasterItem {
+  id          String   @id @default(uuid())
+  parentId    String?  // Parent ID for Category -> Type -> Family -> Variant
+  category    String   // 'STONE_CATEGORY' | 'STONE_TYPE' | 'COLOR' | 'SHAPE' | 'SIZE' | 'ORIGIN' | 'QUALITY_GRADE' | 'TREATMENT' | 'SILVER_PURITY' | 'RAW_CATEGORY' | 'UNIT' | 'WAREHOUSE_TYPE' | 'STONE_FAMILY'
+  code        String   
+  nameAr      String
+  nameEn      String
+  description String?
+  metadata    String?  // JSON metadata for Quality standards, Allowed cuts/colors, Shape-Size link
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent   MasterItem?  @relation("MasterHierarchy", fields: [parentId], references: [id])
+  children MasterItem[] @relation("MasterHierarchy")
+
+  @@unique([category, code])
+}
+
+// -----------------------------------------------------------------------------
+// 2. SUPPLIER PROFILES (PROFILES & SRM)
+// -----------------------------------------------------------------------------
+
+model SupplierProfile {
+  id                     String   @id @default(uuid())
+  supplierCode           String   @unique
+  companyNameAr          String
+  companyNameEn          String
+  contactPerson          String?
+  phone                  String?
+  email                  String?
+  country                String   @default("تايلاند")
+  currency               String   @default("USD")
+  defaultStoneCategories String?  // JSON Array or comma separated
+  defaultRawCategories   String?  // JSON Array or comma separated
+  paymentTerms           String   @default("Net 30") // Net 30, Cash on Delivery, 50% Advance
+  leadTimeDays           Int      @default(14)
+  rating                 Float    @default(5.0)
+  certificates           String?  // GIA, AIGS, ISO certified
+  preferredWarehouseId   String?
+  isActive               Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// 3. MULTI-LEVEL PRICING PROFILES
+// -----------------------------------------------------------------------------
+
+model ItemPriceProfile {
+  id           String   @id @default(uuid())
+  itemId       String   // Stone ID or Item ID
+  profileType  String   // 'RETAIL' | 'WHOLESALE' | 'VIP' | 'EXPORT' | 'FACTORY'
+  pricePerGram Float    @default(0.0)
+  pricePerPiece Float   @default(0.0)
+  pricePerCarat Float   @default(0.0)
+  currency     String   @default("EGP")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([itemId, profileType])
+}
+
+// -----------------------------------------------------------------------------
+// 4. COMPANY & USER MANAGEMENT
+// -----------------------------------------------------------------------------
+
+model Company {
+  id                 String   @id @default(uuid())
+  companyCode        String   @unique
+  nameAr             String
+  nameEn             String
+  taxNumber          String?
+  currencyCode       String   @default("EGP")
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  warehouses        Warehouse[]
+  storageLocations  StorageLocation[]
+  itemsGemstone     ItemGemstone[]
+  itemsRawMaterials ItemRawMaterial[]
+  itemsSilver       ItemSilver[]
+  movements         StockMovement[]
+  audits            InventoryAudit[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  fullNameAr   String
+  fullNameEn   String
+  role         String   @default("warehouse_manager")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+// -----------------------------------------------------------------------------
+// 5. MAIN WAREHOUSE STRUCTURE & HIERARCHICAL STORAGE LOCATIONS
+// -----------------------------------------------------------------------------
+
+model Warehouse {
+  id            String   @id @default(uuid())
+  companyId     String   @default("default-company")
+  code          String   @unique
+  nameAr        String
+  nameEn        String
+  type          String   
+  securityLevel Int      @default(3)
+  capacityPct   Float    @default(0.0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  company          Company           @relation(fields: [companyId], references: [id])
+  storageLocations StorageLocation[]
+  itemsGemstone    ItemGemstone[]
+  itemsRawMaterials ItemRawMaterial[]
+}
+
+model StorageLocation {
+  id               String   @id @default(uuid())
+  companyId        String   @default("default-company")
+  warehouseId      String
+  parentLocationId String?
+  binCode          String   @unique
+  locationName     String
+  cabinet          String?  
+  shelf            String?  
+  drawer           String?  
+  box              String?  
+  bag              String?  
+  fullPathAr       String?  
+  barcode          String?  @unique
+  qrCode           String?  @unique
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  company        Company           @relation(fields: [companyId], references: [id])
+  warehouse      Warehouse         @relation(fields: [warehouseId], references: [id])
+  parentLocation StorageLocation?  @relation("LocationHierarchy", fields: [parentLocationId], references: [id])
+  childLocations StorageLocation[] @relation("LocationHierarchy")
+
+  itemsGemstone     ItemGemstone[]
+  itemsRawMaterials ItemRawMaterial[]
+  lots              StoneLot[]
+}
+
+// -----------------------------------------------------------------------------
+// 6. STONES STORE MASTER DATA & LOT MANAGEMENT
+// -----------------------------------------------------------------------------
+
+model ItemGemstone {
+  id                String   @id @default(uuid())
+  companyId         String   @default("default-company")
+  warehouseId       String
+  storageLocationId String?
+  code              String   @unique
+  internalCode      String?  
+  qrCode            String?  @unique
+  barcode           String?  @unique
+  category          String   
+  stoneType         String   
+  nameAr            String   
+  nameEn            String   
+  color             String   
+  shape             String   
+  cut               String?  
+  size              String   
+  quality           String   
+  treatment         String   
+  origin            String   
+  quantity          Int      @default(0)
+  weightGrams       Float    @default(0.0) // PRIMARY WEIGHT IN GRAMS
+  weightCarats      Float    @default(0.0) // SECONDARY WEIGHT IN CARATS
+  supplierName      String?  
+  invoiceNumber     String?  
+  batchNumber       String?  
+  purchasePrice     Float    @default(0.0)
+  sellingPrice      Float    @default(0.0)
+  purchaseDate      String?  
+  imageUrl          String?  
+  certificateUrl    String?  
+  notes             String?  
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id])
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id])
+  storageLocation StorageLocation? @relation(fields: [storageLocationId], references: [id])
+  lots            StoneLot[]
+}
+
+model StoneLot {
+  id                String   @id @default(uuid())
+  stoneId           String
+  batchNumber       String   @unique
+  supplierName      String?
+  purchaseInvoice   String?
+  purchaseDate      String?
+  purchasePrice     Float    @default(0.0)
+  initialQty        Int      @default(0)
+  availableQty      Int      @default(0)
+  reservedQty       Int      @default(0)
+  weightGrams       Float    @default(0.0)
+  weightCarats      Float    @default(0.0)
+  storageLocationId String?
+  createdAt         DateTime @default(now())
+
+  stone           ItemGemstone     @relation(fields: [stoneId], references: [id])
+  storageLocation StorageLocation? @relation(fields: [storageLocationId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// 7. RAW MATERIALS WAREHOUSE
+// -----------------------------------------------------------------------------
+
+model ItemRawMaterial {
+  id                String   @id @default(uuid())
+  companyId         String   @default("default-company")
+  warehouseId       String
+  storageLocationId String?
+  itemCode          String   @unique
+  batchNumber       String?
+  category          String   
+  nameAr            String
+  nameEn            String
+  supplierName      String?
+  purchasePrice     Float    @default(0.0)
+  unitCost          Float    @default(0.0)
+  availableStock    Float    @default(0.0)
+  unitOfMeasure     String   @default("g")
+  barcode           String?  @unique
+  qrCode            String?  @unique
+  notes             String?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id])
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id])
+  storageLocation StorageLocation? @relation(fields: [storageLocationId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// 8. SILVER INVENTORY
+// -----------------------------------------------------------------------------
+
+model ItemSilver {
+  id               String   @id @default(uuid())
+  companyId        String   @default("default-company")
+  batchCode        String   @unique
+  silverCategory   String   
+  grossWeightGrams Float    @default(0.0)
+  pureSilverGrams  Float    @default(0.0)
+  costPerGram      Float    @default(0.0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// 9. IMMUTABLE MOVEMENT LEDGER
+// -----------------------------------------------------------------------------
+
+model StockMovement {
+  id             String   @id @default(uuid())
+  companyId      String   @default("default-company")
+  txType         String   
+  itemType       String   
+  itemId         String
+  itemCode       String
+  itemName       String
+  batchNumber    String?
+  fromWarehouse  String?
+  fromLocation   String?
+  toWarehouse    String?
+  toLocation     String?
+  quantity       Int      @default(0)
+  weightGrams    Float    @default(0.0)
+  balanceBefore  Float    @default(0.0)
+  balanceAfter   Float    @default(0.0)
+  referenceDoc   String?  
+  userName       String   @default("أمين المخزن")
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// 10. INVENTORY AUDIT
+// -----------------------------------------------------------------------------
+
+model InventoryAudit {
+  id                String               @id @default(uuid())
+  companyId         String               @default("default-company")
+  auditCode         String               @unique
+  warehouseName     String
+  storageLocation   String?
+  auditorName       String
+  status            String               @default("COMPLETED")
+  createdAt         DateTime             @default(now())
+  
+  company Company              @relation(fields: [companyId], references: [id])
+  items   InventoryAuditItem[]
+}
+
+model InventoryAuditItem {
+  id                   String         @id @default(uuid())
+  auditId              String
+  itemCode             String
+  itemName             String
+  systemQty            Int            @default(0)
+  actualQty            Int            @default(0)
+  differenceQty        Int            @default(0)
+  systemWeightGrams    Float          @default(0.0)
+  actualWeightGrams    Float          @default(0.0)
+  differenceWeightGrams Float         @default(0.0)
+  lastMovementDate     String?
+  lastAuditDate        String?
+  auditorNotes         String?
+
+  audit InventoryAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+}
