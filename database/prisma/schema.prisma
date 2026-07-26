@@ -1,5 +1,5 @@
 // Master PostgreSQL Prisma Schema for Baher Silver ERP System
-// Inventory Engine Core (Phase 21)
+// Receiving & Inventory Transaction Engine (Phase 22)
 
 datasource db {
   provider = "postgresql"
@@ -448,4 +448,60 @@ model ComponentItem {
   updatedAt          DateTime     @updatedAt
 
   @@map("component_items")
+}
+
+model PurchaseOrder {
+  id           String       @id @default(uuid())
+  orderNumber  String       @unique
+  supplierId   String
+  supplierName String
+  status       RecordStatus @default(APPROVED)
+  totalAmount  Float        @default(0)
+  currency     String       @default("EGP")
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("purchase_orders")
+}
+
+model GoodsReceiptNote {
+  id              String   @id @default(uuid())
+  grnNumber       String   @unique
+  purchaseOrderId String
+  warehouseId     String
+  receivedBy      String   @default("أمينة المخزن")
+  status          String   @default("PENDING_INSPECTION")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("goods_receipt_notes")
+}
+
+model QualityInspection {
+  id               String   @id @default(uuid())
+  inspectionNo     String   @unique
+  grnId            String
+  inspectorName    String   @default("أخصائي الجودة")
+  passedQty        Float
+  rejectedQty      Float
+  purityResult     String?
+  inspectionStatus String   @default("PASSED")
+  inspectionNotes  String?
+  createdAt        DateTime @default(now())
+
+  @@map("quality_inspections")
+}
+
+model InventoryLock {
+  id          String    @id @default(uuid())
+  warehouseId String
+  locationId  String?
+  reason      String    @default("AUDIT_COUNT_ACTIVE")
+  lockedBy    String    @default("SYSTEM_ADMIN")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  releasedAt  DateTime?
+
+  @@map("inventory_locks")
 }
