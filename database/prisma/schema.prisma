@@ -1,5 +1,5 @@
 // Master PostgreSQL Prisma Schema for Baher Silver ERP System
-// Production Master Data Foundation (Phase 20)
+// Inventory Engine Core (Phase 21)
 
 datasource db {
   provider = "postgresql"
@@ -353,4 +353,99 @@ model StockHistory {
   createdAt     DateTime @default(now())
 
   @@map("stock_histories")
+}
+
+model InventoryBalance {
+  id              String   @id @default(uuid())
+  entityType      String
+  entityId        String
+  itemCode        String
+  batchNumber     String?
+  warehouseId     String
+  locationId      String?
+  availableQty    Float    @default(0)
+  reservedQty     Float    @default(0)
+  inProductionQty Float    @default(0)
+  damagedQty      Float    @default(0)
+  returnedQty     Float    @default(0)
+  baseUnit        String   @default("g")
+  lastMovementId  String?
+  lastMovementAt  DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityId, warehouseId, batchNumber, locationId])
+  @@map("inventory_balances")
+}
+
+model FinishedProduct {
+  id                    String       @id @default(uuid())
+  productCode           String       @unique
+  nameAr                String
+  nameEn                String?
+  category              String       @default("خاتم فضة")
+  billOfMaterialsId     String?
+  silverWeightGrams     Float        @default(0)
+  silverPurity          String       @default("925")
+  stoneWeightGrams      Float        @default(0)
+  stoneCount            Int          @default(0)
+  componentsWeightGrams Float        @default(0)
+  productionRouting     String?      @default("صب ➔ تركيب أحجار ➔ تلميع ➔ دمغ")
+  unitCost              Float        @default(0)
+  sellingPrice          Float        @default(0)
+  barcode               String?      @unique
+  qrCode                String?      @unique
+  warehouseId           String
+  status                RecordStatus @default(APPROVED)
+  isArchived            Boolean      @default(false)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@map("finished_products")
+}
+
+model ChemicalItem {
+  id                  String       @id @default(uuid())
+  itemCode            String       @unique
+  nameAr              String
+  nameEn              String?
+  category            String       @default("أحماض وكيماويات")
+  sdsDocumentUrl      String?
+  hazardClass         String       @default("CORROSIVE_8")
+  concentration       String       @default("68%")
+  storageTempMin      Float        @default(15)
+  storageTempMax      Float        @default(25)
+  expiryDate          DateTime?
+  availableStockGrams Float        @default(0)
+  unitCost            Float        @default(100)
+  supplierName        String?
+  warehouseId         String
+  status              RecordStatus @default(APPROVED)
+  isArchived          Boolean      @default(false)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@map("chemical_items")
+}
+
+model ComponentItem {
+  id                 String       @id @default(uuid())
+  itemCode           String       @unique
+  nameAr             String
+  nameEn             String?
+  category           String       @default("إكسسوارات فضية")
+  weightGrams        Float        @default(0)
+  compatibleProducts String?      @default("خواتم وسلاسل فضية")
+  supplierName       String?
+  size               String?      @default("قياسي")
+  material           String       @default("فضة 925")
+  availableStock     Float        @default(0)
+  unitCost           Float        @default(25)
+  warehouseId        String
+  status             RecordStatus @default(APPROVED)
+  isArchived         Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@map("component_items")
 }
