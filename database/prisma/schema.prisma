@@ -1,5 +1,5 @@
 // Master PostgreSQL Prisma Schema for Baher Silver ERP System
-// Environment: Development, Testing, Production
+// Data Governance & Security Engine (Phase 18)
 
 datasource db {
   provider = "postgresql"
@@ -8,6 +8,27 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+}
+
+enum RecordStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum SystemRole {
+  SYSTEM_ADMIN
+  FACTORY_MANAGER
+  WAREHOUSE_MANAGER
+  WAREHOUSE_CLERK
+  PURCHASING_OFFICER
+  PRODUCTION_MANAGER
+  SALES_MANAGER
+  QUALITY_CONTROL
+  ACCOUNTANT
+  VIEWER
 }
 
 enum WarehouseType {
@@ -74,17 +95,17 @@ model StorageLocation {
 }
 
 model Stone {
-  id            String    @id @default(uuid())
-  code          String    @unique
+  id            String       @id @default(uuid())
+  code          String       @unique
   nameAr        String
   nameEn        String?
   category      String
   stoneType     String
-  origin        String    @default("محلي")
-  color         String    @default("طبيعي")
-  shape         String    @default("افتراضي")
-  size          String    @default("قياسي")
-  quality       String    @default("AAA")
+  origin        String       @default("محلي")
+  color         String       @default("طبيعي")
+  shape         String       @default("افتراضي")
+  size          String       @default("قياسي")
+  quality       String       @default("AAA")
   imageUrl      String?
   weightGrams   Float
   quantity      Int
@@ -92,11 +113,13 @@ model Stone {
   sellingPrice  Float
   supplierName  String?
   invoiceNumber String?
-  barcode       String?   @unique
-  qrCode        String?   @unique
+  barcode       String?      @unique
+  qrCode        String?      @unique
   warehouseId   String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  status        RecordStatus @default(APPROVED)
+  isArchived    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   warehouse Warehouse  @relation(fields: [warehouseId], references: [id])
   movements Movement[]
@@ -105,20 +128,22 @@ model Stone {
 }
 
 model SilverItem {
-  id             String   @id @default(uuid())
-  itemCode       String   @unique
+  id             String       @id @default(uuid())
+  itemCode       String       @unique
   nameAr         String
   nameEn         String?
-  category       String   @default("عيار 999 نقي")
-  availableStock Float    @default(0)
-  unitOfMeasure  String   @default("جرام (g)")
-  unitCost       Float    @default(65)
+  category       String       @default("عيار 999 نقي")
+  availableStock Float        @default(0)
+  unitOfMeasure  String       @default("جرام (g)")
+  unitCost       Float        @default(65)
   supplierName   String?
-  barcode        String?  @unique
-  qrCode         String?  @unique
+  barcode        String?      @unique
+  qrCode         String?      @unique
   warehouseId    String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status         RecordStatus @default(APPROVED)
+  isArchived     Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
@@ -126,18 +151,20 @@ model SilverItem {
 }
 
 model RawMaterial {
-  id             String   @id @default(uuid())
-  itemCode       String   @unique
+  id             String       @id @default(uuid())
+  itemCode       String       @unique
   nameAr         String
   nameEn         String?
   category       String
-  availableStock Float    @default(0)
-  unitOfMeasure  String   @default("جم")
-  unitCost       Float    @default(50)
+  availableStock Float        @default(0)
+  unitOfMeasure  String       @default("جم")
+  unitCost       Float        @default(50)
   supplierName   String?
   warehouseId    String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status         RecordStatus @default(APPROVED)
+  isArchived     Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
@@ -162,14 +189,14 @@ model Account {
 }
 
 model JournalEntry {
-  id               String   @id @default(uuid())
-  entryNo          String   @unique
-  referenceNo      String
-  debitAccountCode String
+  id                String   @id @default(uuid())
+  entryNo           String   @unique
+  referenceNo       String
+  debitAccountCode  String
   creditAccountCode String
-  amount           Float
-  description      String
-  createdAt        DateTime @default(now())
+  amount            Float
+  description       String
+  createdAt         DateTime @default(now())
 
   debitAccount  Account @relation("DebitAccount", fields: [debitAccountCode], references: [code])
   creditAccount Account @relation("CreditAccount", fields: [creditAccountCode], references: [code])
@@ -198,4 +225,20 @@ model Movement {
   stone Stone? @relation(fields: [stoneId], references: [id])
 
   @@map("inventory_movements")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  userName   String
+  action     String
+  entityType String
+  entityId   String
+  oldValue   String?
+  newValue   String?
+  ipAddress  String?  @default("127.0.0.1")
+  device     String?  @default("Enterprise Terminal")
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
 }

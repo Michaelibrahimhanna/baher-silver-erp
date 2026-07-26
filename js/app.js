@@ -73,8 +73,65 @@ const state = {
   pendingStoneImageUrl: '',
   activeModal: null,
   toastMessage: null,
-  searchQuery: ''
+  searchQuery: '',
+  auditLogs: []
 };
+
+// ENTERPRISE DATA GOVERNANCE & SECURITY MATRIX (Phase 18)
+const RECORD_STATUSES = {
+  DRAFT: 'DRAFT',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  ARCHIVED: 'ARCHIVED'
+};
+
+const SYSTEM_ROLES = {
+  SYSTEM_ADMIN: { nameAr: 'مدير النظام الفائق (System Administrator)', permissions: ['CREATE', 'READ', 'UPDATE', 'ARCHIVE', 'APPROVE', 'AUDIT', 'FINANCE'] },
+  FACTORY_MANAGER: { nameAr: 'مدير المصنع التنفيذي (Factory Manager)', permissions: ['CREATE', 'READ', 'UPDATE', 'ARCHIVE', 'APPROVE', 'FINANCE'] },
+  WAREHOUSE_MANAGER: { nameAr: 'مدير المخازن الرئيسي (Warehouse Manager)', permissions: ['CREATE', 'READ', 'UPDATE', 'ARCHIVE', 'APPROVE'] },
+  WAREHOUSE_CLERK: { nameAr: 'أمينات ومسؤولي المخازن (Warehouse Clerk)', permissions: ['CREATE_DRAFT', 'READ'] },
+  PURCHASING_OFFICER: { nameAr: 'مسؤول المشتريات والسبائك (Purchasing Officer)', permissions: ['CREATE', 'READ', 'UPDATE'] },
+  PRODUCTION_MANAGER: { nameAr: 'مدير ورش الصب والإنتاج (Production Manager)', permissions: ['CREATE', 'READ', 'UPDATE'] },
+  SALES_MANAGER: { nameAr: 'مدير المبيعات والجملة (Sales Manager)', permissions: ['CREATE', 'READ', 'UPDATE'] },
+  QUALITY_CONTROL: { nameAr: 'أخصائي فحص وفحص العيار والجودة (Quality Control)', permissions: ['READ', 'APPROVE', 'REJECT'] },
+  ACCOUNTANT: { nameAr: 'رئيس الحسابات والمالية (Chief Accountant)', permissions: ['CREATE', 'READ', 'UPDATE', 'FINANCE'] },
+  VIEWER: { nameAr: 'مستعرض قراءة فقط (Viewer)', permissions: ['READ'] }
+};
+
+function logAuditEvent(action, entityType, entityId, oldValue, newValue) {
+  const auditEntry = {
+    id: 'AUD-' + Date.now(),
+    userId: 'USR-ADMIN',
+    userName: state.currentUserRole || 'مدير النظام (System Admin)',
+    action: action,
+    entityType: entityType,
+    entityId: entityId,
+    oldValue: oldValue ? JSON.stringify(oldValue) : null,
+    newValue: newValue ? JSON.stringify(newValue) : null,
+    ipAddress: '127.0.0.1',
+    device: typeof navigator !== 'undefined' ? navigator.userAgent : 'Enterprise Terminal',
+    createdAt: new Date().toISOString(),
+    timestamp: new Date().toLocaleString('ar-EG')
+  };
+  state.auditLogs.unshift(auditEntry);
+}
+
+function archiveRecord(entityType, id) {
+  let target = null;
+  if (entityType === 'Stone') target = state.stones.find(s => s.id === id);
+  if (entityType === 'SilverItem') target = state.silverItems.find(s => s.id === id);
+  if (entityType === 'RawMaterial') target = state.rawMaterials.find(r => r.id === id);
+
+  if (target) {
+    const oldVal = { ...target };
+    target.status = RECORD_STATUSES.ARCHIVED;
+    target.isArchived = true;
+    logAuditEvent('ARCHIVE_RECORD', entityType, id, oldVal, target);
+    renderApp();
+    showToast(`تم أرشفة الصنف بنجاح (Soft Delete Policy - Zero Data Loss)!`);
+  }
+}
 
 // Master Data Modules Definition
 const MASTER_CATEGORIES = [
