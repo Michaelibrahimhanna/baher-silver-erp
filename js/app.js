@@ -451,6 +451,7 @@ function renderApp() {
 
       <!-- Navigation Tabs -->
       <nav class="hidden xl:flex items-center space-x-1 space-x-reverse bg-slate-900/90 p-1.5 rounded-2xl border border-brand-500/20 text-xs font-bold overflow-x-auto">
+        ${renderNavButton('admin_dashboard', '👑 لوحة الأدمن')}
         ${renderNavButton('wh_dashboard', '📊 لوحة التحكم')}
         ${renderNavButton('product_engineering', '🏭 المنتجات والـ BOM')}
         ${renderNavButton('stones_store', '💎 الأحجار')}
@@ -1371,6 +1372,7 @@ function renderSidebar() {
       </div>
 
       <nav class="space-y-1 text-xs font-bold">
+        ${renderSidebarItem('admin_dashboard', '👑', 'لوحة تحكم الأدمن الرئيسية')}
         ${renderSidebarItem('wh_dashboard', '📊', 'لوحة التحكم المخزنية')}
         ${renderSidebarItem('product_engineering', '🏭', 'هندسة المنتجات وقائمة المواد (BOM)')}
         ${renderSidebarItem('stones_store', '💎', 'مخزن الأحجار الكريمة')}
@@ -1407,6 +1409,7 @@ function renderSidebarItem(tabId, icon, label) {
 
 function renderActiveTabContent() {
   switch (state.activeTab) {
+    case 'admin_dashboard': return renderAdminDashboardScreen();
     case 'wh_dashboard': return renderWarehouseDashboardScreen();
     case 'product_engineering': return renderProductEngineeringScreen();
     case 'stones_store': return renderStonesStoreScreen();
@@ -1423,7 +1426,7 @@ function renderActiveTabContent() {
     case 'accounting_system': return renderAccountingSystemScreen();
     case 'inventory_audit': return renderInventoryAuditScreen();
     case 'universal_search': return renderUniversalSearchScreen();
-    default: return renderWarehouseDashboardScreen();
+    default: return renderAdminDashboardScreen();
   }
 }
 
@@ -5195,6 +5198,164 @@ function handleAuthSessionExpired() {
 
   alert('انتهت الجلسة. يرجى إعادة تسجيل الدخول مرة أخرى.');
   renderApp();
+}
+
+function renderAdminDashboardScreen() {
+  const users = state.users || [];
+  const sessions = state.userSessions || [];
+  const products = state.products || [];
+  const stones = state.stones || [];
+  const logs = state.loginHistoryLogs || [];
+
+  const activeUsersCount = users.filter(u => u.status === 'ACTIVE').length;
+
+  const dashboardTabs = [
+    { code: 'tab.dashboard', name: '📊 الداش بورد الرئيسية' },
+    { code: 'tab.products', name: '🏭 المنتجات والـ BOM' },
+    { code: 'tab.stones', name: '💎 مخزن الأحجار' },
+    { code: 'tab.raw_materials', name: '🧪 الخامات' },
+    { code: 'tab.silver', name: '🥈 الفضة الخام' },
+    { code: 'tab.master_center', name: '⚙️ مركز البيانات' },
+    { code: 'tab.warehouses', name: '🏛️ المخازن السبعة' },
+    { code: 'tab.locations', name: '📍 التخزين الهرمي' },
+    { code: 'tab.transactions', name: '📜 سجل الحركات' },
+    { code: 'tab.accounting', name: '⚖️ النظام المحاسبي' },
+    { code: 'tab.audit', name: '📋 الجرد الدوري' },
+    { code: 'tab.search', name: '🔍 البحث الفائق' }
+  ];
+
+  return `
+    <div class="space-y-6 font-sans">
+      <!-- Top Banner for Admin Dashboard -->
+      <div class="glass-card rounded-3xl p-6 border border-amber-500/40 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/40 shadow-2xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10 relative">
+          <div class="flex items-center gap-4">
+            <div class="h-16 w-16 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-3xl text-amber-400 shadow-xl">
+              👑
+            </div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-white tracking-wide flex items-center gap-2">
+                لوحة تحكم الأدمن والتحكم الإداري الشامل
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">SUPER ADMIN</span>
+              </h2>
+              <p class="text-xs text-slate-300 font-mono mt-1">المركز الرئيسي للتحكم في جميع موظفي مصنع باهر سيلفر • تحديد صلاحيات شاشات الداش بورد • إدارة الحسابات والجلسات</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="openModal('addUserModal')" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-xl flex items-center gap-2">
+              <span>+ إضافة موظف جديد</span>
+            </button>
+            <button onclick="openModal('changeMyPasswordModal')" class="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-white font-bold text-xs shadow-lg">
+              🔑 تغيير كلمة السير الخاصة بي
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick KPI Stat Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+          <div class="text-[11px] text-slate-400 font-sans">👥 الموظفين المسجلين</div>
+          <div class="text-2xl font-extrabold text-cyan-400">${users.length} <span class="text-xs text-slate-500">مستخدم</span></div>
+          <div class="text-[10px] text-emerald-400 font-sans">نشط: ${activeUsersCount} موظف</div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+          <div class="text-[11px] text-slate-400 font-sans">📱 الأجهزة والجلسات النشطة</div>
+          <div class="text-2xl font-extrabold text-purple-400">${sessions.length} <span class="text-xs text-slate-500">جهاز</span></div>
+          <div class="text-[10px] text-purple-300 font-sans">حماية وتشفير JWT</div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+          <div class="text-[11px] text-slate-400 font-sans">🏭 المنتجات المصنعة</div>
+          <div class="text-2xl font-extrabold text-amber-400">${products.length} <span class="text-xs text-slate-500">منتج</span></div>
+          <div class="text-[10px] text-amber-300 font-sans">مع مسارات BOM</div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+          <div class="text-[11px] text-slate-400 font-sans">📜 محاولات الدخول المسجلة</div>
+          <div class="text-2xl font-extrabold text-emerald-400">${logs.length} <span class="text-xs text-slate-500">محاولة</span></div>
+          <div class="text-[10px] text-slate-400 font-sans">سجل الأمان الحاد</div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTROL PANEL: EMPLOYEE DASHBOARD SCREEN PERMISSIONS -->
+      <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-borderdark">
+          <div>
+            <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+              <span>🎯</span> التحكم السريع في صلاحيات شاشات الداش بورد للموظفين
+            </h3>
+            <p class="text-xs text-slate-400 font-mono">حدد الشاشات المسموح بكل موظف بالدخول إليها بنقرة واحدة مباشرة من هذه اللوحة</p>
+          </div>
+          <button onclick="loadUsersData()" class="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-amber-400">🔄 تحديث القائمة</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-300 border-b border-slate-800">
+              <tr>
+                <th class="p-3">الموظف / اسم المستخدم</th>
+                <th class="p-3">الدور المؤسسي</th>
+                <th class="p-3 text-center">تخصيص كامل للصلاحيات</th>
+                <th class="p-3 text-center">إعادة تعيين الباسورد</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              ${users.map(u => `
+                <tr class="hover:bg-slate-900/60">
+                  <td class="p-3">
+                    <div class="font-bold text-white font-sans text-sm">${u.fullNameAr}</div>
+                    <div class="text-cyan-400 text-xs">${u.username} ${u.isSystemUser ? '<span class="text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-400 font-sans">آلي</span>' : ''}</div>
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-amber-400 border border-amber-500/30 text-[11px] font-sans font-bold">
+                      ${u.position || u.roleCodes?.[0] || 'موظف'}
+                    </span>
+                  </td>
+                  <td class="p-3 text-center">
+                    <button onclick="openUserPermissionsOverrideModal('${u.id}')" class="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/40 font-extrabold text-xs transition-all">
+                      ⚙️ تعديل وتحديد الصلاحيات ➔
+                    </button>
+                  </td>
+                  <td class="p-3 text-center">
+                    <button onclick="openUserPermissionsOverrideModal('${u.id}')" class="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-300 font-bold text-xs">
+                      🔑 تغيير الباسورد
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADMIN QUICK NAVIGATION CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans text-xs">
+        <div onclick="switchTab('users_admin')" class="p-5 rounded-2xl glass-card border border-cyan-500/30 hover:border-cyan-500 cursor-pointer space-y-2 transition-all">
+          <div class="flex items-center gap-3 text-cyan-400 font-bold text-sm">
+            <span class="text-xl">👥</span> سجل وحسابات المستخدمين
+          </div>
+          <p class="text-slate-400 text-[11px]">إدارة وتعيين الفروع والمخازن وأرشفة أو إضافة الموظفين الجدد.</p>
+        </div>
+
+        <div onclick="switchTab('roles_matrix')" class="p-5 rounded-2xl glass-card border border-amber-500/30 hover:border-amber-500 cursor-pointer space-y-2 transition-all">
+          <div class="flex items-center gap-3 text-amber-400 font-bold text-sm">
+            <span class="text-xl">🛡️</span> مصفوفة الأدوار الـ 7
+          </div>
+          <p class="text-slate-400 text-[11px]">تعديل واستعراض الأذونات الممنوحة لكل دور مؤسسي في النظام.</p>
+        </div>
+
+        <div onclick="switchTab('security_sessions')" class="p-5 rounded-2xl glass-card border border-purple-500/30 hover:border-purple-500 cursor-pointer space-y-2 transition-all">
+          <div class="flex items-center gap-3 text-purple-400 font-bold text-sm">
+            <span class="text-xl">📱</span> إدارة الأجهزة والجلسات
+          </div>
+          <p class="text-slate-400 text-[11px]">عرض الأجهزة والمتصفحات النشطة حالياً وإمكانية إلغائها بنقرة واحدة.</p>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderUsersAdminScreen() {

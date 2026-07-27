@@ -4,8 +4,9 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 const PERMISSION_GROUPS = [
+  { groupCode: 'DASHBOARD', nameAr: 'صلاحيات شاشات الداش بورد الرئيسية', nameEn: 'Main Dashboard Screen Controls', sortOrder: 0 },
   { groupCode: 'INVENTORY', nameAr: 'إدارة المخزون والأحجار', nameEn: 'Inventory & Gemstones', sortOrder: 1 },
-  { groupCode: 'WAREHOUSE', nameAr: 'المخازن والمواقع الهرمية', nameEn: 'Warehouses & Bins', sortOrder: 2 },
+  { groupCode: 'WAREHOUSE', nameAr: 'المخازن والم مواقع الهرمية', nameEn: 'Warehouses & Bins', sortOrder: 2 },
   { groupCode: 'MANUFACTURING', nameAr: 'هندسة التصنيع والـ BOM', nameEn: 'Manufacturing & BOM', sortOrder: 3 },
   { groupCode: 'FINANCE', nameAr: 'الحسابات والشجرة والمالية', nameEn: 'Finance & Accounting', sortOrder: 4 },
   { groupCode: 'CRM', nameAr: 'الموردين والعملاء', nameEn: 'CRM & Suppliers', sortOrder: 5 },
@@ -16,6 +17,21 @@ const PERMISSION_GROUPS = [
 ];
 
 const PERMISSIONS = [
+  // DASHBOARD SCREENS ACCESS CONTROLS
+  { permissionCode: 'tab.admin_dashboard', groupCode: 'DASHBOARD', nameAr: 'لوحة تحكم الأدمن والتحكم الشامل', nameEn: 'Admin Control Dashboard' },
+  { permissionCode: 'tab.dashboard', groupCode: 'DASHBOARD', nameAr: 'شاشة لوحة التحكم المخزنية الرئيسية', nameEn: 'Main Warehouse Dashboard' },
+  { permissionCode: 'tab.products', groupCode: 'DASHBOARD', nameAr: 'شاشة هندسة المنتجات وقائمة المواد BOM', nameEn: 'Product Engineering & BOM Screen' },
+  { permissionCode: 'tab.stones', groupCode: 'DASHBOARD', nameAr: 'شاشة مخزن الأحجار الكريمة', nameEn: 'Gemstones Store Screen' },
+  { permissionCode: 'tab.raw_materials', groupCode: 'DASHBOARD', nameAr: 'شاشة مخزن الخامات والمستلزمات', nameEn: 'Raw Materials Store Screen' },
+  { permissionCode: 'tab.silver', groupCode: 'DASHBOARD', nameAr: 'شاشة مخزن الفضة الخام والسبائك', nameEn: 'Raw Silver Bullion Store Screen' },
+  { permissionCode: 'tab.master_center', groupCode: 'DASHBOARD', nameAr: 'شاشة مركز البيانات الأساسية (12)', nameEn: 'Master Data Center Screen' },
+  { permissionCode: 'tab.warehouses', groupCode: 'DASHBOARD', nameAr: 'شاشة المخازن السبعة الرئيسية', nameEn: 'Seven Main Warehouses Screen' },
+  { permissionCode: 'tab.locations', groupCode: 'DASHBOARD', nameAr: 'شاشة التخزين الهرمي وQR', nameEn: 'Hierarchical Storage Bins Screen' },
+  { permissionCode: 'tab.transactions', groupCode: 'DASHBOARD', nameAr: 'شاشة سجل الحركات والـ Timeline', nameEn: 'Stock Movement Ledger Screen' },
+  { permissionCode: 'tab.accounting', groupCode: 'DASHBOARD', nameAr: 'شاشة النظام المحاسبي وشجرة الحسابات', nameEn: 'Chart of Accounts & Ledgers Screen' },
+  { permissionCode: 'tab.audit', groupCode: 'DASHBOARD', nameAr: 'شاشة الجرد الدوري والرصيد', nameEn: 'Inventory Auditing Screen' },
+  { permissionCode: 'tab.search', groupCode: 'DASHBOARD', nameAr: 'شاشة البحث الفائق الشامل', nameEn: 'Universal Search Engine Screen' },
+
   // INVENTORY
   { permissionCode: 'inventory.view', groupCode: 'INVENTORY', nameAr: 'عرض رصيد وشاشة المخزون', nameEn: 'View Inventory' },
   { permissionCode: 'inventory.create', groupCode: 'INVENTORY', nameAr: 'إضافة أصناف وأحجار جديدة', nameEn: 'Create Inventory Items' },
