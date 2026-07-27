@@ -55,7 +55,11 @@ const state = {
   movements: [],
   audits: [],
   masterItems: [],
-  searchResults: { stones: [], rawMaterials: [], silverItems: [], locations: [], movements: [] },
+  products: [],
+  selectedProduct: null,
+  productCategoryFilter: 'ALL',
+  productDetailTab: 'info',
+  searchResults: { stones: [], rawMaterials: [], silverItems: [], locations: [], movements: [], products: [] },
 
   // Enterprise Double-Entry Accounting Matrix
   chartOfAccounts: [
@@ -332,14 +336,15 @@ async function loadAllDatabaseData() {
   renderApp();
 
   try {
-    const [whs, locs, stns, raws, mvmt, auds, masters] = await Promise.all([
+    const [whs, locs, stns, raws, mvmt, auds, masters, prods] = await Promise.all([
       apiGet('/warehouses'),
       apiGet('/warehouses/locations'),
       apiGet('/inventory/stones'),
       apiGet('/inventory/raw-materials'),
       apiGet('/inventory/movements'),
       apiGet('/inventory/audits'),
-      apiGet('/master-data')
+      apiGet('/master-data'),
+      apiGet('/products')
     ]);
 
     state.warehouses = (whs && whs.length) ? whs : DEFAULT_7_WAREHOUSES;
@@ -350,6 +355,7 @@ async function loadAllDatabaseData() {
     state.movements = mvmt || [];
     state.audits = auds || [];
     state.masterItems = masters || [];
+    state.products = prods || [];
   } catch (err) {
     console.error('Failed to load database data:', err);
     state.warehouses = DEFAULT_7_WAREHOUSES;
@@ -400,6 +406,7 @@ function renderApp() {
       <!-- Navigation Tabs -->
       <nav class="hidden lg:flex items-center space-x-1 space-x-reverse bg-slate-900/90 p-1.5 rounded-2xl border border-brand-500/20 text-xs font-bold overflow-x-auto">
         ${renderNavButton('wh_dashboard', '📊 لوحة التحكم')}
+        ${renderNavButton('product_engineering', '🏭 المنتجات والـ BOM')}
         ${renderNavButton('stones_store', '💎 مخزن الأحجار')}
         ${renderNavButton('raw_store', '🧪 مخزن الخامات')}
         ${renderNavButton('silver_store', '🥈 مخزن الفضة الخام')}
@@ -1310,6 +1317,7 @@ function renderSidebar() {
 
       <nav class="space-y-1 text-xs font-bold">
         ${renderSidebarItem('wh_dashboard', '📊', 'لوحة التحكم المخزنية')}
+        ${renderSidebarItem('product_engineering', '🏭', 'هندسة المنتجات وقائمة المواد (BOM)')}
         ${renderSidebarItem('stones_store', '💎', 'مخزن الأحجار الكريمة')}
         ${renderSidebarItem('raw_store', '🧪', 'مخزن الخامات والمستلزمات')}
         ${renderSidebarItem('silver_store', '🥈', 'مخزن الفضة الخام والسبائك')}
@@ -1341,6 +1349,7 @@ function renderSidebarItem(tabId, icon, label) {
 function renderActiveTabContent() {
   switch (state.activeTab) {
     case 'wh_dashboard': return renderWarehouseDashboardScreen();
+    case 'product_engineering': return renderProductEngineeringScreen();
     case 'stones_store': return renderStonesStoreScreen();
     case 'raw_store': return renderRawMaterialsStoreScreen();
     case 'silver_store': return renderSilverStoreScreen();
@@ -2675,6 +2684,11 @@ function performLiveSearch(q) {
 // MODALS AND FORMS (FULL DETAILS MODAL + MULTI-OPTION IMAGE ENGINE)
 function renderActiveModal() {
   if (!state.activeModal) return '';
+
+  if (state.activeModal === 'addProductModal') return renderAddProductModal();
+  if (state.activeModal === 'productDetailModal' && state.selectedProduct) return renderProductDetailModal();
+  if (state.activeModal === 'addBOMLineModal' && state.selectedProduct) return renderAddBOMLineModal();
+  if (state.activeModal === 'addVariantModal' && state.selectedProduct) return renderAddVariantModal();
 
   // FULL STONE DETAILS MODAL WITH STONE IMAGE
   if (state.activeModal === 'stoneDetailsModal' && state.selectedStoneDetails) {
@@ -4271,3 +4285,737 @@ function exportMasterCSV() {
   a.download = `master_data_${state.selectedMasterCategory}.csv`;
   a.click();
 }
+
+/* =============================================================================
+   PHASE 23: PRODUCT ENGINEERING & BOM ENGINE UI
+   ============================================================================= */
+
+function renderProductEngineeringScreen() {
+  const products = state.products || [];
+  const filtered = products.filter(p => {
+    if (state.productCategoryFilter && state.productCategoryFilter !== 'ALL' && p.category !== state.productCategoryFilter) return false;
+    if (state.productSearchQuery) {
+      const q = state.productSearchQuery.toLowerCase();
+      return p.nameAr.toLowerCase().includes(q) || p.productCode.toLowerCase().includes(q) || (p.collection && p.collection.toLowerCase().includes(q));
+    }
+    return true;
+  });
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <!-- Screen Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-borderdark">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl text-amber-400">
+            🏭
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-white tracking-wide">هندسة المنتجات وقائمة المواد (Product Engineering & BOM Engine)</h2>
+            <p class="text-xs text-slate-400 font-mono">سجل المنتجات التامة • قوائم المواد التفصيلية BOM • متغيرات المنتج • مسارات التصنيع • الاحتساب التلقائي والتكلفة الحقيقية</p>
+          </div>
+        </div>
+
+        <button onclick="openModal('addProductModal')" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-lg flex items-center gap-2 transition-all">
+          <span>+ إضافة منتج تام جديد</span>
+        </button>
+      </div>
+
+      <!-- Controls & Filter Bar -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <input type="text" placeholder="بحث باسم المنتج، الكود، الكولكشن..." value="${state.productSearchQuery || ''}" oninput="state.productSearchQuery = this.value; renderApp();" class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-100 focus:border-amber-500 focus:outline-none w-full sm:w-64">
+          <select onchange="state.productCategoryFilter = this.value; renderApp();" class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-100 focus:border-amber-500 focus:outline-none">
+            <option value="ALL" ${state.productCategoryFilter === 'ALL' ? 'selected' : ''}>جميع التصنيفات</option>
+            <option value="خاتم" ${state.productCategoryFilter === 'خاتم' ? 'selected' : ''}>خواتم</option>
+            <option value="قلادة" ${state.productCategoryFilter === 'قلادة' ? 'selected' : ''}>قلادات ومعلقات</option>
+            <option value="إسوارة" ${state.productCategoryFilter === 'إسوارة' ? 'selected' : ''}>أساور وانسيالات</option>
+            <option value="حلق" ${state.productCategoryFilter === 'حلق' ? 'selected' : ''}>أقراط وحلقان</option>
+            <option value="طقم" ${state.productCategoryFilter === 'طقم' ? 'selected' : ''}>أطقم مجوهرات كاملة</option>
+          </select>
+        </div>
+        <div class="text-xs text-slate-400 font-mono">
+          عدد المنتجات المسجلة: <span class="text-amber-400 font-bold">${filtered.length}</span> من أصل ${products.length}
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      ${filtered.length === 0 ? renderEmptyState('لا توجد منتجات تامة مسجلة حتى الآن. اضغط للإضافة', 'إضافة منتج جديد', 'addProductModal') : `
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          ${filtered.map(p => renderProductCard(p)).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderProductCard(p) {
+  const bomCount = p.bom?.lines?.length || 0;
+  const variantCount = p.variants?.length || 0;
+  const stepsCount = p.routing?.steps?.length || 0;
+  const cost = p.cost;
+  const marginPct = cost ? Math.round(cost.profitMargin || 0) : 0;
+
+  const mainImg = p.imageUrls ? (JSON.parse(p.imageUrls)[0] || null) : null;
+  const imgTag = mainImg
+    ? `<img src="${mainImg}" alt="${p.nameAr}" class="w-20 h-20 rounded-xl object-cover border border-slate-700 shrink-0">`
+    : `<div class="w-20 h-20 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl text-slate-600 shrink-0">💍</div>`;
+
+  return `
+    <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-amber-500/50 transition-all space-y-4 shadow-lg flex flex-col justify-between">
+      <div class="space-y-3">
+        <div class="flex gap-3">
+          ${imgTag}
+          <div class="space-y-1 overflow-hidden">
+            <span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">${p.productCode}</span>
+            <h3 class="font-extrabold text-white text-sm truncate">${p.nameAr}</h3>
+            <p class="text-xs text-slate-400 font-mono">${p.category} • عيار ${p.silverPurity} ${p.collection ? '• ' + p.collection : ''}</p>
+          </div>
+        </div>
+
+        <!-- Specifications Breakdown -->
+        <div class="grid grid-cols-3 gap-2 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-[11px] font-mono text-center">
+          <div>
+            <div class="text-slate-500">وزن الفضة</div>
+            <div class="text-slate-200 font-bold">${p.silverWeightGrams} جم</div>
+          </div>
+          <div>
+            <div class="text-slate-500">الأحجار</div>
+            <div class="text-slate-200 font-bold">${p.stoneCount} حجر (${p.stoneWeightGrams}جم)</div>
+          </div>
+          <div>
+            <div class="text-slate-500">المكونات</div>
+            <div class="text-slate-200 font-bold">${p.componentWeightGrams} جم</div>
+          </div>
+        </div>
+
+        <!-- BOM, Variants, Routing Pills -->
+        <div class="flex items-center gap-2 text-[10px] font-mono">
+          <span class="px-2 py-1 rounded-lg ${bomCount > 0 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}">📋 BOM: ${bomCount} مكون</span>
+          <span class="px-2 py-1 rounded-lg ${variantCount > 0 ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'bg-slate-800 text-slate-500'}">🔀 متغبرات: ${variantCount}</span>
+          <span class="px-2 py-1 rounded-lg ${stepsCount > 0 ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30' : 'bg-slate-800 text-slate-500'}">⚙️ مسار: ${stepsCount} مرحلة</span>
+        </div>
+      </div>
+
+      <!-- Cost & Profit Row -->
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-slate-400">التكلفة / البيع</div>
+          <div class="text-xs font-bold text-white font-mono">
+            ${cost ? `${cost.actualCost.toFixed(1)} ج.م / <span class="text-amber-400">${cost.sellingPrice.toFixed(1)} ج.م</span>` : 'غير محتسب'}
+          </div>
+        </div>
+
+        <button onclick="openProductDetailModal('${p.id}')" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/40 text-xs font-bold transition-all">
+          التفاصيل والـ BOM ➔
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function openProductDetailModal(id) {
+  state.isLoading = true;
+  renderApp();
+  try {
+    const res = await apiGet(`/products/${id}`);
+    if (res) {
+      state.selectedProduct = res;
+      state.productDetailTab = 'info';
+      state.activeModal = 'productDetailModal';
+    }
+  } catch(e) {
+    alert('تعذر تحميل تفاصيل المنتج');
+  } finally {
+    state.isLoading = false;
+    renderApp();
+  }
+}
+
+function renderProductDetailModal() {
+  const p = state.selectedProduct;
+  if (!p) return '';
+
+  const activeTab = state.productDetailTab || 'info';
+
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-4xl w-full p-6 rounded-3xl border border-amber-500/40 space-y-6 max-h-[92vh] overflow-y-auto text-right font-sans shadow-2xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center pb-4 border-b border-borderdark">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 font-mono">${p.productCode}</span>
+              <h3 class="text-xl font-extrabold text-white">${p.nameAr}</h3>
+            </div>
+            <p class="text-xs text-slate-400 font-mono mt-1">${p.category} • عيار ${p.silverPurity} • ${p.collection || 'بدون كولكشن'}</p>
+          </div>
+          <button onclick="closeModal()" class="h-9 w-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+        </div>
+
+        <!-- 5-Tab Navigation Bar -->
+        <div class="flex border-b border-slate-800 text-xs font-bold">
+          <button onclick="state.productDetailTab = 'info'; renderApp();" class="px-4 py-2.5 border-b-2 transition-all ${activeTab === 'info' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'}">📋 بيانات المنتج</button>
+          <button onclick="state.productDetailTab = 'bom'; renderApp();" class="px-4 py-2.5 border-b-2 transition-all ${activeTab === 'bom' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'}">🧪 قائمة المواد (BOM)</button>
+          <button onclick="state.productDetailTab = 'variants'; renderApp();" class="px-4 py-2.5 border-b-2 transition-all ${activeTab === 'variants' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'}">🔀 المتغيرات (Variants)</button>
+          <button onclick="state.productDetailTab = 'routing'; renderApp();" class="px-4 py-2.5 border-b-2 transition-all ${activeTab === 'routing' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'}">⚙️ مسار التصنيع (Routing)</button>
+          <button onclick="state.productDetailTab = 'cost'; renderApp();" class="px-4 py-2.5 border-b-2 transition-all ${activeTab === 'cost' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'}">💰 التكلفة والتسعير (Costing)</button>
+        </div>
+
+        <!-- Tab Body -->
+        <div class="space-y-4">
+          ${activeTab === 'info' ? renderProductTabInfo(p) : ''}
+          ${activeTab === 'bom' ? renderProductTabBOM(p) : ''}
+          ${activeTab === 'variants' ? renderProductTabVariants(p) : ''}
+          ${activeTab === 'routing' ? renderProductTabRouting(p) : ''}
+          ${activeTab === 'cost' ? renderProductTabCosting(p) : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProductTabInfo(p) {
+  return `
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+      <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
+        <div class="text-amber-400 font-bold font-sans">المواصفات الفنية للفضة والأحجار:</div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>وزن الفضة النقي:</span><span class="text-white font-bold">${p.silverWeightGrams} جرام</span></div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>عيار الفضة المطلوب:</span><span class="text-white font-bold">${p.silverPurity}</span></div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>عدد الأحجار المثبتة:</span><span class="text-white font-bold">${p.stoneCount} حجر</span></div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>وزن الأحجار الإجمالي:</span><span class="text-white font-bold">${p.stoneWeightGrams} جرام</span></div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>وزن الإكسسوارات والمكونات:</span><span class="text-white font-bold">${p.componentWeightGrams} جرام</span></div>
+      </div>
+
+      <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
+        <div class="text-amber-400 font-bold font-sans">التجهيز النهائي والملاحظات:</div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>نوع الطلاء الروديوم:</span><span class="text-white font-bold">${p.rhodiumType || 'بدون طلاء'}</span></div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>المقاس الافتراضي:</span><span class="text-white font-bold">${p.ringSizeDefault || 'قياسي'}</span></div>
+        <div class="flex justify-between border-b border-slate-800/60 py-1"><span>الكولكشن / المجموعة:</span><span class="text-white font-bold">${p.collection || 'عام'}</span></div>
+        <div class="pt-2 text-slate-400 font-sans">
+          <div class="text-[11px] text-slate-500 font-bold mb-1">ملاحظات التصنيع والتشغيل:</div>
+          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs">${p.manufacturingNotes || 'لا توجد ملاحظات مسجلة.'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProductTabBOM(p) {
+  const bom = p.bom;
+  const lines = bom?.lines || [];
+
+  return `
+    <div class="space-y-4">
+      <div class="flex justify-between items-center bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+        <div class="text-xs text-slate-300 font-bold">
+          معامل الهالك المتوقع: <span class="text-amber-400 font-mono">${bom?.expectedLossPercent || 2.0}%</span> | 
+          نسبة الإنتاجية المتوقعة: <span class="text-emerald-400 font-mono">${bom?.expectedYield || 100}%</span>
+        </div>
+        <button onclick="openModal('addBOMLineModal')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-bold">
+          + إضافة مكون لـ BOM
+        </button>
+      </div>
+
+      ${lines.length === 0 ? renderEmptyState('لا توجد مكونات مسجلة في BOM لهذا المنتج', 'إضافة مكون', 'addBOMLineModal') : `
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-mono">
+              <tr>
+                <th class="p-3">نوع المكون</th>
+                <th class="p-3">كود الصنف</th>
+                <th class="p-3">اسم المكون</th>
+                <th class="p-3">الكمية/الوزن</th>
+                <th class="p-3">تكلفة الوحدة</th>
+                <th class="p-3">الهالك %</th>
+                <th class="p-3">التكلفة الإجمالية</th>
+                <th class="p-3">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-mono">
+              ${lines.map(l => `
+                <tr class="hover:bg-slate-900/50">
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-sans text-[10px]">${l.lineType}</span></td>
+                  <td class="p-3 text-amber-400">${l.itemCode}</td>
+                  <td class="p-3 text-white font-sans font-bold">${l.itemName}</td>
+                  <td class="p-3">${l.quantity} ${l.unitOfMeasure}</td>
+                  <td class="p-3">${l.unitCost.toFixed(2)} ج.م</td>
+                  <td class="p-3 text-amber-400">${l.wasteFactor}%</td>
+                  <td class="p-3 text-emerald-400 font-bold">${l.totalCost.toFixed(2)} ج.م</td>
+                  <td class="p-3">
+                    <button onclick="removeBOMLine('${l.id}')" class="text-rose-400 hover:text-rose-300 text-xs">حذف</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderProductTabVariants(p) {
+  const variants = p.variants || [];
+
+  return `
+    <div class="space-y-4">
+      <div class="flex justify-between items-center bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+        <div class="text-xs text-slate-300 font-bold">المتغيرات المتاحة لهذا المنتج (Ring Sizes, Stone Colors, Finishes):</div>
+        <button onclick="openModal('addVariantModal')" class="px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/40 text-xs font-bold">
+          + إضافة متغير جديد
+        </button>
+      </div>
+
+      ${variants.length === 0 ? renderEmptyState('لا توجد متغيرات مسجلة لهذا المنتج', 'إضافة متغير', 'addVariantModal') : `
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-3">كود المتغير</th>
+                <th class="p-3">المقاس</th>
+                <th class="p-3">لون الحجر</th>
+                <th class="p-3">مقاس الحجر</th>
+                <th class="p-3">عيار الفضة</th>
+                <th class="p-3">نوع التشطيب</th>
+                <th class="p-3">فارق السعر</th>
+                <th class="p-3">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              ${variants.map(v => `
+                <tr class="hover:bg-slate-900/50">
+                  <td class="p-3 text-cyan-400 font-bold">${v.variantCode}</td>
+                  <td class="p-3">${v.ringSize || '—'}</td>
+                  <td class="p-3">${v.stoneColor || '—'}</td>
+                  <td class="p-3">${v.stoneSize || '—'}</td>
+                  <td class="p-3">${v.silverPurity || '—'}</td>
+                  <td class="p-3">${v.surfaceFinish || '—'}</td>
+                  <td class="p-3 text-emerald-400">${v.priceDelta >= 0 ? '+' : ''}${v.priceDelta} ج.م</td>
+                  <td class="p-3">
+                    <button onclick="deleteVariant('${v.id}')" class="text-rose-400 hover:text-rose-300 text-xs">حذف</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderProductTabRouting(p) {
+  const steps = p.routing?.steps || [];
+
+  return `
+    <div class="space-y-4">
+      <div class="flex justify-between items-center bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+        <div class="text-xs text-slate-300 font-bold">مسار مراحل التصنيع (Production Routing Template):</div>
+        <button onclick="saveDefaultRoutingTemplate('${p.id}')" class="px-3.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/40 text-xs font-bold">
+          ⚡ توليد المسار القياسي (9 مراحل)
+        </button>
+      </div>
+
+      ${steps.length === 0 ? renderEmptyState('لم يتم إعداد مسار التصنيع لهذا المنتج. اضغط لتوليد المسار القياسي', 'توليد المسار القياسي', '') : `
+        <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-9 gap-2 text-center text-xs font-mono">
+          ${steps.map(s => `
+            <div class="p-3 rounded-2xl bg-slate-950 border border-purple-500/30 space-y-1">
+              <span class="text-[10px] text-purple-400 font-bold">#${s.sequenceNo}</span>
+              <div class="font-bold text-white text-[11px] font-sans">${s.stage}</div>
+              <div class="text-[10px] text-slate-400">${s.laborMinutes} دقيقة</div>
+              <div class="text-[10px] text-emerald-400">${s.laborCostRate} ج.م/د</div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderProductTabCosting(p) {
+  const cost = p.cost;
+
+  return `
+    <div class="space-y-4">
+      <div class="flex justify-between items-center bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+        <div class="text-xs text-slate-300 font-bold">احتساب التكلفة التلقائي وتحديد هامش الربح:</div>
+        <button onclick="triggerCostCalculation('${p.id}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-lg">
+          🔄 إعادة الاحتساب أوتوماتيكياً
+        </button>
+      </div>
+
+      ${!cost ? renderEmptyState('لم يتم احتساب التكلفة بعد. اضغط لإجراء الاحتساب الأول', 'احتساب التكلفة الآن', '') : `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <div class="text-slate-400">تكلفة المواد (Materials)</div>
+            <div class="text-lg font-bold text-white">${cost.materialCost.toFixed(2)} ج.م</div>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <div class="text-slate-400">تكلفة العمالة (Labor)</div>
+            <div class="text-lg font-bold text-white">${cost.laborCost.toFixed(2)} ج.م</div>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <div class="text-slate-400">تكلفة الماكينات (Machine)</div>
+            <div class="text-lg font-bold text-white">${cost.machineCost.toFixed(2)} ج.م</div>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <div class="text-slate-400">المصروفات الإدارية (Overhead)</div>
+            <div class="text-lg font-bold text-white">${cost.overhead.toFixed(2)} ج.م</div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950 rounded-2xl border border-amber-500/40 space-y-3 font-mono text-xs">
+          <div class="flex justify-between items-center text-sm font-bold text-white">
+            <span>إجمالي التكلفة الحقيقية (Actual Cost):</span>
+            <span class="text-amber-400 text-lg">${cost.actualCost.toFixed(2)} ج.م</span>
+          </div>
+          <div class="flex justify-between items-center text-sm font-bold text-white">
+            <span>سعر البيع المقترح:</span>
+            <span class="text-emerald-400 text-lg">${cost.sellingPrice.toFixed(2)} ج.م</span>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-300">
+            <span>هامش الربح المحقق (Profit Margin):</span>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">${cost.profitMargin.toFixed(1)}%</span>
+          </div>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderAddProductModal() {
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-2xl w-full p-6 md:p-8 rounded-3xl border border-amber-500/40 space-y-6 max-h-[92vh] overflow-y-auto text-right font-sans shadow-2xl">
+        <div class="flex justify-between items-center pb-4 border-b border-borderdark">
+          <div>
+            <h3 class="text-xl font-extrabold text-white">إضافة منتج تام جديد في الهندسة</h3>
+            <p class="text-xs text-slate-400 font-mono">تحديد كود وتصنيف ومواصفات المنتج الفنية</p>
+          </div>
+          <button onclick="closeModal()" class="h-9 w-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+        </div>
+
+        <form onsubmit="submitAddProduct(event)" class="space-y-4 text-xs font-sans">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">اسم المنتج بالعربية *</label>
+              <input type="text" name="nameAr" required placeholder="مثال: خاتم فضة عيار 925 مرصع بياقوت أحمر" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">اسم المنتج بالإنجليزية</label>
+              <input type="text" name="nameEn" placeholder="e.g. 925 Silver Ring Ruby" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">التصنيف *</label>
+              <select name="category" required class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+                <option value="خاتم">خاتم</option>
+                <option value="قلادة">قلادة / معلقة</option>
+                <option value="إسوارة">إسوارة / انسيال</option>
+                <option value="حلق">حلق / أقراط</option>
+                <option value="طقم">طقم مجوهرات</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">عيار الفضة *</label>
+              <select name="silverPurity" required class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+                <option value="925">925 (فضة إسترليني)</option>
+                <option value="999">999 (فضة نقية)</option>
+                <option value="835">835</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">المجموعة / Collection</label>
+              <input type="text" name="collection" placeholder="مثال: Royal Collection 2026" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">وزن الفضة المتوقع (جرام) *</label>
+              <input type="number" step="0.01" name="silverWeightGrams" required placeholder="0.00" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">عدد الأحجار</label>
+              <input type="number" name="stoneCount" placeholder="0" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">وزن الأحجار (جرام)</label>
+              <input type="number" step="0.01" name="stoneWeightGrams" placeholder="0.00" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">طلاء الروديوم</label>
+              <input type="text" name="rhodiumType" placeholder="مثال: طلاء روديوم أبيض إيطالي" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">المقاس الافتراضي</label>
+              <input type="text" name="ringSizeDefault" placeholder="مثال: 18 (US 8)" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ملاحظات التصنيع والتشغيل</label>
+            <textarea name="manufacturingNotes" rows="2" placeholder="أدخل أي ملاحظات تقنية خاصة بالورشة والصب..." class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-500 focus:outline-none"></textarea>
+          </div>
+
+          <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
+            <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold border border-slate-700">إلغاء</button>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold shadow-lg">حفظ المنتج الجديد ➔</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function renderAddBOMLineModal() {
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-lg w-full p-6 rounded-3xl border border-emerald-500/40 space-y-5 text-right font-sans shadow-2xl">
+        <div class="flex justify-between items-center pb-3 border-b border-borderdark">
+          <h3 class="text-lg font-extrabold text-white">إضافة مكون جديد في BOM</h3>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form onsubmit="submitAddBOMLine(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">نوع المكون *</label>
+            <select name="lineType" required class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+              <option value="SILVER">فضة (Silver)</option>
+              <option value="STONE">حجر (Gemstone)</option>
+              <option value="COMPONENT">مكون/إكسسوار (Component)</option>
+              <option value="CHEMICAL">كيماويات (Chemical)</option>
+              <option value="PACKAGING">تغليف (Packaging)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">كود الصنف *</label>
+            <input type="text" name="itemCode" required placeholder="مثال: SLV-92501 أو STN-101" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">اسم المكون *</label>
+            <input type="text" name="itemName" required placeholder="مثال: فضة كسر 925" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">الكمية/الوزن *</label>
+              <input type="number" step="0.01" name="quantity" required placeholder="1.0" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">تكلفة الوحدة (ج.م) *</label>
+              <input type="number" step="0.01" name="unitCost" required placeholder="50.00" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">نسبة الهالك الخاص %</label>
+            <input type="number" step="0.1" name="wasteFactor" placeholder="0.0" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+          </div>
+
+          <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300">إلغاء</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold">إضافة المكون ➔</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function renderAddVariantModal() {
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-md w-full p-6 rounded-3xl border border-cyan-500/40 space-y-4 text-right font-sans shadow-2xl">
+        <div class="flex justify-between items-center pb-3 border-b border-borderdark">
+          <h3 class="text-lg font-extrabold text-white">إضافة متغير جديد (Variant)</h3>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form onsubmit="submitAddVariant(event)" class="space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">المقاس</label>
+              <input type="text" name="ringSize" placeholder="مثال: 16" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">لون الحجر</label>
+              <input type="text" name="stoneColor" placeholder="مثال: أحمر ياقوتي" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">مقاس الحجر</label>
+              <input type="text" name="stoneSize" placeholder="مثال: 6x8 mm" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">عيار الفضة</label>
+              <input type="text" name="silverPurity" placeholder="925" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">فارق السعر (Price Delta) ج.م</label>
+            <input type="number" step="0.5" name="priceDelta" placeholder="0.0" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+          </div>
+
+          <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300">إلغاء</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold">إضافة المتغير ➔</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+// ACTION HANDLERS
+async function submitAddProduct(e) {
+  e.preventDefault();
+  const form = e.target;
+  const body = {
+    nameAr: form.nameAr.value,
+    nameEn: form.nameEn.value,
+    category: form.category.value,
+    collection: form.collection.value,
+    silverPurity: form.silverPurity.value,
+    silverWeightGrams: parseFloat(form.silverWeightGrams.value || 0),
+    stoneCount: parseInt(form.stoneCount.value || 0, 10),
+    stoneWeightGrams: parseFloat(form.stoneWeightGrams.value || 0),
+    rhodiumType: form.rhodiumType.value,
+    ringSizeDefault: form.ringSizeDefault.value,
+    manufacturingNotes: form.manufacturingNotes.value
+  };
+
+  try {
+    const res = await apiPost('/products', body);
+    if (res && res.success) {
+      closeModal();
+      showToast(`تم إنشاء المنتج ${res.data.productCode} بنجاح!`);
+      await loadAllDatabaseData();
+    }
+  } catch(err) {
+    alert('حدث خطأ أثناء حفظ المنتج');
+  }
+}
+
+async function submitAddBOMLine(e) {
+  e.preventDefault();
+  const p = state.selectedProduct;
+  if (!p) return;
+
+  const form = e.target;
+  const body = {
+    lineType: form.lineType.value,
+    itemCode: form.itemCode.value,
+    itemName: form.itemName.value,
+    quantity: parseFloat(form.quantity.value || 1),
+    unitCost: parseFloat(form.unitCost.value || 0),
+    wasteFactor: parseFloat(form.wasteFactor.value || 0)
+  };
+
+  try {
+    const res = await apiPost(`/products/${p.id}/bom/lines`, body);
+    if (res && res.success) {
+      closeModal();
+      showToast('تمت إضافة المكون لـ BOM بنجاح!');
+      await openProductDetailModal(p.id);
+    }
+  } catch(err) {
+    alert('حدث خطأ أثناء إضافة المكون');
+  }
+}
+
+async function removeBOMLine(lineId) {
+  const p = state.selectedProduct;
+  if (!p) return;
+
+  if (confirm('هل أنت تأكد من حذف هذا المكون من BOM؟')) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/products/${p.id}/bom/lines/${lineId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        showToast('تم حذف المكون بنجاح');
+        await openProductDetailModal(p.id);
+      }
+    } catch(err) {
+      alert('تعذر الحذف');
+    }
+  }
+}
+
+async function submitAddVariant(e) {
+  e.preventDefault();
+  const p = state.selectedProduct;
+  if (!p) return;
+
+  const form = e.target;
+  const body = {
+    ringSize: form.ringSize.value,
+    stoneColor: form.stoneColor.value,
+    stoneSize: form.stoneSize.value,
+    silverPurity: form.silverPurity.value,
+    priceDelta: parseFloat(form.priceDelta.value || 0)
+  };
+
+  try {
+    const res = await apiPost(`/products/${p.id}/variants`, body);
+    if (res && res.success) {
+      closeModal();
+      showToast('تمت إضافة المتغير بنجاح!');
+      await openProductDetailModal(p.id);
+    }
+  } catch(err) {
+    alert('حدث خطأ أثناء إضافة المتغير');
+  }
+}
+
+async function deleteVariant(vid) {
+  const p = state.selectedProduct;
+  if (!p) return;
+
+  if (confirm('هل ترغب في حذف هذا المتغير؟')) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/products/${p.id}/variants/${vid}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        showToast('تم حذف المتغير بنجاح');
+        await openProductDetailModal(p.id);
+      }
+    } catch(err) {
+      alert('تعذر الحذف');
+    }
+  }
+}
+
+async function saveDefaultRoutingTemplate(productId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/${productId}/routing`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('تم توليد وتأكيد المسار القياسي (9 مراحل) بنجاح!');
+      await openProductDetailModal(productId);
+    }
+  } catch(e) {
+    alert('تعذر حفظ المسار');
+  }
+}
+
+async function triggerCostCalculation(productId) {
+  try {
+    const res = await apiPost(`/products/${productId}/cost/calculate`, {});
+    if (res && res.success) {
+      showToast(`تم احتساب التكلفة الحقيقية: ${res.data.actualCost.toFixed(2)} ج.م!`);
+      await openProductDetailModal(productId);
+    }
+  } catch(e) {
+    alert('تعذر احتساب التكلفة');
+  }
+}
+

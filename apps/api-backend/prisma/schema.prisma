@@ -345,3 +345,126 @@ model InventoryAuditItem {
 
   audit InventoryAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
 }
+
+// -----------------------------------------------------------------------------
+// 11. PHASE 23: PRODUCT ENGINEERING & BOM ENGINE
+// -----------------------------------------------------------------------------
+
+model ProductMaster {
+  id                   String   @id @default(uuid())
+  productCode          String   @unique
+  nameAr               String
+  nameEn               String
+  category             String   @default("خاتم") // خاتم / قلادة / إسوارة / حلق
+  collection           String?  
+  silverPurity         String   @default("925") // 925 / 999 / 835
+  silverWeightGrams    Float    @default(0.0)
+  stoneCount           Int      @default(0)
+  stoneWeightGrams     Float    @default(0.0)
+  componentWeightGrams Float    @default(0.0)
+  rhodiumType          String?  
+  ringSizeDefault      String?  
+  imageUrls            String?  // JSON array of image URLs
+  attachmentUrls       String?  // JSON array of attachment URLs
+  manufacturingNotes   String?  
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  bom        ProductBOM?
+  variants   ProductVariant[]
+  routing    RoutingTemplate?
+  cost       ProductCost?
+}
+
+model ProductBOM {
+  id                 String    @id @default(uuid())
+  productId          String    @unique
+  expectedYield      Float     @default(100.0) // Percentage
+  expectedLossPercent Float    @default(2.0)   // Expected loss %
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  product ProductMaster @relation(fields: [productId], references: [id], onDelete: Cascade)
+  lines   BOMLine[]
+}
+
+model BOMLine {
+  id           String     @id @default(uuid())
+  bomId        String
+  lineType     String     // SILVER | STONE | COMPONENT | CHEMICAL | PACKAGING | EXPECTED_LOSS
+  itemId       String?    // Reference to Stone, RawMaterial, Silver, etc.
+  itemCode     String
+  itemName     String
+  quantity     Float      @default(1.0)
+  unitOfMeasure String    @default("g")
+  unitCost     Float      @default(0.0)
+  totalCost    Float      @default(0.0)
+  wasteFactor  Float      @default(0.0) // Loss % specific to this component
+  notes        String?
+  createdAt    DateTime   @default(now())
+
+  bom ProductBOM @relation(fields: [bomId], references: [id], onDelete: Cascade)
+}
+
+model ProductVariant {
+  id            String   @id @default(uuid())
+  productId     String
+  variantCode   String   @unique
+  ringSize      String?
+  stoneColor    String?
+  stoneSize     String?
+  silverPurity  String?
+  surfaceFinish String?
+  priceDelta    Float    @default(0.0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product ProductMaster @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model RoutingTemplate {
+  id          String   @id @default(uuid())
+  productId   String   @unique
+  templateName String  @default("المسار القياسي للتصنيع")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product ProductMaster @relation(fields: [productId], references: [id], onDelete: Cascade)
+  steps   RoutingStep[]
+}
+
+model RoutingStep {
+  id             String          @id @default(uuid())
+  routingId      String
+  sequenceNo     Int
+  stage          String          // WAX | TREE | CASTING | CLEANING | STONE_SETTING | POLISHING | QC | HALLMARK | PACKAGING
+  laborMinutes   Int             @default(0)
+  machineMinutes Int             @default(0)
+  laborCostRate  Float           @default(0.0)
+  notes          String?
+  createdAt      DateTime        @default(now())
+
+  routing RoutingTemplate @relation(fields: [routingId], references: [id], onDelete: Cascade)
+}
+
+model ProductCost {
+  id            String   @id @default(uuid())
+  productId     String   @unique
+  materialCost  Float    @default(0.0)
+  laborCost     Float    @default(0.0)
+  machineCost   Float    @default(0.0)
+  overhead      Float    @default(0.0)
+  packagingCost Float    @default(0.0)
+  actualCost    Float    @default(0.0)
+  sellingPrice  Float    @default(0.0)
+  profitMargin  Float    @default(0.0)
+  calculatedAt  DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product ProductMaster @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
