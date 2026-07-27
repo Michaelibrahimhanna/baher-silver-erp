@@ -11,7 +11,7 @@ export class AIController {
         return res.status(400).json({ success: false, error: 'Prompt input string required' });
       }
 
-      const companyId = req.user?.companyId || '00000000-0000-0000-0000-000000000000';
+      const companyId = req.user?.branchId || '00000000-0000-0000-0000-000000000000';
       await setTenantSessionContext(client, companyId, req.user?.userId);
 
       // Natural language copilot synthesis response simulation

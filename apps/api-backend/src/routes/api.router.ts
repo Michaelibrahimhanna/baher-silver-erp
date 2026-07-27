@@ -13,8 +13,39 @@ import { BOMController } from '../controllers/bom.controller';
 import { VariantController } from '../controllers/variant.controller';
 import { RoutingController } from '../controllers/routing.controller';
 import { CostingController } from '../controllers/costing.controller';
+import { AuthController } from '../controllers/auth.controller';
+import { UserManagementController } from '../controllers/user_management.controller';
+import { RBACController } from '../controllers/rbac.controller';
+import { authenticateJWT, requirePermission } from '../middleware/auth';
 
 const router = Router();
+
+// 0. ENTERPRISE AUTHENTICATION, HYBRID RBAC + ABAC ENGINE (Phase 23A)
+router.post('/auth/login', AuthController.login);
+router.post('/auth/refresh', AuthController.refresh);
+router.post('/auth/logout', authenticateJWT, AuthController.logout);
+router.get('/auth/me', authenticateJWT, AuthController.getMe);
+router.get('/auth/sessions', authenticateJWT, AuthController.getSessions);
+router.delete('/auth/sessions/:id', authenticateJWT, AuthController.revokeSession);
+
+// Users Management
+router.get('/users', authenticateJWT, requirePermission('users.view'), UserManagementController.listUsers);
+router.post('/users', authenticateJWT, requirePermission('users.manage'), UserManagementController.createUser);
+router.get('/users/:id', authenticateJWT, requirePermission('users.view'), UserManagementController.getUserById);
+router.put('/users/:id', authenticateJWT, requirePermission('users.manage'), UserManagementController.updateUser);
+router.delete('/users/:id', authenticateJWT, requirePermission('users.manage'), UserManagementController.softDeleteUser);
+router.post('/users/:id/permissions', authenticateJWT, requirePermission('users.manage'), UserManagementController.setPermissionOverride);
+router.delete('/users/:id/permissions', authenticateJWT, requirePermission('users.manage'), UserManagementController.removePermissionOverride);
+
+// Roles & Permissions Matrix
+router.get('/roles', authenticateJWT, requirePermission('users.manage'), RBACController.listRoles);
+router.post('/roles', authenticateJWT, requirePermission('users.manage'), RBACController.createRole);
+router.put('/roles/:id/permissions', authenticateJWT, requirePermission('users.manage'), RBACController.updateRolePermissions);
+router.get('/permissions', authenticateJWT, requirePermission('users.manage'), RBACController.listPermissionGroups);
+
+// Security Logs
+router.get('/security/login-history', authenticateJWT, requirePermission('settings.view'), RBACController.getLoginHistory);
+router.get('/security/audit-logs', authenticateJWT, requirePermission('settings.view'), RBACController.getAuthAuditLogs);
 
 // 1. Master Data Center & Phase 15 Relational Enhancements
 router.get('/master-data', MasterController.listMasterItems);
@@ -87,4 +118,5 @@ router.get('/products/:id/cost', CostingController.getCost);
 router.post('/products/:id/cost/calculate', CostingController.calculateCost);
 
 export default router;
+
 

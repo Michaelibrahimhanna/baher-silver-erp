@@ -61,6 +61,18 @@ const state = {
   productDetailTab: 'info',
   searchResults: { stones: [], rawMaterials: [], silverItems: [], locations: [], movements: [], products: [] },
 
+  // Enterprise Auth & Security State (Phase 23A)
+  currentUser: JSON.parse(localStorage.getItem('baher_user') || 'null'),
+  accessToken: localStorage.getItem('baher_access_token') || null,
+  refreshToken: localStorage.getItem('baher_refresh_token') || null,
+  users: [],
+  roles: [],
+  permissions: [],
+  permissionGroups: [],
+  loginHistoryLogs: [],
+  userSessions: [],
+  selectedUserForPermissions: null,
+
   // Enterprise Double-Entry Accounting Matrix
   chartOfAccounts: [
     { code: '1101', nameAr: 'مخزون الأحجار الكريمة', category: 'ASSET', balanceType: 'DEBIT', balance: 0 },
@@ -244,13 +256,28 @@ const MASTER_COLOR_HEX_MAP = {
 };
 
 // API Fetch Helpers
+function getAuthHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  if (state.accessToken) {
+    headers['Authorization'] = `Bearer ${state.accessToken}`;
+  }
+  return headers;
+}
+
 async function apiGet(endpoint) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, { signal: controller.signal });
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: getAuthHeaders(),
+      signal: controller.signal
+    });
     clearTimeout(timeout);
     const json = await res.json();
+    if (res.status === 401 && state.accessToken) {
+      handleAuthSessionExpired();
+      return null;
+    }
     return json.success ? json.data : null;
   } catch (err) {
     console.error(`API GET ${endpoint} Error:`, err);
@@ -262,10 +289,14 @@ async function apiPost(endpoint, body) {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(body)
     });
-    return await res.json();
+    const json = await res.json();
+    if (res.status === 401 && state.accessToken) {
+      handleAuthSessionExpired();
+    }
+    return json;
   } catch (err) {
     console.error(`API POST ${endpoint} Error:`, err);
     return { success: false, error: err.message };
@@ -274,8 +305,15 @@ async function apiPost(endpoint, body) {
 
 async function apiPatch(endpoint) {
   try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, { method: 'PATCH' });
-    return await res.json();
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (res.status === 401 && state.accessToken) {
+      handleAuthSessionExpired();
+    }
+    return json;
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -388,6 +426,14 @@ function renderApp() {
   document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
   document.documentElement.lang = state.lang;
 
+  // Show Login Screen if User is not Authenticated
+  if (!state.currentUser) {
+    root.innerHTML = renderEnterpriseLoginScreen();
+    return;
+  }
+
+  const u = state.currentUser;
+
   root.innerHTML = `
     <!-- Top Bar Navigation Header -->
     <header class="bg-slate-950/95 border-b border-brand-500/30 p-4 sticky top-0 z-40 backdrop-blur-md flex items-center justify-between shadow-2xl">
@@ -396,28 +442,37 @@ function renderApp() {
 
         <div>
           <h1 class="text-lg font-bold font-display tracking-tight text-white flex items-center gap-2">
-            نظام مصنع باهر سيلفر — مركز البيانات والمخازن
-            <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">ENTERPRISE v4.0</span>
+            نظام مصنع باهر سيلفر — ERP Enterprise
+            <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">v4.0 AUTH</span>
           </h1>
           <p class="text-xs text-slate-400 font-sans">مصنع الفضة • المرجع الموحد لجميع القوائم</p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="hidden lg:flex items-center space-x-1 space-x-reverse bg-slate-900/90 p-1.5 rounded-2xl border border-brand-500/20 text-xs font-bold overflow-x-auto">
+      <nav class="hidden xl:flex items-center space-x-1 space-x-reverse bg-slate-900/90 p-1.5 rounded-2xl border border-brand-500/20 text-xs font-bold overflow-x-auto">
         ${renderNavButton('wh_dashboard', '📊 لوحة التحكم')}
         ${renderNavButton('product_engineering', '🏭 المنتجات والـ BOM')}
-        ${renderNavButton('stones_store', '💎 مخزن الأحجار')}
-        ${renderNavButton('raw_store', '🧪 مخزن الخامات')}
-        ${renderNavButton('silver_store', '🥈 مخزن الفضة الخام')}
-        ${renderNavButton('master_center', '⚙️ مركز البيانات')}
-        ${renderNavButton('warehouses', '🏛️ المخازن السبعة')}
-        ${renderNavButton('locations', '📍 التخزين الهرمي')}
-        ${renderNavButton('transactions', '📜 سجل الحركات')}
-        ${renderNavButton('accounting_system', '⚖️ النظام المحاسبي والشجرة')}
-        ${renderNavButton('inventory_audit', '📋 الجرد الدوري')}
-        ${renderNavButton('universal_search', '🔍 البحث الفائق')}
+        ${renderNavButton('stones_store', '💎 الأحجار')}
+        ${renderNavButton('raw_store', '🧪 الخامات')}
+        ${renderNavButton('silver_store', '🥈 الفضة الخام')}
+        ${renderNavButton('users_admin', '👥 المستخدمين')}
+        ${renderNavButton('roles_matrix', '🛡️ الصلاحيات')}
+        ${renderNavButton('security_sessions', '📱 الجلسات')}
+        ${renderNavButton('login_history', '📜 سجل الدخول')}
+        ${renderNavButton('universal_search', '🔍 البحث')}
       </nav>
+
+      <!-- User Profile Dropdown Pill -->
+      <div class="flex items-center gap-3 font-sans">
+        <div class="hidden sm:flex flex-col text-left font-mono">
+          <span class="text-xs font-bold text-white">${u.fullNameAr || u.username}</span>
+          <span class="text-[10px] text-amber-400">${u.roles ? u.roles.join(', ') : 'User'} • ${u.branchId || 'الفرع الرئيسي'}</span>
+        </div>
+        <button onclick="handleUserLogout()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/40 text-xs font-bold transition-all">
+          خروج ➔
+        </button>
+      </div>
     </header>
 
     <!-- Main Content Container -->
@@ -1321,6 +1376,10 @@ function renderSidebar() {
         ${renderSidebarItem('stones_store', '💎', 'مخزن الأحجار الكريمة')}
         ${renderSidebarItem('raw_store', '🧪', 'مخزن الخامات والمستلزمات')}
         ${renderSidebarItem('silver_store', '🥈', 'مخزن الفضة الخام والسبائك')}
+        ${renderSidebarItem('users_admin', '👥', 'إدارة المستخدمين والحسابات')}
+        ${renderSidebarItem('roles_matrix', '🛡️', 'الأدوار ومصفوفة الصلاحيات')}
+        ${renderSidebarItem('security_sessions', '📱', 'الأجهزة والجلسات النشطة')}
+        ${renderSidebarItem('login_history', '📜', 'سجل الدخول ومحاولات الأمان')}
         ${renderSidebarItem('master_center', '⚙️', 'مركز البيانات الأساسية (12)')}
         ${renderSidebarItem('warehouses', '🏛️', 'المخازن السبعة الرئيسية')}
         ${renderSidebarItem('locations', '📍', 'التخزين الهرمي (QR)')}
@@ -1353,6 +1412,10 @@ function renderActiveTabContent() {
     case 'stones_store': return renderStonesStoreScreen();
     case 'raw_store': return renderRawMaterialsStoreScreen();
     case 'silver_store': return renderSilverStoreScreen();
+    case 'users_admin': return renderUsersAdminScreen();
+    case 'roles_matrix': return renderRolesMatrixScreen();
+    case 'security_sessions': return renderActiveSessionsScreen();
+    case 'login_history': return renderLoginHistoryScreen();
     case 'master_center': return renderMasterDataCenterScreen();
     case 'warehouses': return renderWarehousesHierarchyScreen();
     case 'locations': return renderStorageLocationsScreen();
@@ -5018,4 +5081,370 @@ async function triggerCostCalculation(productId) {
     alert('تعذر احتساب التكلفة');
   }
 }
+
+/* =============================================================================
+   PHASE 23A: ENTERPRISE AUTHENTICATION & SECURITY ADMINISTRATION UI
+   ============================================================================= */
+
+function renderEnterpriseLoginScreen() {
+  return `
+    <div class="min-h-screen bg-darkbg text-slate-100 font-sans flex items-center justify-center p-4 selection:bg-brand-500 selection:text-slate-950">
+      <div class="glass-card max-w-md w-full p-8 rounded-3xl border border-brand-500/40 space-y-6 shadow-2xl text-right">
+        <!-- Logo & Title -->
+        <div class="flex flex-col items-center text-center space-y-2">
+          <img src="assets/baher_logo.png" alt="BAHER SILVER" class="h-16 w-16 rounded-2xl object-cover border-2 border-brand-500/50 shadow-xl bg-[#C3B097]">
+          <h2 class="text-2xl font-extrabold text-white tracking-wide">مصنع باهر سيلفر للفضة</h2>
+          <p class="text-xs text-slate-400 font-mono">نظام إدارة الإنتاج والمخازن — تسجيل الدخول المؤسسي</p>
+        </div>
+
+        <form onsubmit="handleEnterpriseLogin(event)" class="space-y-4 text-xs font-sans">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">اسم المستخدم أو البريد الإلكتروني *</label>
+            <input type="text" name="usernameOrEmail" required placeholder="admin" value="admin" class="w-full h-11 px-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">كلمة المرور السرية *</label>
+            <input type="password" name="password" required placeholder="••••••••" value="Admin@Baher2026" class="w-full h-11 px-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-brand-500 focus:outline-none">
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded border-slate-700 bg-slate-900 text-brand-500 focus:ring-0">
+              <span>تذكر الجلسة على هذا الجهاز</span>
+            </label>
+            <span class="text-amber-400 font-mono text-[11px]">v4.0 AUTH</span>
+          </div>
+
+          <button type="submit" class="w-full h-11 rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 font-extrabold text-sm shadow-xl transition-all flex items-center justify-center gap-2">
+            <span>دخول النظام المؤسسي</span> ➔
+          </button>
+        </form>
+
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 text-center font-mono">
+          حساب المسؤول الافتراضي: <span class="text-amber-400 font-bold">admin</span> | كلمه السر: <span class="text-amber-400 font-bold">Admin@Baher2026</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function handleEnterpriseLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const usernameOrEmail = form.usernameOrEmail.value;
+  const password = form.password.value;
+
+  try {
+    state.isLoading = true;
+    renderApp();
+
+    const res = await apiPost('/auth/login', { usernameOrEmail, password });
+    if (res && res.success) {
+      state.currentUser = res.data.user;
+      state.accessToken = res.data.accessToken;
+      state.refreshToken = res.data.refreshToken;
+
+      localStorage.setItem('baher_user', JSON.stringify(res.data.user));
+      localStorage.setItem('baher_access_token', res.data.accessToken);
+      localStorage.setItem('baher_refresh_token', res.data.refreshToken);
+
+      showToast(`مرحباً بك مجدداً، ${res.data.user.fullNameAr}!`);
+      await loadAllDatabaseData();
+    } else {
+      alert(res.error || 'فشل تسجيل الدخول. تأكد من البيانات ودرب المحاولة.');
+    }
+  } catch(err) {
+    alert('حدث خطأ في الاتصال بالخادم');
+  } finally {
+    state.isLoading = false;
+    renderApp();
+  }
+}
+
+async function handleUserLogout() {
+  if (confirm('هل أنت تأكد من تسجيل الخروج من النظام؟')) {
+    try {
+      await apiPost('/auth/logout', { refreshToken: state.refreshToken });
+    } catch(e) {}
+
+    state.currentUser = null;
+    state.accessToken = null;
+    state.refreshToken = null;
+
+    localStorage.removeItem('baher_user');
+    localStorage.removeItem('baher_access_token');
+    localStorage.removeItem('baher_refresh_token');
+
+    renderApp();
+  }
+}
+
+function handleAuthSessionExpired() {
+  state.currentUser = null;
+  state.accessToken = null;
+  state.refreshToken = null;
+
+  localStorage.removeItem('baher_user');
+  localStorage.removeItem('baher_access_token');
+  localStorage.removeItem('baher_refresh_token');
+
+  alert('انتهت الجلسة. يرجى إعادة تسجيل الدخول مرة أخرى.');
+  renderApp();
+}
+
+function renderUsersAdminScreen() {
+  const users = state.users || [];
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-borderdark">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-2xl text-cyan-400">
+            👥
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-white tracking-wide">إدارة المستخدمين والحسابات (Users Management)</h2>
+            <p class="text-xs text-slate-400 font-mono">سجل مستخدمي النظام • تعيين الفروع والمخازن • استثناءات الصلاحيات المباشرة (ALLOW / DENY) • الحذف المرن</p>
+          </div>
+        </div>
+
+        <button onclick="openModal('addUserModal')" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-lg flex items-center gap-2">
+          <span>+ إضافة مستخدم جديد</span>
+        </button>
+      </div>
+
+      <!-- Users Table -->
+      ${users.length === 0 ? renderEmptyState('لا يوجد مستخدمين مسجلين', 'إضافة مستخدم جديد', 'addUserModal') : `
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-3">اسم المستخدم</th>
+                <th class="p-3">الاسم الكامل</th>
+                <th class="p-3">الفرع</th>
+                <th class="p-3">المخزن المخصص</th>
+                <th class="p-3">القسم والوظيفة</th>
+                <th class="p-3">الأدوار</th>
+                <th class="p-3">الحالة</th>
+                <th class="p-3">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              ${users.map(u => `
+                <tr class="hover:bg-slate-900/50">
+                  <td class="p-3 text-cyan-400 font-bold">${u.username} ${u.isSystemUser ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-sans">آلي</span>' : ''}</td>
+                  <td class="p-3 text-white font-sans font-bold">${u.fullNameAr}</td>
+                  <td class="p-3">${u.branchId || 'الرئيسي'}</td>
+                  <td class="p-3 text-slate-300">${u.warehouseId || 'عام'}</td>
+                  <td class="p-3 text-slate-400 font-sans">${u.department || '—'} (${u.position || '—'})</td>
+                  <td class="p-3">
+                    ${(u.userRoles || []).map(r => `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">${r.role.nameAr}</span>`).join(' ')}
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded-full ${u.status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">
+                      ${u.status === 'ACTIVE' ? 'نشط' : 'معطل'}
+                    </span>
+                  </td>
+                  <td class="p-3 flex gap-2">
+                    <button onclick="openUserPermissionsOverrideModal('${u.id}')" class="text-amber-400 hover:text-amber-300">الصلاحيات</button>
+                    ${!u.isSystemUser ? `<button onclick="deleteUser('${u.id}')" class="text-rose-400 hover:text-rose-300">أرشفة</button>` : ''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderRolesMatrixScreen() {
+  const roles = state.roles || [];
+  const groups = state.permissionGroups || [];
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-borderdark">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl text-amber-400">
+            🛡️
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-white tracking-wide">الأدوار ومصفوفة الصلاحيات (Hybrid RBAC Matrix)</h2>
+            <p class="text-xs text-slate-400 font-mono">تخصيص الصلاحيات للأدوار المؤسسية • مصفوفة 9 مجموعات • Super Admin • Factory Manager • Accountant</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        ${roles.map(r => `
+          <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-3 font-mono text-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+              <span class="font-bold text-white text-sm font-sans">${r.nameAr}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400">${r.roleCode}</span>
+            </div>
+            <p class="text-slate-400 font-sans text-[11px]">${r.description || 'دور مؤسسي مخصص'}</p>
+            <div class="text-[11px] text-emerald-400">
+              عدد الصلاحيات الممنوحة: <span class="font-bold">${r.permissions ? r.permissions.length : 0} صلاحية</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderActiveSessionsScreen() {
+  const sessions = state.userSessions || [];
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-borderdark">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-2xl text-purple-400">
+            📱
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-white tracking-wide">الأجهزة والجلسات النشطة (Session Manager)</h2>
+            <p class="text-xs text-slate-400 font-mono">عرض الأجهزة والمتصفحات المسجلة دخول حالياً • إمكانية إلغاء الجلسات المشبوهة بنقرة واحدة</p>
+          </div>
+        </div>
+        <button onclick="loadUserSessions()" class="px-4 py-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/40 text-xs font-bold">🔄 تحديث الجلسات</button>
+      </div>
+
+      ${sessions.length === 0 ? renderEmptyState('لا توجد جلسات نشطة مسجلة حالياً', '', '') : `
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-3">الجهاز / المتصفح</th>
+                <th class="p-3">عنوان IP</th>
+                <th class="p-3">آخر نشاط</th>
+                <th class="p-3">تاريخ الانتهاء</th>
+                <th class="p-3">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              ${sessions.map(s => `
+                <tr class="hover:bg-slate-900/50">
+                  <td class="p-3 text-white font-sans">${s.device || 'متصفح ويب'}</td>
+                  <td class="p-3 text-amber-400">${s.ipAddress || '127.0.0.1'}</td>
+                  <td class="p-3 text-slate-400">${new Date(s.lastActiveAt).toLocaleString('ar-EG')}</td>
+                  <td class="p-3 text-slate-400">${new Date(s.expiresAt).toLocaleString('ar-EG')}</td>
+                  <td class="p-3">
+                    <button onclick="revokeSession('${s.id}')" class="text-rose-400 hover:text-rose-300 font-bold">إنهاء الجلسة ➔</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderLoginHistoryScreen() {
+  const logs = state.loginHistoryLogs || [];
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-borderdark">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-2xl text-indigo-400">
+            📜
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-white tracking-wide">سجل الدخول ومحاولات الأمان (Login History Logs)</h2>
+            <p class="text-xs text-slate-400 font-mono">سجل محاولات الناجحة والفاشلة • عنوان IP • وقت وتاريخ المحاولة • الحظر المؤقت</p>
+          </div>
+        </div>
+        <button onclick="loadLoginHistoryLogs()" class="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 text-xs font-bold">🔄 تحديث السجل</button>
+      </div>
+
+      ${logs.length === 0 ? renderEmptyState('لا توجد سجلات دخول مسجلة مؤخراً', '', '') : `
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-3">التاريخ والوقت</th>
+                <th class="p-3">اسم المستخدم</th>
+                <th class="p-3">الحالة</th>
+                <th class="p-3">عنوان IP</th>
+                <th class="p-3">المتصفح/الجهاز</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              ${logs.map(l => `
+                <tr class="hover:bg-slate-900/50">
+                  <td class="p-3 text-slate-400">${new Date(l.timestamp).toLocaleString('ar-EG')}</td>
+                  <td class="p-3 text-white font-bold">${l.username}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded font-bold ${l.status === 'SUCCESS' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+                      ${l.status}
+                    </span>
+                  </td>
+                  <td class="p-3 text-amber-400">${l.ipAddress || '—'}</td>
+                  <td class="p-3 text-slate-400 text-[11px] truncate max-w-xs">${l.browser || '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+// SECURITY ACTIONS & LOADERS
+async function loadUsersData() {
+  const users = await apiGet('/users');
+  state.users = users || [];
+  renderApp();
+}
+
+async function loadUserSessions() {
+  const sessions = await apiGet('/auth/sessions');
+  state.userSessions = sessions || [];
+  renderApp();
+}
+
+async function loadLoginHistoryLogs() {
+  const logs = await apiGet('/security/login-history');
+  state.loginHistoryLogs = logs || [];
+  renderApp();
+}
+
+async function revokeSession(id) {
+  if (confirm('هل ترغب في إنهاء هذه الجلسة وإغلاق الحساب على هذا الجهاز؟')) {
+    const res = await fetch(`${API_BASE_URL}/auth/sessions/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('تم إنهاء الجلسة بنجاح!');
+      await loadUserSessions();
+    }
+  }
+}
+
+async function deleteUser(id) {
+  if (confirm('هل أنت تأكد من أرشفة هذا المستخدم وتعطيل حسابه؟')) {
+    const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('تم أرشفة حساب المستخدم بنجاح');
+      await loadUsersData();
+    } else {
+      alert(json.error || 'تعذر الحذف');
+    }
+  }
+}
+
 

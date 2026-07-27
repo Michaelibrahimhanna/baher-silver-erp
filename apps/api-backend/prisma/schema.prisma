@@ -107,13 +107,34 @@ model Company {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  fullNameAr   String
-  fullNameEn   String
-  role         String   @default("warehouse_manager")
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id                   String            @id @default(uuid())
+  username             String            @unique
+  email                String?           @unique
+  phone                String?
+  fullNameAr           String
+  fullNameEn           String?
+  passwordHash         String
+  branchId             String?           @default("BRANCH-MAIN")
+  warehouseId          String?           @default("wh-finished")
+  department           String?           @default("إدارة المصنع")
+  position             String?           @default("مدير نظام")
+  profileImage         String?
+  status               String            @default("ACTIVE") // ACTIVE | DISABLED
+  isSystemUser         Boolean           @default(false)
+  isTwoFactorEnabled   Boolean           @default(false)
+  twoFactorSecret      String?
+  failedLoginCount     Int               @default(0)
+  lockoutUntil         DateTime?
+  lastLoginAt          DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  userRoles            UserRoleAssignment[]
+  userPermissions      UserPermissionOverride[]
+  sessions             UserSession[]
+  loginHistory         LoginHistory[]
+  auditLogs            AuthAuditLog[]
 }
 
 // -----------------------------------------------------------------------------
@@ -467,4 +488,131 @@ model ProductCost {
 
   product ProductMaster @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
+
+// -----------------------------------------------------------------------------
+// 12. PHASE 23A: ENTERPRISE AUTHENTICATION, HYBRID RBAC + ABAC ENGINE
+// -----------------------------------------------------------------------------
+
+model SecurityRole {
+  id           String               @id @default(uuid())
+  roleCode     String               @unique
+  nameAr       String
+  nameEn       String
+  description  String?
+  isSystemRole Boolean              @default(false)
+  priority     Int                  @default(10)
+  deletedAt    DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  users        UserRoleAssignment[]
+  permissions  RolePermissionMapping[]
+}
+
+model PermissionGroup {
+  id           String               @id @default(uuid())
+  groupCode    String               @unique // INVENTORY, WAREHOUSE, MANUFACTURING, FINANCE, CRM, REPORTS, HR, ADMINISTRATION, SETTINGS
+  nameAr       String
+  nameEn       String
+  sortOrder    Int                  @default(0)
+  createdAt    DateTime             @default(now())
+
+  permissions  SecurityPermission[]
+}
+
+model SecurityPermission {
+  id             String                  @id @default(uuid())
+  permissionCode String                  @unique // e.g. inventory.view, inventory.create
+  groupId        String
+  nameAr         String
+  nameEn         String
+  description    String?
+  deletedAt      DateTime?
+  createdAt      DateTime                @default(now())
+
+  group          PermissionGroup         @relation(fields: [groupId], references: [id])
+  roles          RolePermissionMapping[]
+  userOverrides  UserPermissionOverride[]
+}
+
+model RolePermissionMapping {
+  id           String             @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role         SecurityRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   SecurityPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model UserRoleAssignment {
+  id        String       @id @default(uuid())
+  userId    String
+  roleId    String
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      SecurityRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model UserPermissionOverride {
+  id           String             @id @default(uuid())
+  userId       String
+  permissionId String
+  grantType    String             // ALLOW | DENY
+  createdAt    DateTime           @default(now())
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   SecurityPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+}
+
+model UserSession {
+  id               String   @id @default(uuid())
+  userId           String
+  refreshTokenHash String   @unique
+  device           String?
+  browser          String?
+  os               String?
+  ipAddress        String?
+  lastActiveAt     DateTime @default(now())
+  isRevoked        Boolean  @default(false)
+  expiresAt        DateTime
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LoginHistory {
+  id         String   @id @default(uuid())
+  userId     String?
+  username   String
+  status     String   // SUCCESS | FAILED_PASSWORD | LOCKED | LOGOUT
+  ipAddress  String?
+  browser    String?
+  device     String?
+  os         String?
+  city       String?  @default("القاهرة")
+  country    String?  @default("مصر")
+  timestamp  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model AuthAuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String   // LOGIN, LOGOUT, CREATE_USER, UPDATE_PERMISSIONS, DELETE_ROLE, EXPORT_DATA
+  entity    String?
+  ipAddress String?
+  userAgent String?
+  status    String   @default("SUCCESS")
+  details   String?
+  timestamp DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
 
