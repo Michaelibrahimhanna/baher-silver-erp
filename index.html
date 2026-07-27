@@ -62,6 +62,18 @@
 <body class="bg-darkbg text-slate-100 font-sans antialiased min-h-screen selection:bg-brand-500 selection:text-slate-950">
   <div id="app" class="flex flex-col min-h-screen"></div>
 
+  <!-- Global Error Handler - shows errors on screen -->
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      var d = document.getElementById('app');
+      if (d) d.innerHTML = '<div style="color:#f87171;padding:2rem;font-family:monospace;font-size:14px;background:#1e1e1e;min-height:100vh"><h2 style="color:#fbbf24">⚠️ JavaScript Error:</h2><pre>' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ', Col: ' + col + (err ? '\n\nStack:\n' + err.stack : '') + '</pre></div>';
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      var d = document.getElementById('app');
+      if (d && d.innerHTML.trim() === '') d.innerHTML = '<div style="color:#f87171;padding:2rem;font-family:monospace;font-size:14px;background:#1e1e1e;min-height:100vh"><h2 style="color:#fbbf24">⚠️ Unhandled Promise Rejection:</h2><pre>' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)) + '</pre></div>';
+    });
+  </script>
   <!-- Standard Script Loading -->
   <script src="js/app.js"></script>
 </body>

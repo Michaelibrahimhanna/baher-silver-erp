@@ -11,7 +11,10 @@ async function detectApiPort() {
   const ports = [4000, 4005, 4001, 4002];
   for (const port of ports) {
     try {
-      const res = await fetch(`http://localhost:${port}/health`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 800);
+      const res = await fetch(`http://localhost:${port}/health`, { signal: controller.signal });
+      clearTimeout(timeout);
       if (res.ok) { API_BASE_URL = `http://localhost:${port}/api/v1`; return; }
     } catch (e) {}
   }
@@ -130,6 +133,7 @@ function archiveRecord(entityType, id) {
     logAuditEvent('ARCHIVE_RECORD', entityType, id, oldVal, target);
     renderApp();
     showToast(`تم أرشفة الصنف بنجاح (Soft Delete Policy - Zero Data Loss)!`);
+  }
 }
 
 // ENTERPRISE CONFIGURATION ENGINE (Phase 19)
@@ -238,7 +242,10 @@ const MASTER_COLOR_HEX_MAP = {
 // API Fetch Helpers
 async function apiGet(endpoint) {
   try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, { signal: controller.signal });
+    clearTimeout(timeout);
     const json = await res.json();
     return json.success ? json.data : null;
   } catch (err) {
