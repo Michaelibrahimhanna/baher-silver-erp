@@ -27,6 +27,8 @@ router.post('/auth/logout', authenticateJWT, AuthController.logout);
 router.get('/auth/me', authenticateJWT, AuthController.getMe);
 router.get('/auth/sessions', authenticateJWT, AuthController.getSessions);
 router.delete('/auth/sessions/:id', authenticateJWT, AuthController.revokeSession);
+router.post('/auth/change-password', authenticateJWT, AuthController.changePassword);
+router.post('/auth/reset-password', authenticateJWT, requirePermission('users.manage'), AuthController.resetPassword);
 
 // Users Management
 router.get('/users', authenticateJWT, requirePermission('users.view'), UserManagementController.listUsers);

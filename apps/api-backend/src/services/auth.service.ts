@@ -245,4 +245,30 @@ export class AuthService {
       data: { isRevoked: true }
     });
   }
+
+  static async changePassword(userId: string, oldPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error('المستخدم غير موجود');
+
+    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!isMatch) throw new Error('كلمة المرور الحالية غير صحيحة');
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHash }
+    });
+
+    return { success: true, message: 'تم تغيير كلمة المرور بنجاح' };
+  }
+
+  static async resetUserPassword(targetUserId: string, newPassword: string) {
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id: targetUserId },
+      data: { passwordHash: newHash, failedLoginCount: 0, lockoutUntil: null }
+    });
+
+    return { success: true, message: 'تم إعادة تعيين كلمة المرور بنجاح' };
+  }
 }

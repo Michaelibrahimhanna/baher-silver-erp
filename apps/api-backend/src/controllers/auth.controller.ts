@@ -78,4 +78,26 @@ export class AuthController {
       res.status(400).json({ success: false, error: err.message });
     }
   }
+
+  static async changePassword(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      const { oldPassword, newPassword } = req.body;
+      if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+      const result = await AuthService.changePassword(userId, oldPassword, newPassword);
+      res.json({ success: true, data: result });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  }
+
+  static async resetPassword(req: AuthRequest, res: Response) {
+    try {
+      const { targetUserId, newPassword } = req.body;
+      const result = await AuthService.resetUserPassword(targetUserId, newPassword);
+      res.json({ success: true, data: result });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  }
 }

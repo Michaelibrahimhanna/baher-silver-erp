@@ -2753,6 +2753,10 @@ function renderActiveModal() {
   if (state.activeModal === 'addBOMLineModal' && state.selectedProduct) return renderAddBOMLineModal();
   if (state.activeModal === 'addVariantModal' && state.selectedProduct) return renderAddVariantModal();
 
+  if (state.activeModal === 'addUserModal') return renderAddUserModal();
+  if (state.activeModal === 'changeMyPasswordModal') return renderChangeMyPasswordModal();
+  if (state.activeModal === 'userPermissionsOverrideModal' && state.selectedUserForPermissions) return renderUserPermissionsOverrideModal();
+
   // FULL STONE DETAILS MODAL WITH STONE IMAGE
   if (state.activeModal === 'stoneDetailsModal' && state.selectedStoneDetails) {
     const s = state.selectedStoneDetails;
@@ -5446,5 +5450,298 @@ async function deleteUser(id) {
     }
   }
 }
+
+// USER CREATION MODAL
+function renderAddUserModal() {
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-lg w-full p-6 md:p-8 rounded-3xl border border-cyan-500/40 space-y-6 max-h-[92vh] overflow-y-auto text-right font-sans shadow-2xl">
+        <div class="flex justify-between items-center pb-4 border-b border-borderdark">
+          <div>
+            <h3 class="text-xl font-extrabold text-white">إضافة مستخدم جديد في النظام</h3>
+            <p class="text-xs text-slate-400 font-mono">إنشاء حساب موظف/مسؤول وتحديد الدور المباشر</p>
+          </div>
+          <button onclick="closeModal()" class="h-9 w-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+        </div>
+
+        <form onsubmit="submitAddUser(event)" class="space-y-4 text-xs font-sans">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">اسم المستخدم (Username) *</label>
+              <input type="text" name="username" required placeholder="مثال: ahmed_silv" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:border-cyan-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">كلمة المرور *</label>
+              <div class="relative">
+                <input type="password" id="newUserPasswordInput" name="password" required placeholder="••••••••" class="w-full h-10 px-3.5 pl-10 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:border-cyan-500 focus:outline-none">
+                <button type="button" onclick="togglePasswordVisibility('newUserPasswordInput')" class="absolute left-3 top-2.5 text-slate-400 hover:text-white text-xs">👁️</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">الاسم الكامل بالعربية *</label>
+              <input type="text" name="fullNameAr" required placeholder="مثال: أحمد محمود علي" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">البريد الإلكتروني</label>
+              <input type="email" name="email" placeholder="ahmed@bahersilver.online" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:border-cyan-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">الفرع المخصص *</label>
+              <select name="branchId" class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+                <option value="BRANCH-MAIN">الفرع الرئيسي والمصنع (HQ)</option>
+                <option value="BRANCH-STORE">معرض الفضة والمحل</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">الدور المؤسسي (Role) *</label>
+              <select name="roleCode" required class="w-full h-10 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none font-mono">
+                <option value="FACTORY_MANAGER">FACTORY_MANAGER — مدير المصنع والإنتاج</option>
+                <option value="WAREHOUSE_MANAGER">WAREHOUSE_MANAGER — أمين/مدير المخازن</option>
+                <option value="ACCOUNTANT">ACCOUNTANT — محاسب المصنع</option>
+                <option value="SALES">SALES — مسؤول المبيعات والمعرض</option>
+                <option value="CASHIER">CASHIER — أمين الصندوق</option>
+                <option value="PRODUCTION_EMPLOYEE">PRODUCTION_EMPLOYEE — فني ورشة وإنتاج</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
+            <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300">إلغاء</button>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-extrabold shadow-lg">حفظ وإضافة الحساب ➔</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+// CHANGE MY PASSWORD MODAL
+function renderChangeMyPasswordModal() {
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-md w-full p-6 md:p-8 rounded-3xl border border-amber-500/40 space-y-6 text-right font-sans shadow-2xl">
+        <div class="flex justify-between items-center pb-4 border-b border-borderdark">
+          <div>
+            <h3 class="text-xl font-extrabold text-white">تغيير كلمة المرور الخاصة بي</h3>
+            <p class="text-xs text-slate-400 font-mono">تحديث كلمة السر الشخصية لحسابك الحالي</p>
+          </div>
+          <button onclick="closeModal()" class="h-9 w-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+        </div>
+
+        <form onsubmit="submitChangeMyPassword(event)" class="space-y-4 text-xs font-sans">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">كلمة المرور الحالية *</label>
+            <div class="relative">
+              <input type="password" id="oldPasswordInput" name="oldPassword" required placeholder="••••••••" class="w-full h-11 px-4 pl-10 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:border-amber-500 focus:outline-none">
+              <button type="button" onclick="togglePasswordVisibility('oldPasswordInput')" class="absolute left-3 top-3 text-slate-400 hover:text-white text-xs">👁️</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">كلمة المرور الجديدة *</label>
+            <div class="relative">
+              <input type="password" id="newPasswordInput" name="newPassword" required placeholder="••••••••" class="w-full h-11 px-4 pl-10 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:border-amber-500 focus:outline-none">
+              <button type="button" onclick="togglePasswordVisibility('newPasswordInput')" class="absolute left-3 top-3 text-slate-400 hover:text-white text-xs">👁️</button>
+            </div>
+          </div>
+
+          <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
+            <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300">إلغاء</button>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-extrabold shadow-lg">تحديث كلمة السر ➔</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+// USER DIRECT PERMISSIONS OVERRIDE MODAL
+async function openUserPermissionsOverrideModal(userId) {
+  state.isLoading = true;
+  renderApp();
+  try {
+    const user = await apiGet(`/users/${userId}`);
+    const groups = await apiGet('/permissions');
+    if (user && groups) {
+      state.selectedUserForPermissions = { user, groups };
+      state.activeModal = 'userPermissionsOverrideModal';
+    }
+  } catch(e) {
+    alert('تعذر تحميل بيانات المستخدم');
+  } finally {
+    state.isLoading = false;
+    renderApp();
+  }
+}
+
+function renderUserPermissionsOverrideModal() {
+  const data = state.selectedUserForPermissions;
+  if (!data) return '';
+
+  const u = data.user;
+  const groups = data.groups || [];
+  const overridesMap = new Map();
+  (u.userPermissions || []).forEach(up => overridesMap.set(up.permission.permissionCode, up.grantType));
+
+  return `
+    <div class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-3xl w-full p-6 md:p-8 rounded-3xl border border-amber-500/40 space-y-6 max-h-[92vh] overflow-y-auto text-right font-sans shadow-2xl">
+        <div class="flex justify-between items-center pb-4 border-b border-borderdark">
+          <div>
+            <h3 class="text-xl font-extrabold text-white">تحكم وإدارة صلاحيات الموظف المباشرة (Direct Overrides)</h3>
+            <p class="text-xs text-slate-400 font-mono">الموظف: <span class="text-amber-400 font-bold">${u.fullNameAr} (${u.username})</span> • تتيح منح (ALLOW) أو حظر (DENY) أي صلاحية بشكل منفرد</p>
+          </div>
+          <button onclick="closeModal()" class="h-9 w-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+        </div>
+
+        <!-- Admin Reset User Password Section -->
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <h4 class="text-xs font-bold text-amber-400 font-sans">🔑 تغيير كلمة مرور هذا الموظف مباشرة بواسطة الأدمن:</h4>
+          <form onsubmit="submitAdminResetUserPassword(event, '${u.id}')" class="flex gap-3">
+            <div class="relative flex-1">
+              <input type="password" id="adminResetPassInput" name="newPassword" required placeholder="أدخل كلمة المرور الجديدة للموظف..." class="w-full h-10 px-3.5 pl-10 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:border-amber-500 focus:outline-none">
+              <button type="button" onclick="togglePasswordVisibility('adminResetPassInput')" class="absolute left-3 top-2.5 text-slate-400 hover:text-white text-xs">👁️</button>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-lg">تعيين الباسورد ➔</button>
+          </form>
+        </div>
+
+        <!-- Permission Groups Grid -->
+        <div class="space-y-4 text-xs font-mono">
+          ${groups.map(g => `
+            <div class="p-4 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-2">
+              <div class="text-xs font-extrabold text-amber-400 font-sans border-b border-slate-800 pb-2">${g.nameAr} (${g.groupCode})</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                ${(g.permissions || []).map(p => {
+                  const currentGrant = overridesMap.get(p.permissionCode);
+                  return `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800">
+                      <span class="text-white font-sans truncate max-w-[180px]">${p.nameAr}</span>
+                      <div class="flex items-center gap-1">
+                        <button onclick="setDirectPermissionOverride('${u.id}', '${p.permissionCode}', 'ALLOW')" class="px-2 py-0.5 rounded text-[10px] font-bold ${currentGrant === 'ALLOW' ? 'bg-emerald-500 text-slate-950 font-extrabold' : 'bg-slate-800 text-slate-400 hover:text-white'}">سماح</button>
+                        <button onclick="setDirectPermissionOverride('${u.id}', '${p.permissionCode}', 'DENY')" class="px-2 py-0.5 rounded text-[10px] font-bold ${currentGrant === 'DENY' ? 'bg-rose-500 text-white font-extrabold' : 'bg-slate-800 text-slate-400 hover:text-white'}">حظر</button>
+                        ${currentGrant ? `<button onclick="removeDirectPermissionOverride('${u.id}', '${p.permissionCode}')" class="text-slate-500 hover:text-slate-300 text-[10px] px-1">إلغاء</button>` : ''}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// TOGGLE PASSWORD VISIBILITY HELPER
+function togglePasswordVisibility(inputId) {
+  const input = document.getElementById(inputId);
+  if (input) {
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+}
+
+// SUBMIT HANDLERS
+async function submitAddUser(e) {
+  e.preventDefault();
+  const form = e.target;
+  const body = {
+    username: form.username.value,
+    password: form.password.value,
+    fullNameAr: form.fullNameAr.value,
+    email: form.email.value,
+    branchId: form.branchId.value,
+    roleCodes: [form.roleCode.value]
+  };
+
+  try {
+    const res = await apiPost('/users', body);
+    if (res && res.success) {
+      closeModal();
+      showToast(`تم إنشاء حساب الموظف (${res.data.fullNameAr}) بنجاح!`);
+      await loadUsersData();
+    } else {
+      alert(res.error || 'حدث خطأ أثناء إضافة المستخدم');
+    }
+  } catch(err) {
+    alert('حدث خطأ بالخادم');
+  }
+}
+
+async function submitChangeMyPassword(e) {
+  e.preventDefault();
+  const form = e.target;
+  const body = {
+    oldPassword: form.oldPassword.value,
+    newPassword: form.newPassword.value
+  };
+
+  try {
+    const res = await apiPost('/auth/change-password', body);
+    if (res && res.success) {
+      closeModal();
+      showToast('تم تغيير كلمة المرور الخاصة بك بنجاح!');
+    } else {
+      alert(res.error || 'كلمة المرور الحالية غير صحيحة');
+    }
+  } catch(err) {
+    alert('حدث خطأ أثناء تعديل كلمة السر');
+  }
+}
+
+async function submitAdminResetUserPassword(e, targetUserId) {
+  e.preventDefault();
+  const form = e.target;
+  const newPassword = form.newPassword.value;
+
+  try {
+    const res = await apiPost('/auth/reset-password', { targetUserId, newPassword });
+    if (res && res.success) {
+      showToast('تم إعادة تعيين كلمة مرور الموظف بنجاح!');
+      form.reset();
+    } else {
+      alert(res.error || 'تعذر تعيين كلمة السر');
+    }
+  } catch(err) {
+    alert('حدث خطأ أثناء تعيين كلمة السر');
+  }
+}
+
+async function setDirectPermissionOverride(userId, permissionCode, grantType) {
+  try {
+    const res = await apiPost(`/users/${userId}/permissions`, { permissionCode, grantType });
+    if (res && res.success) {
+      showToast(`تم تحديث الصلاحية إلى (${grantType})`);
+      await openUserPermissionsOverrideModal(userId);
+    }
+  } catch(e) {
+    alert('تعذر تحديث الصلاحية');
+  }
+}
+
+async function removeDirectPermissionOverride(userId, permissionCode) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/${userId}/permissions`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ permissionCode })
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('تم إلغاء الاستثناء المباشر الصلاحية');
+      await openUserPermissionsOverrideModal(userId);
+    }
+  } catch(e) {
+    alert('تعذر الإلغاء');
+  }
+}
+
 
 

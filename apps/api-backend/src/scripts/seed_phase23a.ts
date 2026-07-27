@@ -135,7 +135,33 @@ export async function seedPhase23A() {
     }
   });
 
-  // 5. Seed Default Super Admin User
+  // 5. Seed Baher Admin User (Username: baher, Password: michael)
+  const baherPasswordHash = await bcrypt.hash('michael', 12);
+  const baherUser = await prisma.user.upsert({
+    where: { username: 'baher' },
+    update: { passwordHash: baherPasswordHash, status: 'ACTIVE' },
+    create: {
+      username: 'baher',
+      email: 'baher@bahersilver.online',
+      phone: '01000000000',
+      fullNameAr: 'المهندس باهر — مدير المصنع الفائق',
+      fullNameEn: 'Eng. Baher - Super Admin',
+      passwordHash: baherPasswordHash,
+      branchId: 'BRANCH-MAIN',
+      department: 'الإدارة العليا',
+      position: 'Super Administrator'
+    }
+  });
+
+  if (adminRole && baherUser) {
+    await prisma.userRoleAssignment.upsert({
+      where: { userId_roleId: { userId: baherUser.id, roleId: adminRole.id } },
+      update: {},
+      create: { userId: baherUser.id, roleId: adminRole.id }
+    });
+  }
+
+  // Legacy admin user
   const adminPasswordHash = await bcrypt.hash('Admin@Baher2026', 12);
   const adminUser = await prisma.user.upsert({
     where: { username: 'admin' },
@@ -162,7 +188,7 @@ export async function seedPhase23A() {
   }
 
   console.log('✅ Phase 23A Seeding Completed Successfully!');
-  console.log('🔑 Default Super Admin Login: username="admin", password="Admin@Baher2026"');
+  console.log('🔑 Super Admin Login: username="baher", password="michael"');
 }
 
 seedPhase23A()
