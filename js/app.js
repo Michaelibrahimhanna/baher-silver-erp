@@ -255,7 +255,7 @@ const MASTER_COLOR_HEX_MAP = {
   'متعدد الألوان': '#6366F1'
 };
 
-// API Fetch Helpers
+// API Fetch Helpers with Automatic JWT Token Refresh Engine
 function getAuthHeaders() {
   const headers = { 'Content-Type': 'application/json' };
   if (state.accessToken) {
@@ -264,7 +264,34 @@ function getAuthHeaders() {
   return headers;
 }
 
-async function apiGet(endpoint) {
+let isRefreshingToken = false;
+async function tryRefreshToken() {
+  if (!state.refreshToken || isRefreshingToken) return false;
+  try {
+    isRefreshingToken = true;
+    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: state.refreshToken })
+    });
+    const json = await res.json();
+    if (json.success && json.data?.accessToken) {
+      state.accessToken = json.data.accessToken;
+      if (json.data.refreshToken) state.refreshToken = json.data.refreshToken;
+
+      localStorage.setItem('baher_access_token', state.accessToken);
+      if (json.data.refreshToken) localStorage.setItem('baher_refresh_token', state.refreshToken);
+      return true;
+    }
+  } catch (e) {
+    console.warn('Token refresh failed:', e);
+  } finally {
+    isRefreshingToken = false;
+  }
+  return false;
+}
+
+async function apiGet(endpoint, retryCount = 0) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
@@ -273,11 +300,16 @@ async function apiGet(endpoint) {
       signal: controller.signal
     });
     clearTimeout(timeout);
-    const json = await res.json();
-    if (res.status === 401 && state.accessToken) {
+    
+    if (res.status === 401) {
+      if (retryCount === 0 && (await tryRefreshToken())) {
+        return apiGet(endpoint, 1);
+      }
       handleAuthSessionExpired();
       return null;
     }
+
+    const json = await res.json();
     return json.success ? json.data : null;
   } catch (err) {
     console.error(`API GET ${endpoint} Error:`, err);
@@ -285,17 +317,23 @@ async function apiGet(endpoint) {
   }
 }
 
-async function apiPost(endpoint, body) {
+async function apiPost(endpoint, body, retryCount = 0) {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(body)
     });
-    const json = await res.json();
-    if (res.status === 401 && state.accessToken) {
+
+    if (res.status === 401) {
+      if (retryCount === 0 && (await tryRefreshToken())) {
+        return apiPost(endpoint, body, 1);
+      }
       handleAuthSessionExpired();
+      return { success: false, error: 'انتهت الجلسة. يرجى إعادة تسجيل الدخول' };
     }
+
+    const json = await res.json();
     return json;
   } catch (err) {
     console.error(`API POST ${endpoint} Error:`, err);
@@ -303,16 +341,22 @@ async function apiPost(endpoint, body) {
   }
 }
 
-async function apiPatch(endpoint) {
+async function apiPatch(endpoint, retryCount = 0) {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PATCH',
       headers: getAuthHeaders()
     });
-    const json = await res.json();
-    if (res.status === 401 && state.accessToken) {
+
+    if (res.status === 401) {
+      if (retryCount === 0 && (await tryRefreshToken())) {
+        return apiPatch(endpoint, 1);
+      }
       handleAuthSessionExpired();
+      return { success: false, error: 'انتهت الجلسة. يرجى إعادة تسجيل الدخول' };
     }
+
+    const json = await res.json();
     return json;
   } catch (err) {
     return { success: false, error: err.message };
