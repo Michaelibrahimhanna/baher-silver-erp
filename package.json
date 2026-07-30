@@ -2,9 +2,15 @@
   "name": "baher-silver-erp",
   "version": "4.0.0",
   "description": "Baher Silver Manufacturing ERP Enterprise System",
+  "main": "index.html",
   "scripts": {
+    "start": "cd apps/api-backend && npm run dev",
+    "dev": "cd apps/api-backend && npm run dev",
     "dev:backend": "cd apps/api-backend && npm run dev",
-    "dev:frontend": "npx serve ."
+    "dev:frontend": "npx serve . -p 3000",
+    "build": "cd apps/api-backend && npm run build",
+    "seed": "cd apps/api-backend && npx ts-node src/scripts/seed_master_data.ts",
+    "db:push": "cd apps/api-backend && npx prisma db push && npx prisma generate"
   },
   "devDependencies": {
     "esprima": "^4.0.1",

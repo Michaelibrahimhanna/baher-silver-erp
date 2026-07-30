@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import apiRouter from './routes/api.router';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
@@ -22,9 +23,12 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/v1', apiRouter);
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({ success: false, error: 'Endpoint not found' });
+// Serve Frontend Static Web App (index.html, customer_portal.html, passport.html, assets, css, js)
+app.use(express.static(path.join(__dirname, '../../../')));
+
+// Fallback to index.html for SPA routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../../index.html'));
 });
 
 export default app;

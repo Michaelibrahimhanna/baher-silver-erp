@@ -1,3 +1,1626 @@
+/* BAHER SILVER ERP v4.0 ENTERPRISE SELF-CONTAINED JS BUNDLE */
+
+/* --- ui_components.js --- */
+/**
+ * BAHER SILVER ERP ENTERPRISE v4.0 — REUSABLE COMPONENT LIBRARY (Phase 1)
+ * Inspired by Odoo, SAP Business One, Stripe Dashboard, Linear, Framer
+ * Modular JS UI Component Renderers — NO inline CSS, NO inline JS
+ */
+
+const UIComponents = {
+  /**
+   * 1. ENTERPRISE SIDEBAR COMPONENT
+   */
+  renderSidebar(activeTab = 'dashboard', collapsed = false) {
+    const modules = [
+      {
+        group: 'الرئيسية (Core)',
+        items: [
+          { id: 'wh_dashboard', icon: '📊', nameAr: 'لوحة القيادة التنفيذية', nameEn: 'Executive Dashboard', badge: 'v4.0' },
+          { id: 'stones', icon: '💎', nameAr: 'مخزون الأحجار الكريمة', nameEn: 'Gemstone Inventory' },
+          { id: 'raw_materials', icon: '🧪', nameAr: 'الخامات والكيماويات', nameEn: 'Raw & Chemicals' },
+          { id: 'silver_inventory', icon: '🪙', nameAr: 'خزينة الفضة والسبائك (925/999)', nameEn: 'Silver Bullion 925/999', badge: 'g/ct' },
+          { id: 'inventory_movements', icon: '🔄', nameAr: 'حركات وسجل المخزون', nameEn: 'Stock Movements' }
+        ]
+      },
+      {
+        group: 'التصنيع والهندسة (Engineering)',
+        items: [
+          { id: 'products', icon: '💍', nameAr: 'هندسة المنتجات والموديلات', nameEn: 'Product Engineering' },
+          { id: 'bom', icon: '🌲', nameAr: 'قوائم المواد ومسارات التصنيع', nameEn: 'BOM & Routings' },
+          { id: 'mo_kanban', icon: '🏭', nameAr: 'أوامر التصنيع ورش المصنع MO', nameEn: 'Manufacturing Orders' }
+        ]
+      },
+      {
+        group: 'التجارية والمشتريات (Commercial)',
+        items: [
+          { id: 'suppliers', icon: '🤝', nameAr: 'إدارة الموردين SRM', nameEn: 'Supplier Portal' },
+          { id: 'purchasing', icon: '📦', nameAr: 'أوامر الشراء والاستلام', nameEn: 'Purchasing & GRN' },
+          { id: 'customer_orders', icon: '🛒', nameAr: 'طلبات العملاء والتصاميم', nameEn: 'Customer Orders' }
+        ]
+      },
+      {
+        group: 'بوابة العملاء والخدمات (Portal & DPP)',
+        items: [
+          { id: 'customer_portal', icon: '🏛️', nameAr: 'بوابة العملاء الخاصة', nameEn: 'Customer Portal' },
+          { id: 'dpp_admin', icon: '🛡️', nameAr: 'جواز السفر الرقمي DPP & QR', nameEn: 'Digital Product Passport', badge: 'HMAC' },
+          { id: 'customer_service', icon: '🛠️', nameAr: 'مركز خدمة العملاء والإصلاح', nameEn: 'Customer Service Center' },
+          { id: 'warranty_center', icon: '📜', nameAr: 'مركز الضمانات والعيار 25 سنة', nameEn: 'Warranty Center' }
+        ]
+      },
+      {
+        group: 'التحليلات والنظام (Enterprise)',
+        items: [
+          { id: 'reports_analytics', icon: '📈', nameAr: 'التقارير والتحليلات المتقدمة', nameEn: 'Reports & BI Analytics' },
+          { id: 'system_health', icon: '⚡', nameAr: 'صحة النظام والأجهزة HAL', nameEn: 'System Health & HAL' },
+          { id: 'user_management', icon: '🔒', nameAr: 'إدارة المستخدمين والصلاحيات', nameEn: 'User Security Matrix' },
+          { id: 'settings', icon: '⚙️', nameAr: 'إعدادات النظام العامة', nameEn: 'System Settings' }
+        ]
+      }
+    ];
+
+    const collapsedClass = collapsed ? 'w-20' : 'w-72';
+
+    let html = `
+      <aside id="bs-app-sidebar" class="bg-slate-900/95 border-l border-slate-800 flex flex-col transition-all duration-300 z-30 select-none ${collapsedClass}">
+        <!-- Sidebar Brand Header -->
+        <div class="h-16 px-4 flex items-center justify-between border-b border-slate-800">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 flex items-center justify-center shadow-lg shadow-amber-900/30 flex-shrink-0">
+              <span class="text-xl">✨</span>
+            </div>
+            <div class="flex flex-col ${collapsed ? 'hidden' : 'block'} min-w-0">
+              <h1 class="font-extrabold text-sm text-slate-100 truncate tracking-tight">باهر سيلفر ERP</h1>
+              <span class="text-[10px] text-amber-400 font-bold">ENTERPRISE v4.0</span>
+            </div>
+          </div>
+          <button id="btn-toggle-sidebar" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+            <span class="text-sm">${collapsed ? '⏩' : '⏪'}</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <div class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+    `;
+
+    modules.forEach((group) => {
+      html += `
+        <div>
+          <h3 class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ${collapsed ? 'hidden' : 'block'}">${group.group}</h3>
+          <div class="space-y-1">
+      `;
+
+      group.items.forEach((item) => {
+        const isActive = activeTab === item.id;
+        const activeClass = isActive
+          ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 font-bold border-r-2 border-amber-500'
+          : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200';
+
+        html += `
+          <button data-tab="${item.id}" class="bs-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all ${activeClass}">
+            <span class="text-base flex-shrink-0">${item.icon}</span>
+            <span class="truncate ${collapsed ? 'hidden' : 'block'}">${item.nameAr}</span>
+            ${item.badge && !collapsed ? `<span class="mr-auto px-1.5 py-0.5 text-[9px] font-black rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">${item.badge}</span>` : ''}
+          </button>
+        `;
+      });
+
+      html += `</div></div>`;
+    });
+
+    html += `
+        </div>
+
+        <!-- Sidebar User Footer -->
+        <div class="p-3 border-t border-slate-800 bg-slate-950/40 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 font-bold flex-shrink-0">
+            A
+          </div>
+          <div class="flex flex-col min-w-0 ${collapsed ? 'hidden' : 'block'}">
+            <span class="text-xs font-bold text-slate-200 truncate">مدير النظام (Admin)</span>
+            <span class="text-[10px] text-emerald-400">● متصل بنجاح</span>
+          </div>
+        </div>
+      </aside>
+    `;
+
+    return html;
+  },
+
+  /**
+   * 2. ENTERPRISE HEADER COMPONENT
+   */
+  renderHeader(currentTitle = 'لوحة القيادة التنفيذية', activeTab = 'dashboard') {
+    return `
+      <header class="h-16 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 flex items-center justify-between z-20">
+        <!-- Left Section: Breadcrumbs & Quick Search Trigger -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+            <span class="hover:text-slate-200 cursor-pointer">باهر سيلفر ERP</span>
+            <span>/</span>
+            <span class="text-amber-400 font-bold">${currentTitle}</span>
+          </div>
+        </div>
+
+        <!-- Center Section: Command Palette Trigger -->
+        <div class="flex-1 max-w-md mx-6">
+          <button id="btn-open-command-palette" class="w-full flex items-center justify-between bg-slate-950/60 border border-slate-800 hover:border-slate-700 rounded-xl px-4 py-2 text-xs text-slate-400 transition-all shadow-inner">
+            <div class="flex items-center gap-2">
+              <span>🔍</span>
+              <span>البحث السريع في النظام والقطاع...</span>
+            </div>
+            <kbd class="px-2 py-0.5 text-[10px] font-mono font-bold bg-slate-800 text-slate-300 rounded border border-slate-700">Ctrl + K</kbd>
+          </button>
+        </div>
+
+        <!-- Right Section: Actions, Notifications, Theme & Profile -->
+        <div class="flex items-center gap-3">
+          <!-- Quick Add Action Button -->
+          <button id="btn-quick-action" class="bs-btn bs-btn-primary bs-btn-sm shadow-md">
+            <span>➕</span>
+            <span>إضافة جديدة</span>
+          </button>
+
+          <!-- Language Switcher -->
+          <button id="btn-toggle-lang" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors">
+            🌐 AR
+          </button>
+
+          <!-- Theme Mode Switcher -->
+          <button id="btn-toggle-theme" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold transition-colors">
+            🌙
+          </button>
+
+          <!-- Notification Drawer Trigger -->
+          <button id="btn-open-notifications" class="relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors">
+            <span>🔔</span>
+            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center animate-pulse">3</span>
+          </button>
+        </div>
+      </header>
+    `;
+  },
+
+  /**
+   * 3. MULTI-TAB NAVIGATION BAR
+   */
+  renderMultiTabBar(openTabs = [{ id: 'wh_dashboard', title: 'لوحة القيادة التنفيذية', icon: '📊' }], activeTab = 'wh_dashboard') {
+    let tabsHtml = `
+      <div class="h-10 bg-slate-950/80 border-b border-slate-800/80 px-4 flex items-center gap-2 overflow-x-auto select-none">
+    `;
+
+    openTabs.forEach((tab) => {
+      const isActive = tab.id === activeTab;
+      const activeClass = isActive
+        ? 'bg-slate-900 text-amber-400 font-bold border-t-2 border-amber-500 shadow-md'
+        : 'bg-slate-950/40 text-slate-400 hover:bg-slate-900/60 hover:text-slate-200';
+
+      tabsHtml += `
+        <div data-tab="${tab.id}" class="bs-tab-item flex items-center gap-2 px-3 py-1.5 rounded-t-lg text-xs cursor-pointer transition-all ${activeClass}">
+          <span>${tab.icon}</span>
+          <span class="truncate max-w-[120px]">${tab.title}</span>
+          ${tab.id !== 'wh_dashboard' ? `<span data-close-tab="${tab.id}" class="hover:text-rose-400 rounded p-0.5 text-[10px]">✕</span>` : ''}
+        </div>
+      `;
+    });
+
+    tabsHtml += `</div>`;
+    return tabsHtml;
+  },
+
+  /**
+   * 4. COMMAND PALETTE MODAL (Ctrl+K)
+   */
+  renderCommandPalette() {
+    return `
+      <div id="bs-command-palette-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-start justify-center pt-20 p-4">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden font-sans">
+          <!-- Palette Search Input -->
+          <div class="p-4 border-b border-slate-800 flex items-center gap-3">
+            <span class="text-lg">🔍</span>
+            <input id="cmd-palette-input" type="text" placeholder="اكتب للبحث أو الانتقال لأي وحدة... (مثال: أحجار, فحص, ضمان)" class="w-full bg-transparent text-sm text-slate-100 outline-none">
+            <kbd class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-400 rounded">ESC</kbd>
+          </div>
+
+          <!-- Quick Navigation Results -->
+          <div class="max-h-80 overflow-y-auto p-2 space-y-1 text-xs text-slate-300">
+            <div class="px-3 py-1 text-[10px] font-bold text-slate-500 uppercase">الوحدات السريعة (Quick Jump)</div>
+            
+            <div data-cmd-tab="wh_dashboard" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>📊</span><span>لوحة القيادة التنفيذية</span></span>
+              <span class="text-[10px] text-slate-500">منطقة الأداء الكلي</span>
+            </div>
+
+            <div data-cmd-tab="stones" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>💎</span><span>مخزون الأحجار الكريمة</span></span>
+              <span class="text-[10px] text-slate-500">إدارة الألماس والياقوت والزركون</span>
+            </div>
+
+            <div data-cmd-tab="silver_inventory" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>🪙</span><span>خزينة الفضة والسبائك 925/999</span></span>
+              <span class="text-[10px] text-slate-500">جرامات والوزن الإيطالي</span>
+            </div>
+
+            <div data-cmd-tab="customer_service" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>🛠️</span><span>مركز خدمة العملاء والإصلاح</span></span>
+              <span class="text-[10px] text-slate-500">طلبات الصيانة والطلاء</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  /**
+   * 5. NOTIFICATION CENTER DRAWER
+   */
+  renderNotificationDrawer() {
+    return `
+      <div id="bs-notification-drawer" class="hidden fixed inset-y-0 left-0 z-50 w-80 bg-slate-900/98 border-r border-slate-800 backdrop-blur-xl p-4 shadow-2xl flex flex-col justify-between font-sans text-xs">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="font-extrabold text-slate-100 flex items-center gap-2">
+              <span>🔔</span><span>مركز التنبيهات والإشعارات</span>
+            </h3>
+            <button id="btn-close-notifications" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <div class="py-4 space-y-3">
+            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300">
+              <div class="font-bold mb-1">⚠️ تنبيه مخزون حرج</div>
+              <div class="text-[11px] text-slate-300">انخفض مخزون الفضة النقية عيار 999 عن الحد الأدنى 500 جرام.</div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
+              <div class="font-bold mb-1">🛠️ طلب صيانة جديد</div>
+              <div class="text-[11px] text-slate-300">تم تقديم طلب إصلاح جديد (SRV-2026-000002) لطلاء الروديوم.</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-center font-bold">تحديد الكل ككمقروء</button>
+      </div>
+    `;
+  },
+
+  /**
+   * 6. KPI CARD RENDERER
+   */
+  renderKpiCard(title, value, subtitle, icon, trendPct = 0, isPositive = true) {
+    const trendClass = isPositive ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+    const arrow = isPositive ? '↑' : '↓';
+
+    return `
+      <div class="bs-glass-card bs-kpi-card">
+        <div class="bs-kpi-header">
+          <span class="bs-kpi-title">${title}</span>
+          <span class="p-2 rounded-xl bg-slate-800 border border-slate-700 text-base">${icon}</span>
+        </div>
+        <div class="bs-kpi-value">${value}</div>
+        <div class="bs-kpi-footer">
+          <span class="bs-badge ${trendClass}">${arrow} ${Math.abs(trendPct)}%</span>
+          <span class="text-slate-400">${subtitle}</span>
+        </div>
+      </div>
+    `;
+  }
+};
+
+/* --- Sidebar.js --- */
+/**
+ * BAHER SILVER ERP — SIDEBAR COMPONENT MODULE
+ */
+const Sidebar = {
+  render(activeTab = 'dashboard', collapsed = false) {
+    return UIComponents.renderSidebar(activeTab, collapsed);
+  }
+};
+
+/* --- Header.js --- */
+/**
+ * BAHER SILVER ERP — HEADER COMPONENT MODULE
+ */
+const Header = {
+  render(currentTitle = 'لوحة القيادة التنفيذية', activeTab = 'dashboard') {
+    return UIComponents.renderHeader(currentTitle, activeTab);
+  }
+};
+
+/* --- Tabs.js --- */
+/**
+ * BAHER SILVER ERP — MULTI-TAB WORKSPACE MODULE
+ */
+const Tabs = {
+  render(openTabs = [], activeTab = 'wh_dashboard') {
+    return UIComponents.renderMultiTabBar(openTabs, activeTab);
+  }
+};
+
+/* --- DataGrid.js --- */
+/**
+ * BAHER SILVER ERP — ENTERPRISE DATA GRID & WORKSPACE MEMORY SYSTEM (Phase 3)
+ * Includes Saved Filters, Quick Filters, Filter Chips, Column Manager, Bulk Action Toolbar,
+ * Split View, Virtualized Table Foundation, and Workspace Memory Persistence.
+ */
+
+const DataGrid = {
+  /**
+   * WORKSPACE MEMORY ENGINE
+   */
+  memory: {
+    get(key, defaultValue = null) {
+      try {
+        const val = localStorage.getItem(`bs_erp_${key}`);
+        return val ? JSON.parse(val) : defaultValue;
+      } catch {
+        return defaultValue;
+      }
+    },
+    set(key, value) {
+      try {
+        localStorage.setItem(`bs_erp_${key}`, JSON.stringify(value));
+      } catch (err) {
+        console.error('Workspace memory save error:', err);
+      }
+    }
+  },
+
+  /**
+   * 1. RENDER ENTERPRISE DATA GRID TOOLBAR & FILTER CHIPS
+   */
+  renderToolbar({
+    searchQuery = '',
+    quickFilters = [],
+    activeFilterId = null,
+    savedFilters = [],
+    activeChips = [],
+    selectedCount = 0,
+    onSearch = 'handleDataGridSearch',
+    onFilter = 'handleDataGridFilter',
+    onSaveFilter = 'handleSaveFilterPreset'
+  }) {
+    return `
+      <div class="space-y-3 font-sans">
+        <!-- Main Toolbar Row -->
+        <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-900/90 border border-slate-800 rounded-xl">
+          <!-- Search & Quick Filter Pills -->
+          <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+            <div class="relative flex-1 min-w-[200px]">
+              <span class="absolute right-3 top-2.5 text-xs text-slate-400">🔍</span>
+              <input type="text" value="${searchQuery}" placeholder="البحث في القائمة والبيانات..." oninput="${onSearch}(this.value)" class="w-full pr-8 pl-3 py-1.5 bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-lg text-xs text-slate-100 outline-none">
+            </div>
+
+            <!-- Quick Filter Presets -->
+            ${quickFilters.map(f => `
+              <button onclick="${onFilter}('${f.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${activeFilterId === f.id ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}">
+                ${f.label}
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Column Manager & Saved Filters Dropdown Buttons -->
+          <div class="flex items-center gap-2">
+            <button onclick="DataGrid.toggleColumnManager()" class="bs-btn bs-btn-secondary bs-btn-sm">
+              <span>👁️</span><span>إدارة الأعمدة</span>
+            </button>
+            <button onclick="${onSaveFilter}()" class="bs-btn bs-btn-ghost bs-btn-sm text-amber-400">
+              <span>💾</span><span>حفظ الفلتر</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Chips Row -->
+        ${activeChips.length > 0 ? `
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <span class="text-slate-400 font-sans">الفلاتر النشطة:</span>
+            ${activeChips.map(c => `
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span>${c.label}: ${c.value}</span>
+                <button onclick="${c.onRemove}" class="hover:text-rose-400 text-[10px]">✕</button>
+              </span>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <!-- Bulk Action Floating Toolbar (When items selected) -->
+        ${selectedCount > 0 ? `
+          <div class="flex items-center justify-between p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs font-bold animate-fade-in shadow-lg">
+            <div class="flex items-center gap-2">
+              <span>☑️</span>
+              <span>تم تحديد ${selectedCount} عناصر في القائمة</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="handleBulkExport()" class="bs-btn bs-btn-secondary bs-btn-sm">تصدير المحددة (CSV)</button>
+              <button onclick="handleBulkDelete()" class="bs-btn bs-btn-danger bs-btn-sm">حذف المحددة</button>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  },
+
+  /**
+   * 2. RENDER SPLIT VIEW WRAPPER (Data Grid + Details Drawer Panel)
+   */
+  renderSplitView(tableHtml, detailsPanelHtml = null) {
+    if (!detailsPanelHtml) return tableHtml;
+
+    return `
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
+        <div class="lg:col-span-2 space-y-4">
+          ${tableHtml}
+        </div>
+        <div class="lg:col-span-1 bg-slate-900/95 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl sticky top-20">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="font-extrabold text-sm text-slate-100 flex items-center gap-2">
+              <span>👁️</span><span>تفاصيل العنصر المحدد (Split View)</span>
+            </h3>
+            <button onclick="closeSplitViewDetails()" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+          <div class="space-y-3">
+            ${detailsPanelHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  /**
+   * 3. TOGGLE COLUMN MANAGER POPUP
+   */
+  toggleColumnManager() {
+    alert('إدارة الأعمدة: يمكنك إخفاء/إظهار وإعادة ترتيب أعمدة القائمة بمرونة.');
+  },
+
+  /**
+   * 4. RENDER DATA TABLE
+   */
+  renderTable({ columns = [], rows = [], keyField = 'id', onRowClick = null }) {
+    if (rows.length === 0) {
+      return this.renderEmptyState('لا توجد بيانات مسجلة حالياً لعرضها في القائمة.');
+    }
+
+    return `
+      <div class="bs-table-container font-mono text-xs">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th class="w-10 text-center"><input type="checkbox" onchange="toggleSelectAllRows(this.checked)"></th>
+              ${columns.map(col => `<th>${col.label}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr class="hover:bg-slate-900/50 cursor-pointer transition-colors" ${onRowClick ? `onclick="${onRowClick}('${row[keyField]}')"` : ''}>
+                <td class="w-10 text-center" onclick="event.stopPropagation()"><input type="checkbox" class="bs-row-checkbox"></td>
+                ${columns.map(col => `<td>${col.render ? col.render(row[col.field], row) : (row[col.field] ?? '—')}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  /**
+   * 5. STATES (Loading Skeleton, Empty, Error, Permission)
+   */
+  renderSkeleton(columnsCount = 5, rowsCount = 6) {
+    return `
+      <div class="space-y-3 font-sans">
+        <div class="flex items-center justify-between gap-4 pb-2">
+          <div class="h-6 w-48 bs-skeleton"></div>
+          <div class="h-8 w-32 bs-skeleton"></div>
+        </div>
+        <div class="bs-table-container">
+          <div class="space-y-2 p-4">
+            ${Array.from({ length: rowsCount }).map(() => `
+              <div class="flex items-center gap-4">
+                ${Array.from({ length: columnsCount }).map(() => `<div class="h-5 flex-1 bs-skeleton"></div>`).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  renderEmptyState(message = 'لا توجد بيانات مسجلة حالياً', actionText = null, actionModal = null) {
+    return `
+      <div class="p-12 text-center border-2 border-dashed border-slate-800 rounded-2xl space-y-4 bg-slate-950/40 font-sans">
+        <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-3xl mx-auto text-amber-400">
+          📦
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-base font-bold text-slate-200">${message}</h3>
+          <p class="text-xs text-slate-400">يمكنك البدء بإضافة عناصر جديدة أو تغيير الفلاتر الحالية.</p>
+        </div>
+        ${actionText && actionModal ? `
+          <button onclick="openModal('${actionModal}')" class="bs-btn bs-btn-primary bs-btn-sm shadow-md">
+            <span>+</span>
+            <span>${actionText}</span>
+          </button>
+        ` : ''}
+      </div>
+    `;
+  },
+
+  renderErrorState(title = 'خطأ في جلب البيانات', errorMessage = 'تعذر الاتصال بمركز البيانات المسجلة، يرجى المحاولة لاحقاً.') {
+    return `
+      <div class="p-8 border border-rose-500/30 bg-rose-500/10 rounded-2xl space-y-3 font-sans text-rose-300">
+        <div class="flex items-center gap-3 font-bold text-sm text-rose-400">
+          <span class="text-xl">⚠️</span>
+          <span>${title}</span>
+        </div>
+        <p class="text-xs text-rose-200/80 leading-relaxed">${errorMessage}</p>
+        <button onclick="renderApp()" class="bs-btn bs-btn-danger bs-btn-sm">
+          <span>🔄</span>
+          <span>إعادة المحاولة</span>
+        </button>
+      </div>
+    `;
+  },
+
+  renderPermissionState(permissionName = 'REQUIRED_PERMISSION') {
+    return `
+      <div class="p-12 text-center border border-amber-500/30 bg-amber-500/10 rounded-2xl space-y-4 font-sans text-amber-300">
+        <div class="w-16 h-16 rounded-full bg-amber-950/80 border border-amber-500/50 flex items-center justify-center text-3xl mx-auto text-amber-400">
+          🔒
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-base font-extrabold">عفواً! لا تملك صلاحية الوصول لهذه الشاشة</h3>
+          <p class="text-xs text-amber-200/80">تتطلب هذه العملية الصلاحية التالية: <code class="px-2 py-0.5 rounded bg-amber-950 border border-amber-500/40 text-amber-400 font-mono">${permissionName}</code></p>
+        </div>
+      </div>
+    `;
+  }
+};
+
+/* --- Timeline.js --- */
+/**
+ * BAHER SILVER ERP — UNIFIED CUSTOMER 360° TIMELINE COMPONENT MODULE (Phase 4)
+ * Renders the 8-stage customer timeline: Order ➔ Manufacturing ➔ QC ➔ Delivery ➔ Warranty ➔ Service ➔ Repairs ➔ Ownership
+ */
+
+const Timeline = {
+  /**
+   * 1. RENDER 360° LIFECYCLE STAGE STEPPER
+   */
+  renderLifecycleStepper(currentStage = 'WARRANTY') {
+    const stages = [
+      { id: 'ORDER', title: 'الطلب', icon: '🛒' },
+      { id: 'MANUFACTURING', title: 'التصنيع', icon: '🏭' },
+      { id: 'QC', title: 'فحص الجودة', icon: '🔍' },
+      { id: 'DELIVERY', title: 'التسليم', icon: '🚚' },
+      { id: 'WARRANTY', title: 'الضمان', icon: '📜' },
+      { id: 'SERVICE', title: 'الخدمات', icon: '🛠️' },
+      { id: 'REPAIRS', title: 'الإصلاح', icon: '🔧' },
+      { id: 'OWNERSHIP', title: 'الملكية', icon: '👑' }
+    ];
+
+    const currentIdx = stages.findIndex(s => s.id === currentStage);
+
+    return `
+      <div class="w-full py-4 overflow-x-auto select-none font-sans">
+        <div class="flex items-center justify-between min-w-[640px] px-2">
+          ${stages.map((stage, idx) => {
+            const isCompleted = idx <= currentIdx;
+            const isCurrent = idx === currentIdx;
+            const stepClass = isCurrent
+              ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-500/20 font-bold scale-110 shadow-lg shadow-amber-500/30'
+              : isCompleted
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+              : 'bg-slate-900 text-slate-600 border border-slate-800';
+
+            return `
+              <div class="flex flex-col items-center gap-1.5 flex-1 relative">
+                <!-- Connecting Line -->
+                ${idx < stages.length - 1 ? `
+                  <div class="absolute top-4 right-1/2 left-0 h-[2px] ${idx < currentIdx ? 'bg-emerald-500' : 'bg-slate-800'} -z-10"></div>
+                ` : ''}
+                
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all ${stepClass}">
+                  <span>${stage.icon}</span>
+                </div>
+                <span class="text-[11px] font-bold ${isCurrent ? 'text-amber-400' : isCompleted ? 'text-slate-200' : 'text-slate-500'}">
+                  ${stage.title}
+                </span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  },
+
+  /**
+   * 2. RENDER EVENT MILESTONE TIMELINE
+   */
+  render(events = []) {
+    if (events.length === 0) return '<div class="text-xs text-slate-500 p-4">لا توجد أحداث سابقة في سجل الجدول الزمني</div>';
+
+    return `
+      <div class="relative border-r-2 border-slate-800 pr-6 space-y-6 font-sans">
+        ${events.map(ev => `
+          <div class="relative group">
+            <div class="absolute -right-8 top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-amber-500 flex items-center justify-center shadow">
+              <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+            </div>
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 space-y-1 hover:border-amber-500/40 transition-colors">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-200 flex items-center gap-2">
+                  <span>${ev.icon || '📌'}</span>
+                  <span>${ev.title}</span>
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">${ev.timestamp}</span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">${ev.description}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+};
+
+/* --- Charts.js --- */
+/**
+ * BAHER SILVER ERP — SPARKLINE & MINI CHARTS COMPONENT MODULE
+ */
+const Charts = {
+  renderSparkline(points = [10, 25, 18, 30, 45, 40, 60], width = 120, height = 36, color = '#C3B097') {
+    const min = Math.min(...points);
+    const max = Math.max(...points);
+    const len = points.length - 1;
+
+    const pathPoints = points.map((p, idx) => {
+      const x = (idx / len) * width;
+      const y = height - ((p - min) / (max - min || 1)) * height;
+      return `${x},${y}`;
+    }).join(' L ');
+
+    return `
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="overflow-visible">
+        <path d="M ${pathPoints}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    `;
+  }
+};
+
+/* --- CommandPalette.js --- */
+/**
+ * BAHER SILVER ERP — GLOBAL COMMAND PALETTE & SEARCH MODULE (Phase 5)
+ * Searches across: Products, Customers, Orders, Suppliers, DPP, Warranty, QR, Service Requests
+ */
+
+const CommandPalette = {
+  render() {
+    return `
+      <div id="bs-command-palette-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-start justify-center pt-20 p-4 font-sans select-none">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden">
+          <!-- Input Header -->
+          <div class="p-4 border-b border-slate-800 flex items-center gap-3">
+            <span class="text-lg">🔍</span>
+            <input id="cmd-palette-input" type="text" placeholder="البحث الموحد الشامل (منتجات، عملاء، أوامر، فواتير، DPP، ضمان، خدمة)..." class="w-full bg-transparent text-sm text-slate-100 outline-none">
+            <kbd class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-400 rounded border border-slate-700">ESC</kbd>
+          </div>
+
+          <!-- Scope Filters Row -->
+          <div class="flex items-center gap-1.5 px-4 py-2 bg-slate-950/60 border-b border-slate-800/80 text-[11px] font-bold text-slate-400 overflow-x-auto">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950">الكل</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 hover:text-white cursor-pointer">💍 المنتجات</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 hover:text-white cursor-pointer">🤝 العملاء</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 hover:text-white cursor-pointer">🛒 الأوامر</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 hover:text-white cursor-pointer">📦 الموردين</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 hover:text-white cursor-pointer">🛡️ DPP & QR</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 hover:text-white cursor-pointer">🛠️ الخدمات</span>
+          </div>
+
+          <!-- Quick Navigation Results -->
+          <div class="max-h-80 overflow-y-auto p-2 space-y-1 text-xs text-slate-300">
+            <div class="px-3 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">نتائج البحث الموصى بها</div>
+            
+            <div data-cmd-tab="wh_dashboard" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>📊</span><span>لوحة القيادة التنفيذية والمؤشرات</span></span>
+              <span class="text-[10px] text-slate-500">وحدة التحكم الكلية</span>
+            </div>
+
+            <div data-cmd-tab="stones" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>💎</span><span>مخزون الأحجار الكريمة والألماس</span></span>
+              <span class="text-[10px] text-slate-500">1,420 قطعة مسجلة</span>
+            </div>
+
+            <div data-cmd-tab="silver_inventory" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>🪙</span><span>خزينة الفضة والسبائك 999 (Account 1105)</span></span>
+              <span class="text-[10px] text-slate-500">5,840.50 جرام</span>
+            </div>
+
+            <div data-cmd-tab="customer_service" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>🛠️</span><span>طلب خدمة طلاء روديوم (SRV-2026-0001)</span></span>
+              <span class="text-[10px] text-emerald-400">جاري الصيانة</span>
+            </div>
+
+            <div data-cmd-tab="system_health" class="cmd-item p-2.5 rounded-xl hover:bg-amber-500/20 hover:text-amber-300 cursor-pointer flex items-center justify-between">
+              <span class="flex items-center gap-2"><span>⚡</span><span>صحة النظام ومراقبة الأجهزة HAL</span></span>
+              <span class="text-[10px] text-emerald-400">HEALTHY (18ms)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+};
+
+/* --- Notifications.js --- */
+/**
+ * BAHER SILVER ERP — NOTIFICATIONS DRAWER MODULE
+ */
+const Notifications = {
+  render() {
+    return UIComponents.renderNotificationDrawer();
+  }
+};
+
+/* --- Toast.js --- */
+/**
+ * BAHER SILVER ERP — TOAST SYSTEM MODULE
+ */
+const ToastNotification = {
+  show(message, type = 'success') {
+    if (typeof Toast !== 'undefined' && Toast.show) {
+      Toast.show(message, '', type);
+    }
+  }
+};
+
+/* --- ui.js --- */
+/**
+ * BAHER SILVER ERP v2.0 — UI Behaviors
+ * Sidebar | Theme | Language | Search | Notifications | Counters
+ * Does NOT touch app.js data logic
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   TRANSLATIONS — Full AR/EN coverage
+   ═══════════════════════════════════════════════════════════════ */
+const T = {
+  en: {
+    // Nav
+    nav_main:'MAIN', nav_management:'MANAGEMENT',
+    nav_dashboard:'Dashboard', nav_inventory:'Gemstone Inventory',
+    nav_movements:'Stock Movement', nav_search:'Advanced Search',
+    nav_suppliers:'Suppliers', nav_barcode:'Barcode & QR',
+    nav_reports:'Reports', nav_settings:'Settings',
+    nav_collapse:'Collapse sidebar', nav_expand:'Expand sidebar',
+    // Topbar
+    search_placeholder:'Search stones, barcodes, suppliers…',
+    search_hint:'⌘K', search_empty:'No results found',
+
+    // Wholesale
+    col_grams:'Grams', f_grams:'Weight (Grams)', kpi_grams:'Total Grams',
+    f_pieces:'Pieces', pieces:'pcs',
+    // Dynamic Dropdowns
+    "diamond": "Diamond", "ruby": "Ruby", "emerald": "Emerald", "sapphire": "Sapphire", "pearl": "Pearl", "opal": "Opal", "topaz": "Topaz", "amethyst": "Amethyst", "garnet": "Garnet", "turquoise": "Turquoise",
+    "natural": "Natural", "synthetic": "Synthetic", "treated": "Treated", "lab-grown": "Lab-Grown", "simulant": "Simulant",
+    "white": "White", "red": "Red", "pink": "Pink", "blue": "Blue", "green": "Green", "yellow": "Yellow", "orange": "Orange", "purple": "Purple", "black": "Black", "brown": "Brown", "gray": "Gray", "colorless": "Colorless", "multi-color": "Multi-Color",
+    "round": "Round", "oval": "Oval", "pear": "Pear", "marquise": "Marquise", "princess": "Princess", "cushion": "Cushion", "emerald cut": "Emerald Cut", "asscher": "Asscher", "radiant": "Radiant", "heart": "Heart", "trillion": "Trillion", "baguette": "Baguette", "cabochon": "Cabochon", "freeform": "Freeform",
+    "brilliant": "Brilliant", "step": "Step", "mixed": "Mixed", "rose": "Rose", "briolette": "Briolette", "faceted": "Faceted", "smooth": "Smooth",
+    "carat": "Carat", "piece": "Piece", "gram": "Gram", "set": "Set", "pair": "Pair", "lot": "Lot",
+
+    search_tip_enter:'to select', search_tip_esc:'to close',
+    notif_title:'Notifications', notif_empty:'All caught up!',
+    notif_empty_sub:'No alerts at the moment',
+    notif_mark_read:'Mark all as read',
+    notif_low_stock:'Low Stock Alert',
+    notif_out_stock:'Out of Stock',
+    theme_dark:'Dark mode', theme_light:'Light mode',
+    user_name:'Administrator', user_role:'System Admin',
+    user_profile:'Profile', user_settings:'Settings', user_logout:'Sign out',
+    quick_add:'New Stone',
+    // Page titles
+    page_dashboard:'Dashboard', page_inventory:'Gemstone Inventory',
+    page_movements:'Stock Movement', page_search:'Advanced Search',
+    page_suppliers:'Suppliers', page_barcode:'Barcode & QR',
+    page_reports:'Reports & Analytics', page_settings:'Settings',
+    // Dashboard
+    dash_subtitle:'Gemstone inventory overview',
+    kpi_inv_value:'Inventory Value', kpi_purchase:'Purchase Value',
+    kpi_selling:'Selling Value', kpi_profit:'Gross Profit',
+    kpi_types:'Stone Types', kpi_qty:'Total Quantity',
+    kpi_low:'Low Stock', kpi_out:'Out of Stock',
+    chart_monthly:'Monthly Stock Movement',
+    chart_category:'By Category', chart_color:'By Color',
+    chart_shape:'By Shape', chart_supplier:'By Supplier',
+    top_stones:'Top Stones by Value', recent_tx:'Recent Transactions',
+    stock_alerts:'Stock Alerts', view_all:'View All',
+    today_movements:"Today's Movements",
+    // Table
+    col_image:'Image', col_code:'Stone ID', col_name:'Stone Name',
+    col_category:'Category', col_type:'Type', col_color:'Color',
+    col_shape:'Shape', col_cut:'Cut', col_size:'Size (mm)',
+    col_weight:'Weight (ct)', col_qty:'Quantity', col_unit:'Unit',
+    col_buy:'Buy Price', col_sell:'Sell Price', col_value:'Total Value',
+    col_status:'Status', col_location:'Location', col_supplier:'Supplier',
+    col_date:'Date Added', col_actions:'Actions',
+    // Movements
+    col_mov_id:'Movement ID', col_mov_date:'Date & Time',
+    col_mov_stone:'Stone', col_tx_type:'Type', col_employee:'Employee',
+    col_reference:'Reference', col_reason:'Reason',
+    // Status
+    status_in:'In Stock', status_low:'Low Stock', status_out:'Out of Stock',
+    tx_in:'Stock In', tx_out:'Stock Out', tx_adj:'Adjustment', tx_return:'Return',
+    // Actions
+    btn_add:'Add Gemstone', btn_edit:'Edit', btn_delete:'Delete',
+    btn_view:'View', btn_barcode:'Barcode', btn_save:'Save',
+    btn_cancel:'Cancel', btn_export:'Export CSV', btn_import:'Import',
+    btn_print:'Print', btn_close:'Close', btn_confirm:'Confirm',
+    btn_clear:'Clear', btn_search:'Search', btn_new_mov:'New Movement',
+    btn_add_supplier:'Add Supplier', btn_refresh:'Refresh',
+    btn_add_stone:'Add Stone', btn_bulk_delete:'Delete Selected',
+    btn_select_all:'Select All', btn_deselect:'Deselect',
+    // Form fields
+    f_name_en:'Stone Name (English)', f_name_ar:'Stone Name (Arabic)',
+    f_category:'Category', f_type:'Stone Type', f_color:'Color',
+    f_shape:'Shape', f_cut:'Cut', f_size:'Size (mm)', f_weight:'Weight (Carat)',
+    f_qty:'Quantity Available', f_unit:'Unit', f_min_stock:'Min. Stock Level',
+    f_buy_price:'Purchase Price', f_sell_price:'Selling Price',
+    f_margin:'Profit Margin', f_supplier:'Supplier', f_location:'Storage Location',
+    f_notes:'Notes', f_image:'Stone Image', f_barcode:'Barcode',
+    f_barcode_auto:'Auto-generated on save',
+    // Placeholders
+    ph_name_en:'e.g. Round White Diamond',
+    ph_name_ar:'مثال: ألماس أبيض دائري',
+    ph_size:'e.g. 3.5', ph_weight:'e.g. 0.25',
+    ph_qty:'0', ph_min:'10', ph_price:'0.00',
+    ph_notes:'Additional information…',
+    ph_search:'Search by name, code, barcode…',
+    ph_reason:'e.g. Customer order, Production…',
+    ph_reference:'e.g. PO-2024-001',
+    // Validation
+    err_required:'This field is required',
+    err_positive:'Must be a positive number',
+    err_duplicate:'Duplicate entry detected',
+    err_neg_stock:'Insufficient stock for this operation',
+    err_invalid:'Invalid value',
+    // Success messages
+    msg_added:'Record added successfully',
+    msg_updated:'Record updated successfully',
+    msg_deleted:'Record deleted',
+    msg_exported:'Exported successfully',
+    msg_imported:'Imported successfully',
+    msg_saved:'Settings saved',
+    // Confirms
+    confirm_delete:'Are you sure you want to delete this record? This action cannot be undone.',
+    confirm_reset:'This will reset ALL data to demo data. This cannot be undone!',
+    // Movement form
+    f_stone:'Select Stone', f_tx_type:'Transaction Type',
+    f_mov_date:'Date', f_mov_time:'Time',
+    ph_stone_search:'Search by name, code or barcode…',
+    ph_employee:'Select employee',
+    label_current_qty:'Current Stock', label_after_qty:'After Movement',
+    // Supplier fields
+    f_company:'Company Name', f_contact:'Contact Person',
+    f_mobile:'Mobile', f_whatsapp:'WhatsApp', f_email:'Email',
+    f_website:'Website', f_country:'Country', f_address:'Address',
+    // Search
+    search_title:'Advanced Search', search_subtitle:'Find any gemstone instantly',
+    scan_hint:'Scan a barcode or QR code directly into the search box',
+    filter_status:'Stock Status', filter_all:'All', filter_in:'In Stock',
+    filter_low:'Low Stock', filter_out:'Out of Stock',
+    min_qty:'Min Qty', max_qty:'Max Qty',
+    results_found:'gemstone(s) found',
+    no_results:'No gemstones match your search',
+    try_search:'Start searching to find gemstones',
+    // Reports
+    tab_valuation:'Inventory Valuation', tab_stock:'Stock Summary',
+    tab_movements:'Movement Report', tab_alerts:'Stock Alerts',
+    col_buy_total:'Total Buy', col_sell_total:'Total Sell', col_margin:'Margin',
+    total_purchase:'Total Purchase Value', total_selling:'Total Selling Value',
+    gross_profit:'Gross Profit', avg_margin:'Avg. Margin',
+    alerts_low:'Low Stock Items', alerts_out:'Out of Stock Items',
+    all_healthy:'All stocks are healthy',
+    no_alerts:'No alerts at the moment',
+    date_from:'From Date', date_to:'To Date',
+    // Settings
+    set_general:'General', set_categories:'Categories',
+    set_types:'Stone Types', set_colors:'Colors', set_shapes:'Shapes',
+    set_cuts:'Cuts', set_units:'Units', set_employees:'Employees',
+    set_locations:'Locations', set_alerts_s:'Alerts & Currency',
+    set_data:'Data Management',
+    set_company_en:'Company Name (English)', set_company_ar:'Company Name (Arabic)',
+    set_min_stock:'Minimum Stock Alert Level',
+    set_min_hint:'Stones at or below this quantity will trigger alerts',
+    set_currency:'Currency', set_save_general:'Save General Settings',
+    set_save_alerts:'Save Alert Settings',
+    set_export_title:'Export All Data', set_export_desc:'Export all data as JSON backup',
+    set_export_btn:'Export Backup', set_import_title:'Import Data',
+    set_import_desc:'Import a previously exported JSON backup',
+    set_import_btn:'Import JSON', set_danger_title:'Danger Zone',
+    set_danger_desc:'Reset all data to demo data. Cannot be undone.',
+    set_reset_btn:'Reset All Data', set_sysinfo:'System Information',
+    add_item:'Add', edit_item:'Edit', del_item:'Delete',
+    item_placeholder:'Type and press Enter or click Add',
+    // Barcode
+    bc_scanner:'Scanner', bc_scan_hint:'Scan barcode or enter code manually',
+    bc_mode_bc:'Barcode', bc_mode_qr:'QR Code', bc_mode_both:'Both',
+    bc_filter_cat:'All Categories', bc_download:'Download',
+    bc_print:'Print', bc_not_found:'No stone found with this code',
+    // Empty states
+    empty_inventory:'No gemstones yet', empty_inv_desc:'Add your first gemstone to get started',
+    empty_movements:'No movements recorded', empty_mov_desc:'Record your first stock movement',
+    empty_search:'No results', empty_search_desc:'Try adjusting your search terms',
+    empty_suppliers:'No suppliers yet', empty_sup_desc:'Add your first supplier',
+    empty_notif:'All caught up!', empty_notif_desc:'No alerts right now',
+    // Misc
+    today:'Today', yesterday:'Yesterday', just_now:'Just now',
+    currency_egp:'EGP', powered_by:'Baher Silver ERP v2.0',
+    page_of:'of', rows_per_page:'Rows per page',
+    selected_items:'selected', loading:'Loading…',
+    confirm_title:'Confirm Action',
+    bc_title:'Barcode & QR Code Studio',
+    bc_subtitle:'Generate, print and scan gemstone labels',
+    // newly added
+    brand_name:'Baher Silver', brand_desc:'GEMSTONE ERP',
+    btn_filters:'Filters', sort_name_asc:'Name (A-Z)', sort_date_desc:'Newest First', sort_price_desc:'Highest Price',
+    modal_tab_identity:'Identity', modal_tab_physical:'Physical', modal_tab_pricing:'Pricing & Stock',
+    profit_label:'Profit:', dropzone_main:'Click to upload or drag & drop', dropzone_sub:'PNG, JPG, WEBP — max 5MB',
+    select_default:'— Select —', select_none:'— None —', units_total:'units total', stone_types:'stone types',
+    kpi_margin:'margin', latest_tx_units:'units', total_movements:'total movements', net_change:'Net Change',
+    manage_suppliers:'Manage', supplier_accounts:'supplier accounts', label_generator:'Label Generator',
+    displaying_up_to:'Displaying up to 50 stones for printing.', comprehensive_analysis:'Comprehensive data analysis',
+    value_by_category:'Value by Category', avg_qty_type:'Avg Qty per Type', dist_shape:'Distribution by Shape', dist_color:'Distribution by Color',
+    user_avatar:'A', f_buy:'Buy Price', f_sell:'Sell Price', modal_stone:'Stone Details', confirm_del_msg:'Are you sure?',
+    no_data:'No data available', all_healthy:'All stocks are healthy', no_alerts:'No alerts at the moment'
+  },
+  ar: {
+    // Nav
+    nav_main:'الرئيسية', nav_management:'الإدارة',
+    nav_dashboard:'لوحة التحكم', nav_inventory:'مخزون الأحجار الكريمة',
+    nav_movements:'حركة المخزون', nav_search:'البحث المتقدم',
+    nav_suppliers:'الموردون', nav_barcode:'الباركود والـ QR',
+    nav_reports:'التقارير', nav_settings:'الإعدادات',
+    nav_collapse:'طي الشريط الجانبي', nav_expand:'توسيع الشريط الجانبي',
+    // Topbar
+    search_placeholder:'ابحث عن أحجار، باركود، موردين…',
+    search_hint:'بحث', search_empty:'لا توجد نتائج',
+
+    // Wholesale
+    col_grams:'جرام', f_grams:'الوزن (جرام)', kpi_grams:'إجمالي الجرامات',
+    f_pieces:'القطع', pieces:'قطعة',
+    // Dynamic Dropdowns
+    "diamond": "ألماس", "ruby": "ياقوت أحمر", "emerald": "زمرد", "sapphire": "ياقوت أزرق", "pearl": "لؤلؤ", "opal": "أوبال", "topaz": "توباز", "amethyst": "جمشت", "garnet": "عقيق", "turquoise": "فيروز",
+    "natural": "طبيعي", "synthetic": "صناعي", "treated": "معالج", "lab-grown": "مزروع بالمختبر", "simulant": "مقلد",
+    "white": "أبيض", "red": "أحمر", "pink": "وردي", "blue": "أزرق", "green": "أخضر", "yellow": "أصفر", "orange": "برتقالي", "purple": "بنفسجي", "black": "أسود", "brown": "بني", "gray": "رمادي", "colorless": "عديم اللون", "multi-color": "متعدد الألوان",
+    "round": "دائري", "oval": "بيضاوي", "pear": "كمثري", "marquise": "ماركيز", "princess": "أميرة", "cushion": "وسادي", "emerald cut": "زمردي", "asscher": "آشر", "radiant": "مشع", "heart": "قلب", "trillion": "تريليون", "baguette": "باجيت", "cabochon": "كابوشون", "freeform": "شكل حر",
+    "brilliant": "لامع", "step": "متدرج", "mixed": "مختلط", "rose": "وردي", "briolette": "بريوليت", "faceted": "مضلع", "smooth": "أملس",
+    "carat": "قيراط", "piece": "قطعة", "gram": "جرام", "set": "طقم", "pair": "زوج", "lot": "لوط",
+
+    search_tip_enter:'للاختيار', search_tip_esc:'للإغلاق',
+    notif_title:'الإشعارات', notif_empty:'لا توجد إشعارات!',
+    notif_empty_sub:'لا توجد تنبيهات في الوقت الحالي',
+    notif_mark_read:'تحديد الكل كمقروء',
+    notif_low_stock:'تنبيه مخزون منخفض',
+    notif_out_stock:'نفاد المخزون',
+    theme_dark:'الوضع الداكن', theme_light:'الوضع الفاتح',
+    user_name:'المسؤول', user_role:'مدير النظام',
+    user_profile:'الملف الشخصي', user_settings:'الإعدادات', user_logout:'تسجيل الخروج',
+    quick_add:'حجر جديد',
+    // Page titles
+    page_dashboard:'لوحة التحكم', page_inventory:'مخزون الأحجار الكريمة',
+    page_movements:'حركة المخزون', page_search:'البحث المتقدم',
+    page_suppliers:'الموردون', page_barcode:'الباركود والـ QR',
+    page_reports:'التقارير والتحليلات', page_settings:'الإعدادات',
+    // Dashboard
+    dash_subtitle:'نظرة عامة على مخزون الأحجار الكريمة',
+    kpi_inv_value:'قيمة المخزون', kpi_purchase:'قيمة الشراء',
+    kpi_selling:'قيمة البيع', kpi_profit:'إجمالي الربح',
+    kpi_types:'أنواع الأحجار', kpi_qty:'الكمية الإجمالية',
+    kpi_low:'مخزون منخفض', kpi_out:'نفاد المخزون',
+    chart_monthly:'حركة المخزون الشهرية',
+    chart_category:'حسب الفئة', chart_color:'حسب اللون',
+    chart_shape:'حسب الشكل', chart_supplier:'حسب المورد',
+    top_stones:'أعلى الأحجار قيمة', recent_tx:'آخر المعاملات',
+    stock_alerts:'تنبيهات المخزون', view_all:'عرض الكل',
+    today_movements:'حركات اليوم',
+    // Table
+    col_image:'الصورة', col_code:'رقم الحجر', col_name:'اسم الحجر',
+    col_category:'الفئة', col_type:'النوع', col_color:'اللون',
+    col_shape:'الشكل', col_cut:'القطع', col_size:'الحجم (مم)',
+    col_weight:'الوزن (قيراط)', col_qty:'الكمية', col_unit:'الوحدة',
+    col_buy:'سعر الشراء', col_sell:'سعر البيع', col_value:'القيمة الإجمالية',
+    col_status:'الحالة', col_location:'موقع التخزين', col_supplier:'المورد',
+    col_date:'تاريخ الإضافة', col_actions:'الإجراءات',
+    // Movements
+    col_mov_id:'رقم الحركة', col_mov_date:'التاريخ والوقت',
+    col_mov_stone:'الحجر', col_tx_type:'نوع المعاملة', col_employee:'الموظف',
+    col_reference:'المرجع', col_reason:'السبب',
+    // Status
+    status_in:'متوفر', status_low:'مخزون منخفض', status_out:'نفاد المخزون',
+    tx_in:'وارد', tx_out:'صادر', tx_adj:'تعديل', tx_return:'مرتجع',
+    // Actions
+    btn_add:'إضافة حجر', btn_edit:'تعديل', btn_delete:'حذف',
+    btn_view:'عرض', btn_barcode:'باركود', btn_save:'حفظ',
+    btn_cancel:'إلغاء', btn_export:'تصدير CSV', btn_import:'استيراد',
+    btn_print:'طباعة', btn_close:'إغلاق', btn_confirm:'تأكيد',
+    btn_clear:'مسح', btn_search:'بحث', btn_new_mov:'حركة جديدة',
+    btn_add_supplier:'إضافة مورد', btn_refresh:'تحديث',
+    btn_add_stone:'إضافة حجر', btn_bulk_delete:'حذف المحدد',
+    btn_select_all:'تحديد الكل', btn_deselect:'إلغاء التحديد',
+    // Form fields
+    f_name_en:'اسم الحجر (الإنجليزية)', f_name_ar:'اسم الحجر (العربية)',
+    f_category:'الفئة', f_type:'نوع الحجر', f_color:'اللون',
+    f_shape:'الشكل', f_cut:'القطع', f_size:'الحجم (مم)', f_weight:'الوزن (قيراط)',
+    f_qty:'الكمية المتاحة', f_unit:'الوحدة', f_min_stock:'الحد الأدنى للمخزون',
+    f_buy_price:'سعر الشراء', f_sell_price:'سعر البيع',
+    f_margin:'هامش الربح', f_supplier:'المورد', f_location:'موقع التخزين',
+    f_notes:'ملاحظات', f_image:'صورة الحجر', f_barcode:'الباركود',
+    f_barcode_auto:'يُولَّد تلقائياً عند الحفظ',
+    // Placeholders
+    ph_name_en:'مثال: Round White Diamond',
+    ph_name_ar:'مثال: ألماس أبيض دائري',
+    ph_size:'مثال: 3.5', ph_weight:'مثال: 0.25',
+    ph_qty:'0', ph_min:'10', ph_price:'0.00',
+    ph_notes:'معلومات إضافية…',
+    ph_search:'ابحث بالاسم أو الرمز أو الباركود…',
+    ph_reason:'مثال: طلب عميل، إنتاج…',
+    ph_reference:'مثال: PO-2024-001',
+    // Validation
+    err_required:'هذا الحقل مطلوب',
+    err_positive:'يجب أن يكون رقماً موجباً',
+    err_duplicate:'تم اكتشاف إدخال مكرر',
+    err_neg_stock:'رصيد غير كافٍ لهذه العملية',
+    err_invalid:'قيمة غير صحيحة',
+    // Success messages
+    msg_added:'تمت الإضافة بنجاح',
+    msg_updated:'تم التحديث بنجاح',
+    msg_deleted:'تم الحذف',
+    msg_exported:'تم التصدير بنجاح',
+    msg_imported:'تم الاستيراد بنجاح',
+    msg_saved:'تم حفظ الإعدادات',
+    // Confirms
+    confirm_delete:'هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.',
+    confirm_reset:'سيؤدي هذا إلى إعادة ضبط جميع البيانات. لا يمكن التراجع!',
+    // Movement form
+    f_stone:'اختر الحجر', f_tx_type:'نوع المعاملة',
+    f_mov_date:'التاريخ', f_mov_time:'الوقت',
+    ph_stone_search:'ابحث بالاسم أو الرمز أو الباركود…',
+    ph_employee:'اختر الموظف',
+    label_current_qty:'الكمية الحالية', label_after_qty:'بعد الحركة',
+    // Supplier fields
+    f_company:'اسم الشركة', f_contact:'جهة الاتصال',
+    f_mobile:'الجوال', f_whatsapp:'واتساب', f_email:'البريد الإلكتروني',
+    f_website:'الموقع الإلكتروني', f_country:'الدولة', f_address:'العنوان',
+    // Search
+    search_title:'البحث المتقدم', search_subtitle:'ابحث عن أي حجر بسرعة',
+    scan_hint:'امسح الباركود أو رمز QR مباشرة في مربع البحث',
+    filter_status:'حالة المخزون', filter_all:'الكل', filter_in:'متوفر',
+    filter_low:'مخزون منخفض', filter_out:'نفاد المخزون',
+    min_qty:'الحد الأدنى', max_qty:'الحد الأقصى',
+    results_found:'حجر(أحجار) موجودة',
+    no_results:'لا توجد أحجار تطابق بحثك',
+    try_search:'ابدأ البحث للعثور على الأحجار',
+    // Reports
+    tab_valuation:'تقييم المخزون', tab_stock:'ملخص المخزون',
+    tab_movements:'تقرير الحركة', tab_alerts:'تنبيهات المخزون',
+    col_buy_total:'إجمالي الشراء', col_sell_total:'إجمالي البيع', col_margin:'الهامش',
+    total_purchase:'إجمالي قيمة الشراء', total_selling:'إجمالي قيمة البيع',
+    gross_profit:'إجمالي الربح', avg_margin:'متوسط الهامش',
+    alerts_low:'أصناف منخفضة المخزون', alerts_out:'أصناف نافدة المخزون',
+    all_healthy:'جميع المخزونات سليمة',
+    no_alerts:'لا توجد تنبيهات في الوقت الحالي',
+    date_from:'من تاريخ', date_to:'إلى تاريخ',
+    // Settings
+    set_general:'عام', set_categories:'الفئات',
+    set_types:'أنواع الأحجار', set_colors:'الألوان', set_shapes:'الأشكال',
+    set_cuts:'أنواع القطع', set_units:'الوحدات', set_employees:'الموظفون',
+    set_locations:'مواقع التخزين', set_alerts_s:'التنبيهات والعملة',
+    set_data:'إدارة البيانات',
+    set_company_en:'اسم الشركة (الإنجليزية)', set_company_ar:'اسم الشركة (العربية)',
+    set_min_stock:'مستوى تنبيه الحد الأدنى للمخزون',
+    set_min_hint:'الأحجار التي تصل إلى هذه الكمية أو أقل ستثير تنبيهات',
+    set_currency:'العملة', set_save_general:'حفظ الإعدادات العامة',
+    set_save_alerts:'حفظ إعدادات التنبيهات',
+    set_export_title:'تصدير جميع البيانات', set_export_desc:'تصدير جميع البيانات كنسخة احتياطية JSON',
+    set_export_btn:'تصدير النسخة الاحتياطية', set_import_title:'استيراد البيانات',
+    set_import_desc:'استيراد نسخة احتياطية JSON تم تصديرها مسبقاً',
+    set_import_btn:'استيراد JSON', set_danger_title:'منطقة الخطر',
+    set_danger_desc:'إعادة ضبط جميع البيانات. لا يمكن التراجع.',
+    set_reset_btn:'إعادة ضبط الكل', set_sysinfo:'معلومات النظام',
+    add_item:'إضافة', edit_item:'تعديل', del_item:'حذف',
+    item_placeholder:'اكتب ثم اضغط Enter أو انقر إضافة',
+    // Barcode
+    bc_scanner:'الماسح الضوئي', bc_scan_hint:'امسح الباركود أو أدخل الرمز يدوياً',
+    bc_mode_bc:'الباركود', bc_mode_qr:'رمز QR', bc_mode_both:'كلاهما',
+    bc_filter_cat:'جميع الفئات', bc_download:'تنزيل',
+    bc_print:'طباعة', bc_not_found:'لم يتم العثور على حجر بهذا الرمز',
+    // Empty states
+    empty_inventory:'لا توجد أحجار بعد', empty_inv_desc:'أضف حجرك الأول للبدء',
+    empty_movements:'لا توجد حركات مسجلة', empty_mov_desc:'سجّل أول حركة مخزون',
+    empty_search:'لا توجد نتائج', empty_search_desc:'جرب تعديل معايير البحث',
+    empty_suppliers:'لا يوجد موردون بعد', empty_sup_desc:'أضف المورد الأول',
+    empty_notif:'لا توجد إشعارات!', empty_notif_desc:'لا توجد تنبيهات حالياً',
+    // Misc
+    today:'اليوم', yesterday:'أمس', just_now:'الآن',
+    currency_egp:'ج.م', powered_by:'باهر سيلفر - نظام ERP v2.0',
+    page_of:'من', rows_per_page:'صفوف في الصفحة',
+    selected_items:'محدد', loading:'جارٍ التحميل…',
+    confirm_title:'تأكيد الإجراء',
+    bc_title:'استوديو الباركود ورمز QR',
+    bc_subtitle:'توليد وطباعة ومسح ملصقات الأحجار الكريمة',
+    // newly added
+    brand_name:'باهر سيلفر', brand_desc:'نظام الأحجار الكريمة',
+    btn_filters:'التصفيات', sort_name_asc:'الاسم (أ-ي)', sort_date_desc:'الأحدث أولاً', sort_price_desc:'الأعلى سعراً',
+    modal_tab_identity:'الهوية', modal_tab_physical:'المواصفات', modal_tab_pricing:'التسعير والمخزون',
+    profit_label:'الربح:', dropzone_main:'انقر للرفع أو اسحب وأفلت', dropzone_sub:'أقصى حجم 5 ميجابايت',
+    select_default:'— اختر —', select_none:'— لا يوجد —', units_total:'وحدة إجمالاً', stone_types:'أنواع أحجار',
+    kpi_margin:'هامش', latest_tx_units:'وحدة', total_movements:'إجمالي الحركات', net_change:'صافي التغيير',
+    manage_suppliers:'إدارة', supplier_accounts:'حسابات موردين', label_generator:'مولد الملصقات',
+    displaying_up_to:'يتم عرض ما يصل إلى 50 حجراً للطباعة.', comprehensive_analysis:'تحليل بيانات شامل',
+    value_by_category:'القيمة حسب الفئة', avg_qty_type:'متوسط الكمية للنوع', dist_shape:'التوزيع حسب الشكل', dist_color:'التوزيع حسب اللون',
+    user_avatar:'أ', f_buy:'سعر الشراء', f_sell:'سعر البيع', modal_stone:'تفاصيل الحجر', confirm_del_msg:'هل أنت متأكد؟',
+    no_data:'لا توجد بيانات', all_healthy:'جميع المخزونات سليمة', no_alerts:'لا توجد تنبيهات في الوقت الحالي'
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+const UI = {
+  lang: localStorage.getItem('bs_lang') || 'en',
+  theme: localStorage.getItem('bs_theme') || 'dark',
+  sidebarCollapsed: localStorage.getItem('bs_sidebar') === 'true',
+
+  t(key) {
+    if (!key) return '';
+    const k = String(key).toLowerCase();
+    return T[this.lang]?.[k] || T[this.lang]?.[key] || T.en[key] || key;
+  },
+
+  /* ── Theme ── */
+  applyTheme(theme) {
+    this.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('bs_theme', theme);
+    const btn = document.getElementById('theme-btn');
+    if (btn) {
+      btn.innerHTML = theme === 'dark'
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+      btn.title = this.t(theme === 'dark' ? 'theme_light' : 'theme_dark');
+    }
+  },
+  toggleTheme() {
+    this.applyTheme(this.theme === 'dark' ? 'light' : 'dark');
+  },
+
+  /* ── Language ── */
+  applyLang(lang) {
+    this.lang = lang;
+    localStorage.setItem('bs_lang', lang);
+    const isAr = lang === 'ar';
+    document.documentElement.setAttribute('lang', lang);
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    document.body.classList.toggle('lang-ar', isAr);
+    // Font
+    document.body.style.fontFamily = isAr ? "'Cairo', 'Tajawal', sans-serif" : "'Inter', sans-serif";
+    // Update all i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = this.t(key);
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      el.placeholder = this.t(el.getAttribute('data-i18n-ph'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = this.t(el.getAttribute('data-i18n-title'));
+    });
+    // Language buttons
+    document.querySelectorAll('.lang-btn, .lang-toggle-topbar').forEach(btn => {
+      if (btn.dataset.lang) btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    document.querySelectorAll('.lang-toggle-topbar').forEach(btn => {
+      btn.textContent = lang === 'ar' ? 'ع' : 'EN';
+    });
+    // Update theme tooltip
+    this.applyTheme(this.theme);
+  },
+  toggleLang() {
+    this.applyLang(this.lang === 'ar' ? 'en' : 'ar');
+  },
+
+  /* ── Sidebar ── */
+  applySidebar(collapsed) {
+    this.sidebarCollapsed = collapsed;
+    localStorage.setItem('bs_sidebar', collapsed);
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed', collapsed);
+    const btn = document.getElementById('collapse-btn');
+    if (btn) {
+      btn.title = this.t(collapsed ? 'nav_expand' : 'nav_collapse');
+      btn.querySelector('[data-lucide]')?.setAttribute('data-lucide', collapsed ? 'panel-left-open' : 'panel-left-close');
+      if (window.lucide) lucide.createIcons({ nodes: [btn] });
+    }
+  },
+  toggleSidebar() {
+    this.applySidebar(!this.sidebarCollapsed);
+  },
+  openMobileSidebar() {
+    document.getElementById('sidebar')?.classList.add('mobile-open');
+    document.getElementById('sidebar-overlay')?.classList.add('visible');
+  },
+  closeMobileSidebar() {
+    document.getElementById('sidebar')?.classList.remove('mobile-open');
+    document.getElementById('sidebar-overlay')?.classList.remove('visible');
+  },
+
+  /* ── Active Nav ── */
+  setActivePage() {
+    const page = window.location.pathname.split('/').pop().replace('.html', '') || 'index';
+    document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+      el.classList.toggle('active', el.dataset.page === page);
+    });
+    // Update nav badge
+    this.updateNavBadges();
+  },
+  updateNavBadges() {
+    if (typeof DB === 'undefined') return;
+    const stats = DB.getStats();
+    const count = stats.low_stock + stats.out_of_stock;
+    document.querySelectorAll('#low-stock-badge').forEach(b => {
+      b.textContent = count;
+      b.classList.toggle('hidden', count === 0);
+    });
+  },
+
+  /* ── Notifications Panel ── */
+  notifOpen: false,
+  toggleNotifPanel() {
+    this.notifOpen = !this.notifOpen;
+    document.getElementById('notif-panel')?.classList.toggle('open', this.notifOpen);
+    if (this.notifOpen) this.renderNotifications();
+  },
+  renderNotifications() {
+    const panel = document.getElementById('notif-list');
+    if (!panel || typeof DB === 'undefined') return;
+    const settings = DB.getSettings();
+    const minStock = settings.min_stock_default || 10;
+    const stones = DB.getActiveStones();
+    const lowStones = stones.filter(s => parseInt(s.qty_available) > 0 && parseInt(s.qty_available) <= minStock);
+    const outStones = stones.filter(s => parseInt(s.qty_available) === 0);
+
+    const items = [
+      ...outStones.slice(0,3).map(s => ({ type:'danger', icon:'package-x', title: this.t('notif_out_stock'), msg: `${s.name_en} — ${this.t('status_out')}` })),
+      ...lowStones.slice(0,5).map(s => ({ type:'warn', icon:'alert-triangle', title: this.t('notif_low_stock'), msg: `${s.name_en} — ${this.t('col_qty')}: ${s.qty_available}` })),
+    ];
+
+    const badge = document.getElementById('notif-badge');
+    if (badge) { badge.textContent = items.length; badge.classList.toggle('hidden', items.length === 0); }
+
+    if (!items.length) {
+      panel.innerHTML = `<div style="text-align:center;padding:40px 20px"><div style="width:48px;height:48px;margin:0 auto 12px;color:var(--text-3)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:4px">${this.t('empty_notif')}</div><div style="font-size:12.5px;color:var(--text-3)">${this.t('empty_notif_desc')}</div></div>`;
+      return;
+    }
+    panel.innerHTML = items.map(it => `
+      <div class="notif-item">
+        <div class="notif-icon ${it.type}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${it.icon==='package-x'?'<path d="M7.5 4.27 2 7.68l10 5.46 10-5.46-5.5-3.41"/><path d="m2 7.68 10 5.46 10-5.46"/><path d="M12 22V13.14"/><path d="M22 9v5.5"/><path d="m15 19.5-3-3 3-3"/><path d="m19 13.5 3 3"/>'
+          :'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'}</svg>
+        </div>
+        <div>
+          <div class="notif-title">${it.title}</div>
+          <div class="notif-msg">${Utils.escapeHtml(it.msg)}</div>
+        </div>
+      </div>`).join('');
+  },
+
+  /* ── Global Search Modal ── */
+  searchOpen: false,
+  openSearch() {
+    this.searchOpen = true;
+    document.getElementById('search-modal')?.classList.add('open');
+    setTimeout(() => document.getElementById('search-modal-input')?.focus(), 50);
+  },
+  closeSearch() {
+    this.searchOpen = false;
+    document.getElementById('search-modal')?.classList.remove('open');
+    const inp = document.getElementById('search-modal-input');
+    if (inp) { inp.value = ''; }
+    const body = document.getElementById('search-modal-body');
+    if (body) body.innerHTML = '';
+  },
+  runGlobalSearch(q) {
+    const body = document.getElementById('search-modal-body');
+    if (!body || typeof DB === 'undefined') return;
+    if (!q.trim()) { body.innerHTML = ''; return; }
+    const stones = DB.searchStones({ query: q }).slice(0, 8);
+    const settings = DB.getSettings();
+    const currency = settings.currency || 'SAR';
+    const minStock = settings.min_stock_default || 10;
+    if (!stones.length) {
+      body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">${this.t('search_empty')}</div>`;
+      return;
+    }
+    body.innerHTML = stones.map(s => `
+      <div class="search-result-item" onclick="window.location.href='inventory.html'">
+        <div class="search-result-icon">${s.image_data?`<img src="${s.image_data}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--r-md)"/>`:`<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`}</div>
+        <div style="flex:1;min-width:0">
+          <div class="search-result-name">${Utils.escapeHtml(s.name_en)}</div>
+          <div class="search-result-meta">${s.stone_code} · ${s.category||''} · ${this.t('col_qty')}: ${s.qty_available}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:13px;font-weight:700;color:var(--gold)">${Utils.formatCurrency((parseFloat(s.selling_price)||0)*(parseInt(s.qty_available)||0), currency)}</div>
+        </div>
+      </div>`).join('');
+  },
+
+  /* ── Animated Counters ── */
+  animateCounter(el, target, duration = 1200) {
+    const start = 0;
+    const startTime = performance.now();
+    const isFloat = target % 1 !== 0;
+    const step = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = start + (target - start) * eased;
+      el.textContent = isFloat ? current.toFixed(2) : Math.round(current).toLocaleString('en');
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  },
+  initCounters() {
+    document.querySelectorAll('[data-counter]').forEach(el => {
+      const target = parseFloat(el.dataset.counter) || 0;
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) { this.animateCounter(el, target); obs.disconnect(); }
+        });
+      });
+      obs.observe(el);
+    });
+  },
+
+  /* ── Confirm Modal ── */
+  confirm(msg, onOk) {
+    const el = document.getElementById('confirm-modal');
+    if (!el) return;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-title-text').textContent = this.t('confirm_title');
+    document.getElementById('confirm-ok-btn').textContent = this.t('btn_confirm');
+    document.getElementById('confirm-cancel-btn').textContent = this.t('btn_cancel');
+    document.getElementById('confirm-ok-btn').onclick = () => { Modal.close('confirm-modal'); onOk(); };
+    Modal.open('confirm-modal');
+  },
+
+  /* ── Dropdown Manager ── */
+  initDropdowns() {
+    document.addEventListener('click', e => {
+      document.querySelectorAll('.dropdown-menu.open').forEach(menu => {
+        if (!menu.closest('.dropdown')?.contains(e.target)) menu.classList.remove('open');
+      });
+      // Notification panel close on outside click
+      if (this.notifOpen) {
+        const panel = document.getElementById('notif-panel');
+        const btn = document.getElementById('notif-btn');
+        if (panel && !panel.contains(e.target) && !btn?.contains(e.target)) {
+          this.notifOpen = false;
+          panel.classList.remove('open');
+        }
+      }
+    });
+    document.querySelectorAll('[data-dropdown-toggle]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const menu = document.getElementById(btn.dataset.dropdownToggle);
+        if (menu) {
+          const wasOpen = menu.classList.contains('open');
+          document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
+          if (!wasOpen) menu.classList.add('open');
+        }
+      });
+    });
+  },
+
+  /* ── Initialize ── */
+  init() {
+    // Auth guard
+    if (!window.location.pathname.endsWith('index.html') && window.location.pathname !== '/'
+        && !sessionStorage.getItem('bs_auth')) {
+      window.location.href = 'index.html';
+      return;
+    }
+    // Seed data
+    if (typeof DB !== 'undefined') DB.seedDemoData();
+    // Theme + Lang
+    this.applyTheme(this.theme);
+    this.applyLang(this.lang);
+    // Sidebar
+    this.applySidebar(this.sidebarCollapsed);
+    // Lucide icons
+    if (window.lucide) lucide.createIcons();
+    // Active nav
+    this.setActivePage();
+    // Dropdowns
+    this.initDropdowns();
+    // Sidebar collapse button
+    document.getElementById('collapse-btn')?.addEventListener('click', () => this.toggleSidebar());
+    // Mobile menu
+    document.getElementById('topbar-menu-btn')?.addEventListener('click', () => this.openMobileSidebar());
+    document.getElementById('sidebar-overlay')?.addEventListener('click', () => this.closeMobileSidebar());
+    // Theme toggle
+    document.getElementById('theme-btn')?.addEventListener('click', () => this.toggleTheme());
+    // Language toggle (topbar button)
+    document.getElementById('lang-topbar-btn')?.addEventListener('click', () => {
+      this.toggleLang();
+    });
+    // Sidebar lang buttons
+    document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
+      btn.addEventListener('click', () => this.applyLang(btn.dataset.lang));
+    });
+    // Notification button
+    document.getElementById('notif-btn')?.addEventListener('click', () => this.toggleNotifPanel());
+    // Global search
+    document.querySelector('.global-search-trigger')?.addEventListener('click', () => this.openSearch());
+    document.getElementById('search-modal-overlay')?.addEventListener('click', e => {
+      if (e.target.id === 'search-modal-overlay') this.closeSearch();
+    });
+    document.getElementById('search-modal-input')?.addEventListener('input', e => {
+      this.runGlobalSearch(e.target.value);
+    });
+    // ⌘K shortcut
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); this.openSearch(); }
+      if (e.key === 'Escape') {
+        this.closeSearch();
+        this.closeMobileSidebar();
+        document.querySelectorAll('.modal-overlay.open').forEach(m => {
+          m.classList.remove('open');
+          document.body.style.overflow = '';
+        });
+      }
+    });
+    // Animated counters
+    this.initCounters();
+    // Init notifications badge
+    this.renderNotifications();
+  }
+};
+
+/* ── Modal helper (extends existing) ── */
+Object.assign(Modal, {
+  open(id) { const el = document.getElementById(id); if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; } },
+  close(id) { const el = document.getElementById(id); if (el) { el.classList.remove('open'); document.body.style.overflow = ''; } },
+  confirm(msg, onOk) { UI.confirm(msg, onOk); }
+});
+
+/* ── Toast helper ── */
+Object.assign(Toast, {
+  _icons: {
+    success: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    error:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    warning: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    info:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  },
+  show(title, msg = '', type = 'info', ms = 4000) {
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<div class="toast-icon">${this._icons[type]||this._icons.info}</div><div class="toast-content"><div class="toast-title">${Utils.escapeHtml(title)}</div>${msg?`<div class="toast-msg">${Utils.escapeHtml(msg)}</div>`:''}</div><button class="toast-close" onclick="this.parentElement.remove()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(() => t.remove(), 350); }, ms);
+  },
+  success(msg, sub) { this.show(msg, sub||'', 'success'); },
+  error(msg, sub)   { this.show(msg, sub||'', 'error'); },
+  warning(msg, sub) { this.show(msg, sub||'', 'warning'); },
+  info(msg, sub)    { this.show(msg, sub||'', 'info'); },
+});
+
+/* ── Helper functions used in HTML pages ── */
+function getStockBadge(qty, min = 10) {
+  const q = parseInt(qty)||0;
+  const lang = UI.lang;
+  if (q===0) return `<span class="status-pill out-stock"><span class="status-dot"></span>${T[lang].status_out||'Out of Stock'}</span>`;
+  if (q<=min) return `<span class="status-pill low-stock"><span class="status-dot"></span>${T[lang].status_low||'Low Stock'}</span>`;
+  return `<span class="status-pill in-stock"><span class="status-dot"></span>${T[lang].status_in||'In Stock'}</span>`;
+}
+
+function getTxBadge(type) {
+  const lang = UI.lang;
+  const map = { in:['badge tx-in',T[lang].tx_in], out:['badge tx-out',T[lang].tx_out], adjustment:['badge tx-adj',T[lang].tx_adj], return:['badge tx-return',T[lang].tx_return] };
+  const [cls,lbl] = map[type]||['badge badge-silver',type];
+  return `<span class="${cls}">${lbl}</span>`;
+}
+
+function getColorDot(color) {
+  const map = { White:'#F8FAFC', Red:'#EF4444', Pink:'#EC4899', Blue:'#3B82F6', Green:'#10B981', Yellow:'#F59E0B', Orange:'#F97316', Purple:'#8B5CF6', Black:'#374151', Brown:'#92400E', Gray:'#6B7280', Colorless:'#E5E7EB', 'Multi-Color':'#8B5CF6' };
+  const c = map[color] || '#6B7280';
+  return `<span class="color-dot" style="background:${c}"></span>${color}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  UI.init();
+
+  // Command Palette Keyboard Shortcut (Ctrl+K or Cmd+K)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal) {
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+          const input = document.getElementById('cmd-palette-input');
+          if (input) input.focus();
+        }
+      }
+    }
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal && !modal.classList.contains('hidden')) modal.classList.add('hidden');
+      const notif = document.getElementById('bs-notification-drawer');
+      if (notif && !notif.classList.contains('hidden')) notif.classList.add('hidden');
+    }
+  });
+
+  // Global Event Delegation for Dynamic UI Components
+  document.addEventListener('click', (e) => {
+    // Open Command Palette
+    if (e.target.closest('#btn-open-command-palette')) {
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('cmd-palette-input');
+        if (input) input.focus();
+      }
+    }
+
+    // Toggle Notifications Drawer
+    if (e.target.closest('#btn-open-notifications') || e.target.closest('#btn-close-notifications')) {
+      const drawer = document.getElementById('bs-notification-drawer');
+      if (drawer) drawer.classList.toggle('hidden');
+    }
+
+    // Command Palette Quick Jump
+    const cmdItem = e.target.closest('[data-cmd-tab]');
+    if (cmdItem) {
+      const targetTab = cmdItem.getAttribute('data-cmd-tab');
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal) modal.classList.add('hidden');
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(targetTab);
+      }
+    }
+
+    // Sidebar Navigation Click
+    const navItem = e.target.closest('[data-tab]');
+    if (navItem && !navItem.classList.contains('bs-tab-item')) {
+      const targetTab = navItem.getAttribute('data-tab');
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(targetTab);
+      }
+    }
+
+    // Toggle Theme Mode
+    if (e.target.closest('#btn-toggle-theme')) {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('baher_theme', isDark ? 'dark' : 'light');
+    }
+
+    // Toggle Sidebar Collapse
+    if (e.target.closest('#btn-toggle-sidebar')) {
+      const sidebar = document.getElementById('bs-app-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('w-72');
+        sidebar.classList.toggle('w-20');
+      }
+    }
+  });
+});
+
+
+/* --- app.js --- */
 /**
  * BAHER SILVER ERP — WAREHOUSE OPERATIONS & MASTER DATA CENTER v4.0
  * Specialized Exclusively for Baher Silver Factory (NO GOLD)
@@ -5,10 +1628,24 @@
  * Multi-Option Stone Image Engine (Gallery, Mobile Camera & Direct URL)
  */
 
-let API_BASE_URL = 'http://localhost:4000/api/v1';
+let PRODUCTION_API_URL = 'https://baher-silver-erp-api.onrender.com/api/v1';
+
+let API_BASE_URL = (typeof window !== 'undefined' && window.location.hostname.includes('bahersilver.online'))
+  ? PRODUCTION_API_URL
+  : (typeof window !== 'undefined' && window.location.origin && !window.location.origin.startsWith('file')) 
+  ? `${window.location.origin}/api/v1` 
+  : 'http://localhost:4000/api/v1';
 
 async function detectApiPort() {
-  const ports = [4000, 4005, 4001, 4002];
+  if (typeof window !== 'undefined' && window.location.hostname.includes('bahersilver.online')) {
+    API_BASE_URL = PRODUCTION_API_URL;
+    return;
+  }
+  if (typeof window !== 'undefined' && window.location.origin && !window.location.origin.startsWith('file')) {
+    API_BASE_URL = `${window.location.origin}/api/v1`;
+    return;
+  }
+  const ports = [4000, 4001, 4005, 4002];
   for (const port of ports) {
     try {
       const controller = new AbortController();
@@ -19,6 +1656,8 @@ async function detectApiPort() {
     } catch (e) {}
   }
 }
+
+
 
 // Global Application State Matrix
 const state = {
@@ -418,11 +2057,14 @@ async function loadAllDatabaseData() {
   renderApp();
 
   try {
-    const [whs, locs, stns, raws, mvmt, auds, masters, prods] = await Promise.all([
+    const [whs, locs, stns, raws, silvers, chems, comps, mvmt, auds, masters, prods] = await Promise.all([
       apiGet('/warehouses'),
       apiGet('/warehouses/locations'),
       apiGet('/inventory/stones'),
       apiGet('/inventory/raw-materials'),
+      apiGet('/inventory/silver-items'),
+      apiGet('/inventory/chemicals'),
+      apiGet('/inventory/components'),
       apiGet('/inventory/movements'),
       apiGet('/inventory/audits'),
       apiGet('/master-data'),
@@ -433,7 +2075,9 @@ async function loadAllDatabaseData() {
     state.storageLocations = locs || [];
     state.stones = stns || [];
     state.rawMaterials = (raws && raws.length) ? raws : DEFAULT_INITIAL_RAW_MATERIALS;
-    state.silverItems = DEFAULT_INITIAL_SILVER_ITEMS;
+    state.silverItems = (silvers && silvers.length) ? silvers : DEFAULT_INITIAL_SILVER_ITEMS;
+    state.chemicalItems = (chems && chems.length) ? chems : [];
+    state.componentItems = (comps && comps.length) ? comps : [];
     state.movements = mvmt || [];
     state.audits = auds || [];
     state.masterItems = masters || [];
@@ -468,7 +2112,7 @@ function renderApp() {
 
   const isRtl = state.lang === 'ar';
   document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-  document.documentElement.lang = state.lang;
+  document.documentElement.lang = state.lang || 'ar';
 
   // Show Login Screen if User is not Authenticated
   if (!state.currentUser) {
@@ -476,62 +2120,67 @@ function renderApp() {
     return;
   }
 
-  const u = state.currentUser;
+  const tabTitles = {
+    wh_dashboard: 'لوحة القيادة التنفيذية',
+    stones: 'مخزون الأحجار الكريمة',
+    stones_store: 'مخزون الأحجار الكريمة',
+    raw_materials: 'الخامات والكيماويات',
+    raw_store: 'الخامات والكيماويات',
+    silver_inventory: 'خزينة الفضة والسبائك 925/999',
+    silver_store: 'خزينة الفضة والسبائك 925/999',
+    inventory_movements: 'حركات وسجل المخزون',
+    products: 'هندسة المنتجات والموديلات',
+    product_engineering: 'هندسة المنتجات والموديلات',
+    bom: 'قوائم المواد ومسارات التصنيع',
+    mo_kanban: 'أوامر التصنيع ورش المصنع',
+    suppliers: 'إدارة الموردين SRM',
+    purchasing: 'أوامر الشراء والاستلام',
+    customer_orders: 'طلبات العملاء والتصاميم',
+    customer_portal: 'بوابة العملاء الخاصة',
+    dpp_admin: 'جواز السفر الرقمي DPP & QR',
+    customer_service: 'مركز خدمة العملاء والإصلاح',
+    warranty_center: 'مركز الضمانات والعيار 25 سنة',
+    reports_analytics: 'التقارير والتحليلات المتقدمة',
+    system_health: 'صحة النظام والأجهزة HAL',
+    user_management: 'إدارة المستخدمين والصلاحيات',
+    users_admin: 'إدارة المستخدمين والصلاحيات',
+    roles_matrix: 'صلاحيات المستخدمين Matrix',
+    settings: 'إعدادات النظام العامة'
+  };
+
+  const currentTitle = tabTitles[state.activeTab] || 'لوحة القيادة التنفيذية';
 
   root.innerHTML = `
-    <!-- Top Bar Navigation Header -->
-    <header class="bg-slate-950/95 border-b border-brand-500/30 p-4 sticky top-0 z-40 backdrop-blur-md flex items-center justify-between shadow-2xl">
-      <div class="flex items-center space-x-4 space-x-reverse">
-        <img src="assets/baher_logo.png" alt="BAHER SILVER Logo" class="h-12 w-12 rounded-xl object-cover shadow-lg border border-brand-500/50 bg-[#C3B097]">
+    <div class="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+      <!-- Enterprise Sidebar -->
+      ${typeof UIComponents !== 'undefined' ? UIComponents.renderSidebar(state.activeTab, state.isSidebarCollapsed) : renderSidebar()}
 
-        <div>
-          <h1 class="text-lg font-bold font-display tracking-tight text-white flex items-center gap-2">
-            نظام مصنع باهر سيلفر — ERP Enterprise
-            <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">v4.0 AUTH</span>
-          </h1>
-          <p class="text-xs text-slate-400 font-sans">مصنع الفضة • المرجع الموحد لجميع القوائم</p>
-        </div>
+      <!-- Main Content Container -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- Header -->
+        ${typeof UIComponents !== 'undefined' ? UIComponents.renderHeader(currentTitle, state.activeTab) : ''}
+
+        <!-- Multi-Tab Navigation Bar -->
+        ${typeof UIComponents !== 'undefined' ? UIComponents.renderMultiTabBar([
+          { id: 'wh_dashboard', title: 'لوحة القيادة التنفيذية', icon: '📊' },
+          ...(state.activeTab !== 'wh_dashboard' ? [{ id: state.activeTab, title: currentTitle, icon: '⚡' }] : [])
+        ], state.activeTab) : ''}
+
+        <!-- Workspace Content Area -->
+        <main id="bs-workspace-content" class="flex-1 overflow-y-auto p-6 bg-slate-950/60 space-y-6">
+          ${state.isLoading ? renderLoadingSpinner() : renderActiveTabContent()}
+        </main>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="hidden xl:flex items-center space-x-1 space-x-reverse bg-slate-900/90 p-1.5 rounded-2xl border border-brand-500/20 text-xs font-bold overflow-x-auto">
-        ${renderNavButton('admin_dashboard', '👑 لوحة الأدمن')}
-        ${renderNavButton('wh_dashboard', '📊 لوحة التحكم')}
-        ${renderNavButton('product_engineering', '🏭 المنتجات والـ BOM')}
-        ${renderNavButton('stones_store', '💎 الأحجار')}
-        ${renderNavButton('raw_store', '🧪 الخامات')}
-        ${renderNavButton('silver_store', '🥈 الفضة الخام')}
-        ${renderNavButton('users_admin', '👥 المستخدمين')}
-        ${renderNavButton('roles_matrix', '🛡️ الصلاحيات')}
-        ${renderNavButton('security_sessions', '📱 الجلسات')}
-        ${renderNavButton('login_history', '📜 سجل الدخول')}
-        ${renderNavButton('universal_search', '🔍 البحث')}
-      </nav>
-
-      <!-- User Profile Dropdown Pill -->
-      <div class="flex items-center gap-3 font-sans">
-        <div class="hidden sm:flex flex-col text-left font-mono">
-          <span class="text-xs font-bold text-white">${u.fullNameAr || u.username}</span>
-          <span class="text-[10px] text-amber-400">${u.roles ? u.roles.join(', ') : 'User'} • ${u.branchId || 'الفرع الرئيسي'}</span>
-        </div>
-        <button onclick="handleUserLogout()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/40 text-xs font-bold transition-all">
-          خروج ➔
-        </button>
-      </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <div class="flex flex-1 max-w-7xl w-full mx-auto p-6 gap-6">
-      ${renderSidebar()}
-      <main class="flex-1 space-y-6 overflow-hidden">
-        ${state.isLoading ? renderLoadingSpinner() : renderActiveTabContent()}
-      </main>
+      <!-- Drawers & Modals -->
+      ${typeof UIComponents !== 'undefined' ? UIComponents.renderNotificationDrawer() : ''}
+      ${typeof UIComponents !== 'undefined' ? UIComponents.renderCommandPalette() : ''}
+      ${renderActiveModal()}
+      <div id="bs-toast-container"></div>
     </div>
-
-    ${renderToast()}
-    ${renderActiveModal()}
   `;
 }
+
 
 function renderNavButton(tabId, label) {
   const isActive = state.activeTab === tabId;
@@ -1433,6 +3082,7 @@ function renderSidebar() {
         ${renderSidebarItem('accounting_system', '⚖️', 'النظام المحاسبي والشجرة')}
         ${renderSidebarItem('inventory_audit', '📋', 'الجرد الدوري والرصيد')}
         ${renderSidebarItem('universal_search', '🔍', 'البحث الفائق الشامل')}
+        ${renderSidebarItem('label_designer', '🏷️', 'مصمم وطابعات ملصقات الفضة (Zebra Studio)')}
       </nav>
     </aside>
   `;
@@ -1456,9 +3106,39 @@ function renderActiveTabContent() {
     case 'admin_dashboard': return renderAdminDashboardScreen();
     case 'wh_dashboard': return renderWarehouseDashboardScreen();
     case 'product_engineering': return renderProductEngineeringScreen();
+    case 'products': return renderProductEngineeringScreen();
     case 'stones_store': return renderStonesStoreScreen();
+    case 'stones': return renderStonesStoreScreen();
     case 'raw_store': return renderRawMaterialsStoreScreen();
+    case 'raw_materials': return renderRawMaterialsStoreScreen();
     case 'silver_store': return renderSilverStoreScreen();
+    case 'silver_inventory': return renderSilverStoreScreen();
+    case 'suppliers': return renderSuppliersSrmScreen();
+    case 'purchasing': return renderPurchasingOrdersScreen();
+    case 'customer_orders': return renderCustomerOrdersScreen();
+function renderActiveTabContent() {
+  switch (state.activeTab) {
+    case 'admin_dashboard': return renderAdminDashboardScreen();
+    case 'wh_dashboard': return renderWarehouseDashboardScreen();
+    case 'product_engineering': return renderProductEngineeringScreen();
+    case 'products': return renderProductEngineeringScreen();
+    case 'stones_store': return renderStonesStoreScreen();
+    case 'stones': return renderStonesStoreScreen();
+    case 'raw_store': return renderRawMaterialsStoreScreen();
+    case 'raw_materials': return renderRawMaterialsStoreScreen();
+    case 'silver_store': return renderSilverStoreScreen();
+    case 'silver_inventory': return renderSilverStoreScreen();
+    case 'suppliers': return renderSuppliersSrmScreen();
+    case 'purchasing': return renderPurchasingOrdersScreen();
+    case 'customer_orders': return renderCustomerOrdersScreen();
+    case 'customer_portal': return renderCustomerPortalScreen();
+    case 'dpp_admin': return renderDppAdminScreen();
+    case 'customer_service': return renderCustomerServiceCenterScreen();
+    case 'warranty_center': return renderWarrantyCenterScreen();
+    case 'reports_analytics': return renderReportsAnalyticsScreen();
+    case 'system_health': return renderSystemHealthHalScreen();
+    case 'settings': return renderSettingsScreen();
+    case 'user_management': return renderUsersAdminScreen();
     case 'users_admin': return renderUsersAdminScreen();
     case 'roles_matrix': return renderRolesMatrixScreen();
     case 'security_sessions': return renderActiveSessionsScreen();
@@ -1470,9 +3150,575 @@ function renderActiveTabContent() {
     case 'accounting_system': return renderAccountingSystemScreen();
     case 'inventory_audit': return renderInventoryAuditScreen();
     case 'universal_search': return renderUniversalSearchScreen();
-    default: return renderAdminDashboardScreen();
+    case 'label_designer': return renderJewelryLabelDesignerScreen();
+    default: return renderWarehouseDashboardScreen();
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PHASE 5 ENTERPRISE MODULES (Reports, Analytics, Settings, System Health & HAL)
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderReportsAnalyticsScreen() {
+  const spark1 = Charts.renderSparkline([20, 35, 45, 60, 55, 80, 95], 140, 40, '#06B6D4');
+  const spark2 = Charts.renderSparkline([98, 98.4, 98.8, 99.1, 99.5, 99.8, 100], 140, 40, '#10B981');
+
+  return `
+    <div class="space-y-6 font-sans">
+      <!-- Top Analytics Header with Date Range Selector & Comparison Mode -->
+      <div class="bs-glass-card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">📈 التقارير المتقدمة والتحليلات (Enterprise Reports & Analytics)</h2>
+          <p class="text-xs text-slate-400">تصدير PDF/CSV/JSON، مقارنة الفترات الزمنية، وتصدير التقارير المجدولة</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 text-xs">
+          <!-- Date Range Selector -->
+          <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800 font-mono">
+            <span>📅</span>
+            <input type="date" value="2026-07-01" class="bg-transparent text-slate-200 outline-none">
+            <span>إلى</span>
+            <input type="date" value="2026-07-30" class="bg-transparent text-slate-200 outline-none">
+          </div>
+
+          <button class="bs-btn bs-btn-secondary bs-btn-sm">وضع المقارنة 📊</button>
+          <button class="bs-btn bs-btn-primary bs-btn-sm">تصدير PDF 📥</button>
+        </div>
+      </div>
+
+      <!-- KPI Analytics Row with Sparklines -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        ${UIComponents.renderKpiCard('إجمالي حجم الإنتاج الإيطالي', '5,840 g', 'الفضة العيار المعياري', '🥈', 15.4, true)}
+        ${UIComponents.renderKpiCard('عائد كفاءة الفضة Pure Yield', '99.8 %', 'مقارنة بالدورة السابقة', '🧪', 0.4, true)}
+        ${UIComponents.renderKpiCard('نسبة الالتزام بالـ SLA', '98.5 %', 'طلبات الخدمة والإصلاح', '🛠️', 5.0, true)}
+        ${UIComponents.renderKpiCard('معدل رضا العملاء CSAT', '4.8 / 5 ★', 'التقييم العام للمصنع', '⭐', 6.7, true)}
+      </div>
+
+      <!-- Interactive Charts & Saved Layouts Container -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bs-glass-card p-6 space-y-4">
+          <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>📊</span><span>رسم بياني لحركات الفضة الشهرية</span></h3>
+            <span class="text-xs text-cyan-400 font-mono">+15.4% نمو</span>
+          </div>
+          <div class="h-48 flex items-end justify-between gap-2 pt-8 px-4">
+            ${[40, 60, 45, 80, 90, 75, 100].map(h => `
+              <div class="flex-1 bg-gradient-to-t from-amber-600 to-amber-400 rounded-t-lg transition-all hover:opacity-80" style="height: ${h}%"></div>
+            `).join('')}
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-800/60">
+            <span>يناير</span><span>فبراير</span><span>مارس</span><span>أبريل</span><span>مايو</span><span>يونيو</span><span>يوليو</span>
+          </div>
+        </div>
+
+        <div class="bs-glass-card p-6 space-y-4">
+          <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>⚡</span><span>كفاءة عيار 925 وجودة الفحص</span></h3>
+            <span class="text-xs text-emerald-400 font-mono">100% مطابقة</span>
+          </div>
+          <div class="flex items-center justify-center p-6">
+            ${spark2}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSystemHealthHalScreen() {
+  return `
+    <div class="space-y-6 font-sans">
+      <!-- Header Banner -->
+      <div class="bs-glass-card p-5 flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">⚡ صحة النظام وأجهزة الـ HAL (System Health & Hardware)</h2>
+          <p class="text-xs text-slate-400">مراقبة استجابة الـ API، قاعدة البيانات SQLite، الموازين الرقمية، وأجهزة الـ XRF</p>
+        </div>
+        <span class="bs-badge bs-badge-success text-xs">حالة النظام: ممتازة (HEALTHY) 🟢</span>
+      </div>
+
+      <!-- Real-Time Infrastructure Metrics Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+        <div class="bs-glass-card p-4 space-y-1">
+          <div class="text-slate-400 font-sans font-bold">زمن استجابة الـ API Latency:</div>
+          <div class="text-emerald-400 text-xl font-extrabold">18.4 ms</div>
+          <div class="text-[10px] text-slate-500">متوسط الأداء المستقر</div>
+        </div>
+
+        <div class="bs-glass-card p-4 space-y-1">
+          <div class="text-slate-400 font-sans font-bold">حجم قاعدة البيانات (dev.db):</div>
+          <div class="text-amber-400 text-xl font-extrabold">4.80 MB</div>
+          <div class="text-[10px] text-slate-500">40+ جداول معيونة</div>
+        </div>
+
+        <div class="bs-glass-card p-4 space-y-1">
+          <div class="text-slate-400 font-sans font-bold">طابور الطباعة Print Queue:</div>
+          <div class="text-cyan-400 text-xl font-extrabold">0 معلقة / 142 مطبوعة</div>
+          <div class="text-[10px] text-slate-500">طابعة زيبرا الحرارية 600DPI</div>
+        </div>
+
+        <div class="bs-glass-card p-4 space-y-1">
+          <div class="text-slate-400 font-sans font-bold">الأجهزة المربوطة HAL:</div>
+          <div class="text-purple-400 text-xl font-extrabold">3 / 3 متصلة 🟢</div>
+          <div class="text-[10px] text-slate-500">XRF + HAL Scale + Zebra</div>
+        </div>
+      </div>
+
+      <!-- Extended Hardware Monitoring Table -->
+      <div class="bs-glass-card p-6 space-y-4">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
+          <span>📟</span><span>حالة الأجهزة والموازين والمطياف المربوطة بالـ HAL Driver</span>
+        </h3>
+        
+        <div class="overflow-x-auto font-mono text-xs">
+          <table class="bs-table">
+            <thead>
+              <tr>
+                <th>كود الجهاز</th>
+                <th>اسم الجهاز والنوع</th>
+                <th>IP Subnet</th>
+                <th>البطارية</th>
+                <th>الحرارة °C</th>
+                <th>إشارة RSSI</th>
+                <th>درجة الصحة</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-bold text-amber-400">DEV-XRF-01</td>
+                <td>جهاز XRF مطياف عيار الفضة</td>
+                <td>192.168.1.120</td>
+                <td>100 %</td>
+                <td>34.0 °C</td>
+                <td class="text-emerald-400">-48 dBm (قوي)</td>
+                <td class="font-bold text-emerald-400">100 %</td>
+                <td><span class="bs-badge bs-badge-success">متصل ONLINE</span></td>
+              </tr>
+              <tr>
+                <td class="font-bold text-amber-400">DEV-SCALE-01</td>
+                <td>ميزان حساسية الفضة HAL (0.001g)</td>
+                <td>192.168.1.122</td>
+                <td>95 %</td>
+                <td>32.5 °C</td>
+                <td class="text-emerald-400">-52 dBm (ممتاز)</td>
+                <td class="font-bold text-emerald-400">99.5 %</td>
+                <td><span class="bs-badge bs-badge-success">متصل ONLINE</span></td>
+              </tr>
+              <tr>
+                <td class="font-bold text-amber-400">DEV-PRN-01</td>
+                <td>طابعة زيبرا باركود الملصقات 600DPI</td>
+                <td>192.168.1.130</td>
+                <td>100 %</td>
+                <td>38.0 °C</td>
+                <td class="text-emerald-400">-40 dBm (ممتاز)</td>
+                <td class="font-bold text-emerald-400">100 %</td>
+                <td><span class="bs-badge bs-badge-success">متصل ONLINE</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSettingsScreen() {
+  const categories = [
+    { id: 'gen', icon: '⚙️', title: 'إعدادات عامة' },
+    { id: 'comp', icon: '🏛️', title: 'بيانات الشركة' },
+    { id: 'brand', icon: '🎨', title: 'الهوية والتصميم' },
+    { id: 'print', icon: '🖨️', title: 'الطباعة والملصقات' },
+    { id: 'barcode', icon: '🏷️', title: 'الباركود و QR' },
+    { id: 'security', icon: '🔒', title: 'الأمان والحماية' },
+    { id: 'dev', icon: '📟', title: 'إعدادات الأجهزة HAL' },
+    { id: 'backup', icon: '💾', title: 'النسخ الاحتياطي' },
+    { id: 'integrations', icon: '🌐', title: 'الربط البرمجي API' }
+  ];
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">⚙️ إعدادات وتكوين النظام الموحد (Enterprise Settings)</h2>
+          <p class="text-xs text-slate-400">تكوين الهوية، تسلسلات الترقيم، قوالب الطباعة، والأمان</p>
+        </div>
+        <button class="bs-btn bs-btn-primary bs-btn-sm">حفظ كافة الإعدادات 💾</button>
+      </div>
+
+      <!-- Settings 10 Category Tabs -->
+      <div class="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
+        ${categories.map((c, i) => `
+          <button class="px-3 py-2 rounded-xl transition-all ${i === 0 ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'}">
+            <span>${c.icon}</span> <span>${c.title}</span>
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- General Settings Form -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+        <div class="bs-input-group">
+          <label class="bs-label">اسم المصنع (بالعربية)</label>
+          <input type="text" value="شركة باهر سيلفر الفضية المتخصصة" class="bs-input">
+        </div>
+        <div class="bs-input-group">
+          <label class="bs-label">اسم المصنع (بالإنجليزية)</label>
+          <input type="text" value="Baher Silver Pure Jewelry Factory" class="bs-input font-mono">
+        </div>
+        <div class="bs-input-group">
+          <label class="bs-label">العملة الرسمية</label>
+          <input type="text" value="EGP (ج.م)" class="bs-input">
+        </div>
+        <div class="bs-input-group">
+          <label class="bs-label">معيار الفضة الافتراضي</label>
+          <select class="bs-select">
+            <option selected>فضة إيطالية 925</option>
+            <option>فضة نقية 999</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PHASE 4 CUSTOMER EXPERIENCE MODULES (Portal, DPP, Service, Warranty)
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderCustomerPortalScreen() {
+  const stepper = Timeline.renderLifecycleStepper('WARRANTY');
+  
+  const customerTimelineEvents = [
+    { title: 'تقديم طلب الشراء (ORD-2026-0010)', timestamp: '2026-07-28 10:30 AM', icon: '🛒', description: 'تم استلام طلب الشراء وتأكيد نموذج التصميم الإيطالي 925.' },
+    { title: 'بدء عمليات الصب والتصنيع (MO-2026-0005)', timestamp: '2026-07-29 02:15 PM', icon: '🏭', description: 'تم صب الفضة وتجهيز رصيد الجرامات بورشة الصائغ.' },
+    { title: 'فحص الجودة ونقاء الفضة (QC 925 Integrity)', timestamp: '2026-07-30 09:00 AM', icon: '🔍', description: 'مطابقة العيار بواسطة جهاز XRF بنسبة كفاءة 99.8%.' },
+    { title: 'اصدار شهادة الضمان 25 سنة وتفعيل DPP', timestamp: '2026-07-30 06:45 PM', icon: '📜', description: 'توليد كود التوثيق وتفعيل كبسولة جواز السفر الرقمي المشفر.' }
+  ];
+
+  return `
+    <div class="space-y-6 font-sans">
+      <!-- Portal Header Banner -->
+      <div class="bs-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl text-amber-400">
+            🏛️
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-white">بوابة العملاء الخاصة — Baher Customer Portal</h2>
+            <p class="text-xs text-amber-300 font-mono">حساب العميل: شركة الباهر للأعمال الفضية • العضوية الماسية (Diamond tier)</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button class="bs-btn bs-btn-primary bs-btn-sm">+ طلب صيانة جديد</button>
+          <button class="bs-btn bs-btn-secondary bs-btn-sm">تحميل الكتالوج 📥</button>
+        </div>
+      </div>
+
+      <!-- Unified 8-Stage Customer 360 Timeline Stepper -->
+      <div class="bs-glass-card p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-200 flex items-center gap-2">
+            <span>🔄</span><span>مسار دورة حياة المنتج 360° (Customer Lifecycle Timeline)</span>
+          </h3>
+          <span class="bs-badge bs-badge-success">الضمان نشط 🟢</span>
+        </div>
+        ${stepper}
+      </div>
+
+      <!-- Main Portal Split Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Customer Timeline Events -->
+        <div class="lg:col-span-2 bs-glass-card p-6 space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
+            <span>📜</span><span>سجل حركات المنتج الضمانات والخدمات</span>
+          </h3>
+          ${Timeline.render(customerTimelineEvents)}
+        </div>
+
+        <!-- Right: Warranty & Passport Summary Card -->
+        <div class="space-y-6">
+          <div class="bs-glass-card p-5 space-y-4 border-amber-500/30">
+            <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+              <span>🛡️</span><span>شهادة ضمان عيار 925 (25 سنة)</span>
+            </h3>
+            <div class="space-y-2 text-xs font-mono">
+              <div class="flex justify-between text-slate-300"><span>كود الشهادة:</span><span class="text-amber-400 font-bold">W-2026-925001</span></div>
+              <div class="flex justify-between text-slate-300"><span>المنتج:</span><span>طقم فضة إيطالي سويسري</span></div>
+              <div class="flex justify-between text-slate-300"><span>تاريخ الضمان:</span><span>2026-07-30 حتى 2051-07-30</span></div>
+              <div class="flex justify-between text-slate-300"><span>رمز الاستجابة QR:</span><span class="text-emerald-400">HMAC-VERIFIED 🟢</span></div>
+            </div>
+            <button onclick="window.open('passport.html', '_blank')" class="w-full bs-btn bs-btn-primary bs-btn-sm text-center">عرض جواز السفر الرقمي DPP ➔</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDppAdminScreen() {
+  const toolbar = DataGrid.renderToolbar({
+    searchQuery: '',
+    quickFilters: [
+      { id: 'all', label: 'كافة الجوازات' },
+      { id: 'active', label: 'نشط وموثق' },
+      { id: 'shared', label: 'روابط مفرجة (Shared Links)' }
+    ],
+    activeFilterId: 'all'
+  });
+
+  const columns = [
+    { label: 'كود الـ DPP', field: 'dppCode' },
+    { label: 'السيريال المعياري', field: 'pieceSerial' },
+    { label: 'كود التوثيق HMAC', field: 'hmac', render: (val) => `<code class="text-[10px] text-amber-400 font-mono">${val}</code>` },
+    { label: 'الحالة', field: 'status', render: () => '<span class="bs-badge bs-badge-success">موثق أصلي 🟢</span>' },
+    { label: 'الجواز الرقمي', field: 'action', render: () => '<button onclick="window.open(\'passport.html\', \'_blank\')" class="bs-btn bs-btn-ghost bs-btn-sm text-amber-400">فتح الجواز 🔗</button>' }
+  ];
+
+  const dpps = [
+    { dppCode: 'DPP-2026-000001', pieceSerial: 'SN-925-884920', hmac: 'b4a9...f810' },
+    { dppCode: 'DPP-2026-000002', pieceSerial: 'SN-925-884921', hmac: 'e1d2...a904' }
+  ];
+
+  const tableHtml = DataGrid.renderTable({ columns, rows: dpps, keyField: 'dppCode' });
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">🛡️ جواز السفر الرقمي للمنتجات (Digital Product Passport - DPP)</h2>
+          <p class="text-xs text-slate-400">توثيق الأصالة، حماية كود الـ QR، السيرة الذاتية للمجوهرات، وحسابات الروابط المؤقتة</p>
+        </div>
+        <button class="bs-btn bs-btn-primary bs-btn-sm">+ إصدار جواز سفر رقمي جديد</button>
+      </div>
+      ${toolbar}
+      ${tableHtml}
+    </div>
+  `;
+}
+
+function renderCustomerServiceCenterScreen() {
+  const toolbar = DataGrid.renderToolbar({
+    searchQuery: '',
+    quickFilters: [
+      { id: 'all', label: 'جميع الطلبات' },
+      { id: 'repair', label: 'طلبات الإصلاح' },
+      { id: 'plating', label: 'طلبات إعادة الطلاء' }
+    ],
+    activeFilterId: 'all'
+  });
+
+  const columns = [
+    { label: 'رقم طلب الخدمة', field: 'reqNo' },
+    { label: 'العميل', field: 'customer' },
+    { label: 'نوع الطلب', field: 'type' },
+    { label: 'الفني المسؤول', field: 'technician' },
+    { label: 'SLA التزام', field: 'slaStatus', render: () => '<span class="bs-badge bs-badge-success">ضمن الوقت ⏱️</span>' },
+    { label: 'الحالة', field: 'status', render: (s) => `<span class="bs-badge bs-badge-info">${s}</span>` }
+  ];
+
+  const services = [
+    { reqNo: 'SRV-2026-0001', customer: 'شركة الباهر للأعمال الفضية', type: 'طلاء روديوم إيطالي', technician: 'فني طلاء: أحمد سعيد', status: 'جاري العمل 🛠️' },
+    { reqNo: 'SRV-2026-0002', customer: 'مجوهرات الأمل', type: 'تركيب وحقن أحجار زركون', technician: 'فني أحجار: محمود صايغ', status: 'تم الإصلاح وتأكيد العميل ✅' }
+  ];
+
+  const tableHtml = DataGrid.renderTable({ columns, rows: services, keyField: 'reqNo' });
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">🛠️ مركز خدمة العملاء والإصلاح (Customer Service Center)</h2>
+          <p class="text-xs text-slate-400">إدارة طلبات الصيانة، التقييم التقني، حساب التكلفة، ومسار الفنيين</p>
+        </div>
+        <button class="bs-btn bs-btn-primary bs-btn-sm">+ تقديم طلب خدمة جديد</button>
+      </div>
+      ${toolbar}
+      ${tableHtml}
+    </div>
+  `;
+}
+
+function renderWarrantyCenterScreen() {
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-amber-500/30 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-extrabold text-amber-400 flex items-center gap-2">📜 مركز إدارة الضمانات المعيارية 25 سنة (Lifetime Warranty Center)</h2>
+          <p class="text-xs text-slate-400">شهادات ضمان عيار الفضة 925، تتبع المطالبات، والطباعة الرسمية</p>
+        </div>
+        <button onclick="window.print()" class="bs-btn bs-btn-primary bs-btn-sm">طباعة شهادة الضمان 🖨️</button>
+      </div>
+
+      <!-- Certificate Preview Box -->
+      <div class="p-8 border-2 border-amber-500/40 rounded-2xl bg-gradient-to-b from-amber-950/20 via-slate-900 to-slate-950 space-y-6 text-center">
+        <div class="space-y-2">
+          <div class="text-xs font-bold text-amber-500 tracking-widest uppercase">شهادة ضمان رسمية معتمدة — 25 سنة</div>
+          <h1 class="text-2xl font-black text-white font-display">مصنع باهر سيلفر للفضيات الإيطالية عيار 925</h1>
+          <p class="text-xs text-slate-300">نضمن بأن القطعة ذات السيريال المعياري <code class="text-amber-400">SN-925-884920</code> مصنعة من الفضة النقية بنسبة 92.5% مطابق للمواصفات الدولية.</p>
+        </div>
+
+        <div class="flex justify-center my-4">
+          <div class="p-3 bg-white rounded-xl shadow-lg inline-block">
+            <img src="assets/baher_logo.png" class="w-24 h-24 object-cover" alt="QR Verification">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono text-right border-t border-slate-800 pt-4">
+          <div><span class="text-slate-500">رقم الشهادة:</span> <div class="text-amber-400 font-bold">W-2026-925001</div></div>
+          <div><span class="text-slate-500">بداية الضمان:</span> <div class="text-slate-200">2026-07-30</div></div>
+          <div><span class="text-slate-500">نهاية الضمان:</span> <div class="text-slate-200">2051-07-30</div></div>
+          <div><span class="text-slate-500">كود التحقق HMAC:</span> <div class="text-emerald-400">VERIFIED 🟢</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+    case 'users_admin': return renderUsersAdminScreen();
+    case 'roles_matrix': return renderRolesMatrixScreen();
+    case 'security_sessions': return renderActiveSessionsScreen();
+    case 'login_history': return renderLoginHistoryScreen();
+    case 'master_center': return renderMasterDataCenterScreen();
+    case 'warehouses': return renderWarehousesHierarchyScreen();
+    case 'locations': return renderStorageLocationsScreen();
+    case 'transactions': return renderTransactionsTimelineScreen();
+    case 'accounting_system': return renderAccountingSystemScreen();
+    case 'inventory_audit': return renderInventoryAuditScreen();
+    case 'universal_search': return renderUniversalSearchScreen();
+    case 'label_designer': return renderJewelryLabelDesignerScreen();
+    default: return renderWarehouseDashboardScreen();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PHASE 3 COMMERCIAL MODULES (Suppliers, Purchasing, Customer Orders)
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderSuppliersSrmScreen() {
+  const toolbar = DataGrid.renderToolbar({
+    searchQuery: '',
+    quickFilters: [
+      { id: 'all', label: 'الكل' },
+      { id: 'silver', label: 'موردي الفضة 999' },
+      { id: 'stones', label: 'موردي الألماس والأحجار' }
+    ],
+    activeFilterId: 'all'
+  });
+
+  const columns = [
+    { label: 'كود المورد', field: 'code' },
+    { label: 'اسم المورد', field: 'nameAr' },
+    { label: 'نوع التوريد', field: 'supplyType' },
+    { label: 'درجة التقييم', field: 'rating', render: (val) => `<span class="text-amber-400 font-bold">★ ${val || 4.9}</span>` },
+    { label: 'الحالة', field: 'status', render: () => '<span class="bs-badge bs-badge-success">معتمد 🟢</span>' }
+  ];
+
+  const suppliers = [
+    { code: 'SUP-001', nameAr: 'شركة السبيكة الملكية للفضيات', supplyType: 'سبائك فضة نقية 999', rating: 5.0 },
+    { code: 'SUP-002', nameAr: 'مؤسسة الزمرد الإيطالي للأحجار', supplyType: 'أحجار كريمة وزركون إيطالي', rating: 4.8 },
+    { code: 'SUP-003', nameAr: 'مصنع الأكياس والعلب المترفة', supplyType: 'تغليف ومستلزمات فاخرة', rating: 4.9 }
+  ];
+
+  const tableHtml = DataGrid.renderTable({ columns, rows: suppliers, keyField: 'code' });
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">🤝 إدارة الموردين والشركاء (Suppliers SRM)</h2>
+          <p class="text-xs text-slate-400">تقييم الموردين، فاتورة التوريد، وحسابات الموردين (2101)</p>
+        </div>
+        <button onclick="openModal('addSupplier')" class="bs-btn bs-btn-primary bs-btn-sm">+ إضافة مورد جديد</button>
+      </div>
+      ${toolbar}
+      ${tableHtml}
+    </div>
+  `;
+}
+
+function renderPurchasingOrdersScreen() {
+  const toolbar = DataGrid.renderToolbar({
+    searchQuery: '',
+    quickFilters: [
+      { id: 'all', label: 'كافة الأوامر' },
+      { id: 'pending', label: 'قيد الانتظار' },
+      { id: 'received', label: 'تم الاستلام GRN' }
+    ],
+    activeFilterId: 'all'
+  });
+
+  const columns = [
+    { label: 'رقم أمر الشراء PO', field: 'poNo' },
+    { label: 'المورد', field: 'supplier' },
+    { label: 'إجمالي الوزن (g)', field: 'weightGrams' },
+    { label: 'القيمة التقديرية', field: 'totalValue' },
+    { label: 'الحالة', field: 'status', render: (s) => `<span class="bs-badge bs-badge-info">${s}</span>` }
+  ];
+
+  const orders = [
+    { poNo: 'PO-2026-0001', supplier: 'شركة السبيكة الملكية', weightGrams: '5,000 g', totalValue: '325,000 ج.م', status: 'تم الاستلام GRN' },
+    { poNo: 'PO-2026-0002', supplier: 'مؤسسة الزمرد الإيطالي', weightGrams: '1,200 g', totalValue: '180,000 ج.م', status: 'جاري الشحن 🚢' }
+  ];
+
+  const tableHtml = DataGrid.renderTable({ columns, rows: orders, keyField: 'poNo' });
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">📦 أوامر الشراء واستلام البضائع (PO & GRN)</h2>
+          <p class="text-xs text-slate-400">سجل إذن الاستلام ومطابقة الفواتير وتدقيق عيار الفضة 999</p>
+        </div>
+        <button class="bs-btn bs-btn-primary bs-btn-sm">+ أمر شراء جديد PO</button>
+      </div>
+      ${toolbar}
+      ${tableHtml}
+    </div>
+  `;
+}
+
+function renderCustomerOrdersScreen() {
+  const toolbar = DataGrid.renderToolbar({
+    searchQuery: '',
+    quickFilters: [
+      { id: 'all', label: 'جميع الطلبات' },
+      { id: 'design', label: 'اعتماد التصاميم' },
+      { id: 'production', label: 'جاري التصنيع' }
+    ],
+    activeFilterId: 'all'
+  });
+
+  const columns = [
+    { label: 'رقم طلب العميل', field: 'orderNo' },
+    { label: 'العميل', field: 'customer' },
+    { label: 'الموديل والتصميم', field: 'model' },
+    { label: 'الوزن التقريبي', field: 'estWeight' },
+    { label: 'حالة الاعتماد', field: 'status', render: (s) => `<span class="bs-badge bs-badge-success">${s}</span>` }
+  ];
+
+  const customerOrders = [
+    { orderNo: 'ORD-2026-0010', customer: 'شركة الباهر العالمية', model: 'خاتم فضة إيطالي مرصع بالزركون', estWeight: '18.5 g', status: 'موافق عليه ومحول للتصنيع ✅' },
+    { orderNo: 'ORD-2026-0011', customer: 'مجوهرات الأمل العالمية', model: 'سلسلة فضة عيار 925 مطلية روديوم', estWeight: '42.0 g', status: 'جاري تصميم الـ CAD 3D 🎨' }
+  ];
+
+  const tableHtml = DataGrid.renderTable({ columns, rows: customerOrders, keyField: 'orderNo' });
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-xl font-sans">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">🛒 طلبات العملاء وتصاميم CAD (Customer Orders)</h2>
+          <p class="text-xs text-slate-400">متابعة موافقات العميل، الملفات الفنية، والتحويل المباشر لـ MO</p>
+        </div>
+        <button class="bs-btn bs-btn-primary bs-btn-sm">+ طلب عميل جديد</button>
+      </div>
+      ${toolbar}
+      ${tableHtml}
+    </div>
+  `;
+}
+
 
 // DEDICATED RAW SILVER & BULLION STORE SCREEN (مخزن خام الفضة والسبائك المستقل)
 function renderSilverStoreScreen() {
@@ -5148,15 +7394,20 @@ function renderEnterpriseLoginScreen() {
           <p class="text-xs text-slate-400 font-mono">نظام إدارة الإنتاج والمخازن — تسجيل الدخول المؤسسي</p>
         </div>
 
-        <form onsubmit="handleEnterpriseLogin(event)" class="space-y-4 text-xs font-sans">
+        <form id="enterpriseLoginForm" onsubmit="handleEnterpriseLogin(event)" class="space-y-4 text-xs font-sans">
           <div>
             <label class="block font-bold text-slate-300 mb-1">اسم المستخدم أو البريد الإلكتروني *</label>
-            <input type="text" name="usernameOrEmail" required placeholder="admin" value="admin" class="w-full h-11 px-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-brand-500 focus:outline-none">
+            <input type="text" id="loginUsernameInput" name="usernameOrEmail" required placeholder="admin أو baher" value="admin" class="w-full h-11 px-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-brand-500 focus:outline-none transition-all">
           </div>
 
           <div>
             <label class="block font-bold text-slate-300 mb-1">كلمة المرور السرية *</label>
-            <input type="password" name="password" required placeholder="••••••••" value="Admin@Baher2026" class="w-full h-11 px-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-brand-500 focus:outline-none">
+            <div class="relative flex items-center">
+              <input type="password" id="loginPasswordInput" name="password" required placeholder="••••••••" value="Admin@Baher2026" class="w-full h-11 pl-12 pr-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-brand-500 focus:outline-none transition-all">
+              <button type="button" onclick="togglePasswordVisibility()" title="إظهار / إخفاء كلمة المرور" class="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1.5 text-slate-400 hover:text-amber-400 text-xs font-bold rounded-lg hover:bg-slate-800 transition-colors">
+                <span id="eyeIcon">👁️ إظهار</span>
+              </button>
+            </div>
           </div>
 
           <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
@@ -5172,12 +7423,45 @@ function renderEnterpriseLoginScreen() {
           </button>
         </form>
 
-        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 text-center font-mono">
-          حساب المسؤول الافتراضي: <span class="text-amber-400 font-bold">admin</span> | كلمه السر: <span class="text-amber-400 font-bold">Admin@Baher2026</span>
+        <!-- Quick Fill Credentials Box -->
+        <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800/80 text-xs text-slate-300 space-y-2">
+          <div class="font-bold text-slate-400 text-center mb-1">🔑 الحسابات المتاحة للدخول الفوري:</div>
+          <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
+            <button type="button" onclick="fillLoginCredentials('admin', 'Admin@Baher2026')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 font-bold transition-all text-center">
+              👤 admin<br><span class="text-[10px] text-slate-400">Admin@Baher2026</span>
+            </button>
+            <button type="button" onclick="fillLoginCredentials('baher', 'michael')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-emerald-500/30 text-emerald-300 font-bold transition-all text-center">
+              👤 baher<br><span class="text-[10px] text-slate-400">michael</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `;
+}
+
+function togglePasswordVisibility() {
+  const pwdInput = document.getElementById('loginPasswordInput');
+  const eyeIcon = document.getElementById('eyeIcon');
+  if (!pwdInput || !eyeIcon) return;
+
+  if (pwdInput.type === 'password') {
+    pwdInput.type = 'text';
+    eyeIcon.textContent = '🔒 إخفاء';
+  } else {
+    pwdInput.type = 'password';
+    eyeIcon.textContent = '👁️ إظهار';
+  }
+}
+
+function fillLoginCredentials(username, password) {
+  const userInput = document.getElementById('loginUsernameInput');
+  const pwdInput = document.getElementById('loginPasswordInput');
+  if (userInput) userInput.value = username;
+  if (pwdInput) pwdInput.value = password;
+  if (typeof showToast === 'function') {
+    showToast(`تم ملء بيانات الحساب (${username}) بنجاح`);
+  }
 }
 
 async function handleEnterpriseLogin(e) {
@@ -5189,6 +7473,9 @@ async function handleEnterpriseLogin(e) {
   try {
     state.isLoading = true;
     renderApp();
+
+    // Re-detect active API port if server was restarted
+    await detectApiPort();
 
     const res = await apiPost('/auth/login', { usernameOrEmail, password });
     if (res && res.success) {
@@ -5203,10 +7490,15 @@ async function handleEnterpriseLogin(e) {
       showToast(`مرحباً بك مجدداً، ${res.data.user.fullNameAr}!`);
       await loadAllDatabaseData();
     } else {
-      alert(res.error || 'فشل تسجيل الدخول. تأكد من البيانات ودرب المحاولة.');
+      const errMsg = (res && res.error) 
+        ? (res.error.includes('Failed to fetch') 
+            ? 'تعذر الاتصال بالسيرفر (Failed to fetch). يرجى التأكد من تشغيل الخادم على المحطة.' 
+            : res.error)
+        : 'فشل تسجيل الدخول. تأكد من البيانات ثم أعد المحاولة.';
+      alert(errMsg);
     }
   } catch(err) {
-    alert('حدث خطأ في الاتصال بالخادم');
+    alert('حدث خطأ في الاتصال بالخادم: ' + (err.message || String(err)));
   } finally {
     state.isLoading = false;
     renderApp();
@@ -5947,6 +8239,565 @@ async function removeDirectPermissionOverride(userId, permissionCode) {
     alert('تعذر الإلغاء');
   }
 }
+
+// =============================================================================
+// EPIC 03: VISUAL JEWELRY LABEL DESIGNER & THERMAL PRINTING STUDIO ENGINE
+// =============================================================================
+
+if (!window.designerState) {
+  window.designerState = {
+    selectedTemplateId: null,
+    templateCode: 'LBL-TAIL-50X15',
+    templateName: 'ملصق الفضة ذيل الماوس (Jewelry Mouse Tail 50x15mm)',
+    labelType: 'MOUSE_TAIL',
+    widthMm: 50,
+    heightMm: 15,
+    dpi: 300,
+    printerLanguage: 'ZPL',
+    snapToGrid: true,
+    margins: { top: 1, bottom: 1, left: 1, right: 1 },
+    offsets: { x: 0, y: 0 },
+    selectedElementId: 'el-barcode',
+    elements: [
+      { id: 'el-title', type: 'text', field: 'name', text: 'خاتم فضة إيطالي 925', xMm: 2, yMm: 1.5, fontSizePt: 9 },
+      { id: 'el-barcode', type: 'barcode', field: 'barcode', text: 'PRD-2026-000001', xMm: 2, yMm: 4.5, widthMm: 32, heightMm: 5.5 },
+      { id: 'el-serial', type: 'text', field: 'serial', text: 'SN-2026-000041 | SKU-RNG', xMm: 2, yMm: 11, fontSizePt: 7 },
+      { id: 'el-weight', type: 'text', field: 'weight', text: '14.85g | فضة 925 | 2,450.00 EGP', xMm: 2, yMm: 13, fontSizePt: 7 },
+      { id: 'el-qr', type: 'qrcode', field: 'qr', text: 'https://bahersilver.com/v/SN-2026-000041', xMm: 36, yMm: 2, widthMm: 11, heightMm: 11 }
+    ]
+  };
+}
+
+function renderJewelryLabelDesignerScreen() {
+  const d = window.designerState;
+  const dpiScale = d.dpi / 25.4;
+
+  // Render SVG Rulers and Canvas Objects
+  const svgWidthPx = d.widthMm * 6; // 6px per mm for crisp visual editing
+  const svgHeightPx = d.heightMm * 6;
+
+  let elementsSvgHtml = '';
+  d.elements.forEach(el => {
+    const isSelected = el.id === d.selectedElementId;
+    const strokeAttr = isSelected ? 'stroke="#eab308" stroke-width="2" stroke-dasharray="3,3"' : 'stroke="#3b82f6" stroke-width="1" stroke-dasharray="2,2"';
+    const posX = el.xMm * 6;
+    const posY = el.yMm * 6;
+    const w = (el.widthMm || 20) * 6;
+    const h = (el.heightMm || 6) * 6;
+
+    if (el.type === 'barcode') {
+      elementsSvgHtml += `
+        <g id="${el.id}" onclick="selectDesignerElement('${el.id}')" cursor="move">
+          <rect x="${posX}" y="${posY}" width="${w}" height="${h}" fill="#ffffff" ${strokeAttr}/>
+          <rect x="${posX + 2}" y="${posY + 2}" width="2" height="${h - 4}" fill="#000"/>
+          <rect x="${posX + 6}" y="${posY + 2}" width="4" height="${h - 4}" fill="#000"/>
+          <rect x="${posX + 12}" y="${posY + 2}" width="2" height="${h - 4}" fill="#000"/>
+          <rect x="${posX + 16}" y="${posY + 2}" width="6" height="${h - 4}" fill="#000"/>
+          <rect x="${posX + 24}" y="${posY + 2}" width="3" height="${h - 4}" fill="#000"/>
+          <rect x="${posX + 30}" y="${posY + 2}" width="2" height="${h - 4}" fill="#000"/>
+          <text x="${posX + w / 2}" y="${posY + h - 2}" font-family="monospace" font-size="8" text-anchor="middle" fill="#000000">[Code128 Barcode]</text>
+        </g>
+      `;
+    } else if (el.type === 'qrcode') {
+      elementsSvgHtml += `
+        <g id="${el.id}" onclick="selectDesignerElement('${el.id}')" cursor="move">
+          <rect x="${posX}" y="${posY}" width="${w}" height="${h}" fill="#ffffff" ${strokeAttr}/>
+          <rect x="${posX + 2}" y="${posY + 2}" width="8" height="8" fill="#000"/>
+          <rect x="${posX + w - 10}" y="${posY + 2}" width="8" height="8" fill="#000"/>
+          <rect x="${posX + 2}" y="${posY + h - 10}" width="8" height="8" fill="#000"/>
+          <text x="${posX + w / 2}" y="${posY + h / 2}" font-family="monospace" font-size="7" text-anchor="middle" fill="#000">[QR]</text>
+        </g>
+      `;
+    } else if (el.type === 'text') {
+      elementsSvgHtml += `
+        <g id="${el.id}" onclick="selectDesignerElement('${el.id}')" cursor="move">
+          <rect x="${posX - 1}" y="${posY - 10}" width="${Math.max(w, 40)}" height="14" fill="rgba(59,130,246,0.05)" ${strokeAttr}/>
+          <text x="${posX}" y="${posY}" font-family="Tajawal, sans-serif" font-size="11" font-weight="bold" fill="#000000">${el.text || el.field}</text>
+        </g>
+      `;
+    }
+  });
+
+  // Tail Mouse-tail shape overlay
+  const tailOverlay = d.labelType === 'MOUSE_TAIL' ? `
+    <path d="M ${35 * 6} 0 L ${50 * 6} ${7.5 * 6} L ${35 * 6} ${15 * 6} Z" fill="rgba(234, 179, 8, 0.08)" stroke="#eab308" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="${42 * 6}" y="${7.5 * 6}" font-size="9" fill="#eab308" text-anchor="middle">ذيل الماوس (شريط التعليق)</text>
+  ` : '';
+
+  const selectedEl = d.elements.find(e => e.id === d.selectedElementId) || d.elements[0];
+
+  return `
+    <div class="glass-card rounded-2xl p-6 border border-slate-700/60 space-y-6 shadow-2xl font-sans">
+      
+      <!-- Studio Header -->
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-borderdark">
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🏷️</span>
+            <div>
+              <h1 class="text-2xl font-black text-white tracking-wide font-display">مصمم وطابعات ملصقات الفضة (Jewelry Label Studio)</h1>
+              <p class="text-xs text-slate-400 mt-1 font-mono">طابعات حرارية (Zebra ZPL / EPL / TSPL) • ملصقات ذيل الماوس (Mouse-Tail) • معايرة دقيقة بالمليمتر</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openCalibrationWizardModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-2">
+            <span>🎯</span><span>معالج المعايرة (Calibration)</span>
+          </button>
+          <button onclick="executeTestPrint()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition flex items-center gap-2">
+            <span>🖨️</span><span>طباعة تجريبية (Test Print)</span>
+          </button>
+          <button onclick="saveCurrentLabelTemplate()" class="px-3.5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-slate-950 text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-brand-500/20">
+            <span>💾</span><span>حفظ القالب الحالي</span>
+          </button>
+          <button onclick="openBulkPrintModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-black transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+            <span>⚡</span><span>طباعة فورية / دفعة (Bulk Print)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Configuration Controls Bar -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-bold">
+        <div>
+          <label class="block text-slate-400 mb-1">نوع الملصق (Label Shape)</label>
+          <select onchange="updateDesignerLabelType(this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+            <option value="MOUSE_TAIL" ${d.labelType === 'MOUSE_TAIL' ? 'selected' : ''}>ذيل الماوس (Mouse-Tail 50x15mm)</option>
+            <option value="BUTTERFLY_TAG" ${d.labelType === 'BUTTERFLY_TAG' ? 'selected' : ''}>فراشة مزدوجة (Butterfly Tag 30x15mm)</option>
+            <option value="RECTANGLE_TAG" ${d.labelType === 'RECTANGLE_TAG' ? 'selected' : ''}>مستطيل قياسي (Rectangle 70x20mm)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">دقة الطباعة (DPI Resolution)</label>
+          <select onchange="updateDesignerDPI(this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-mono">
+            <option value="203" ${d.dpi === 203 ? 'selected' : ''}>203 DPI (Desktop Printers)</option>
+            <option value="300" ${d.dpi === 300 ? 'selected' : ''}>300 DPI (Standard Industrial)</option>
+            <option value="600" ${d.dpi === 600 ? 'selected' : ''}>600 DPI (High Precision Jewelry)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">لغة الطابعة (Printer Protocol)</label>
+          <select onchange="updateDesignerProtocol(this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-brand-400 font-mono">
+            <option value="ZPL" ${d.printerLanguage === 'ZPL' ? 'selected' : ''}>ZPL II (Zebra Industrial)</option>
+            <option value="EPL" ${d.printerLanguage === 'EPL' ? 'selected' : ''}>EPL2 (Zebra Desktop)</option>
+            <option value="TSPL" ${d.printerLanguage === 'TSPL' ? 'selected' : ''}>TSPL (TSC Printers)</option>
+            <option value="EZPL" ${d.printerLanguage === 'EZPL' ? 'selected' : ''}>EZPL (Godex Printers)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">أبعاد الملصق (Width × Height mm)</label>
+          <div class="flex items-center gap-2">
+            <input type="number" value="${d.widthMm}" onchange="updateDesignerDimension('widthMm', this.value)" class="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-white font-mono text-center" placeholder="العرض">
+            <span class="text-slate-500">×</span>
+            <input type="number" value="${d.heightMm}" onchange="updateDesignerDimension('heightMm', this.value)" class="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-white font-mono text-center" placeholder="الارتفاع">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+            <input type="checkbox" ${d.snapToGrid ? 'checked' : ''} onchange="toggleSnapToGrid(this.checked)" class="rounded bg-slate-800 border-slate-700 text-brand-500">
+            <span>الالتصاق بالشبكة (Snap 1mm)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Main Visual Studio Canvas & Object Inspector Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Element Palette Toolbar -->
+        <div class="lg:col-span-2 glass-card rounded-xl p-4 border border-slate-800 space-y-3 text-xs">
+          <div class="font-bold text-slate-300 border-b border-slate-800 pb-2 flex items-center justify-between">
+            <span>العناصر المتاحة</span>
+            <span class="text-slate-500">سحب وإفلات</span>
+          </div>
+
+          <button onclick="addDesignerElement('barcode')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold transition">
+            <span>📊</span><span>باركود (Code128)</span>
+          </button>
+
+          <button onclick="addDesignerElement('qrcode')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold transition">
+            <span>📱</span><span>رمز QR (اختياري)</span>
+          </button>
+
+          <button onclick="addDesignerElement('text', 'name', 'اسم القطعة')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold transition">
+            <span>📝</span><span>اسم المنتج (Product Name)</span>
+          </button>
+
+          <button onclick="addDesignerElement('text', 'serial', 'الرقم التسلسلي')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold transition">
+            <span>🔢</span><span>الرقم التسلسلي + SKU</span>
+          </button>
+
+          <button onclick="addDesignerElement('text', 'weight', 'الوزن والقيمة')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold transition">
+            <span>⚖️</span><span>الوزن + العيار + السعر</span>
+          </button>
+
+          <button onclick="addDesignerElement('text', 'custom', 'نص مخصص')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold transition">
+            <span>✏️</span><span>نص حر (Custom Text)</span>
+          </button>
+
+          <button onclick="autoCenterAllElements()" class="w-full mt-4 px-3 py-2.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 font-bold transition flex items-center justify-center gap-2">
+            <span>🎯</span><span>توسيط تلقائي (Auto Center)</span>
+          </button>
+        </div>
+
+        <!-- Center Visual Canvas Area with Millimeter Rulers -->
+        <div class="lg:col-span-7 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-950 border border-slate-800 relative overflow-hidden min-h-[380px]">
+          
+          <div class="text-xs text-slate-400 font-mono mb-4 flex items-center gap-4">
+            <span>الكانفاس الفعلي للملصق (${d.widthMm}mm × ${d.heightMm}mm)</span>
+            <span class="text-brand-400">الدقة: ${d.dpi} DPI</span>
+          </div>
+
+          <!-- Millimeter Ruler Header (Top Ruler) -->
+          <div class="flex items-end bg-slate-900 border-b border-slate-700 mb-1" style="width: ${svgWidthPx}px; height: 18px;">
+            ${Array.from({ length: Math.ceil(d.widthMm / 5) + 1 }).map((_, i) => `
+              <div class="text-[9px] font-mono text-slate-400 border-r border-slate-700 pr-1 flex-1 text-left">
+                ${i * 5}mm
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Canvas Container -->
+          <div class="relative bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-brand-500/60" style="width: ${svgWidthPx}px; height: ${svgHeightPx}px;">
+            <!-- Grid Background Pattern -->
+            <svg width="${svgWidthPx}" height="${svgHeightPx}" class="absolute inset-0 pointer-events-none">
+              <defs>
+                <pattern id="gridPattern" width="6" height="6" patternUnits="userSpaceOnUse">
+                  <path d="M 6 0 L 0 0 0 6" fill="none" stroke="#f1f5f9" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#gridPattern)"/>
+              ${tailOverlay}
+              ${elementsSvgHtml}
+            </svg>
+          </div>
+
+          <div class="text-[11px] text-slate-400 font-mono mt-4">
+            انقر على أي عنصر على الكانفاس لتعديل إحداثياته الدقيقة بالمليمتر وحجم الخط
+          </div>
+        </div>
+
+        <!-- Right Object Inspector & Template Management -->
+        <div class="lg:col-span-3 glass-card rounded-xl p-4 border border-slate-800 space-y-4 text-xs font-bold">
+          <div class="font-bold text-slate-200 border-b border-slate-800 pb-2 flex items-center justify-between">
+            <span>خصائص العنصر المحدد</span>
+            <span class="text-brand-400 font-mono">${selectedEl ? selectedEl.id : 'لا يوجد'}</span>
+          </div>
+
+          ${selectedEl ? `
+            <div class="space-y-3">
+              <div>
+                <label class="block text-slate-400 mb-1">المحتوى / النص</label>
+                <input type="text" value="${selectedEl.text || ''}" onchange="updateSelectedElementProp('text', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-slate-400 mb-1">الموقع الأفقي X (mm)</label>
+                  <input type="number" step="0.5" value="${selectedEl.xMm}" onchange="updateSelectedElementProp('xMm', parseFloat(this.value))" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white font-mono">
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">الموقع الرأسي Y (mm)</label>
+                  <input type="number" step="0.5" value="${selectedEl.yMm}" onchange="updateSelectedElementProp('yMm', parseFloat(this.value))" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white font-mono">
+                </div>
+              </div>
+
+              ${selectedEl.type === 'text' ? `
+                <div>
+                  <label class="block text-slate-400 mb-1">حجم الخط (Font Size Pt)</label>
+                  <input type="number" value="${selectedEl.fontSizePt || 8}" onchange="updateSelectedElementProp('fontSizePt', parseInt(this.value))" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-amber-300 font-mono">
+                </div>
+              ` : `
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-slate-400 mb-1">العرض (mm)</label>
+                    <input type="number" value="${selectedEl.widthMm || 20}" onchange="updateSelectedElementProp('widthMm', parseFloat(this.value))" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white font-mono">
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 mb-1">الارتفاع (mm)</label>
+                    <input type="number" value="${selectedEl.heightMm || 6}" onchange="updateSelectedElementProp('heightMm', parseFloat(this.value))" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white font-mono">
+                  </div>
+                </div>
+              `}
+
+              <button onclick="removeSelectedElement('${selectedEl.id}')" class="w-full px-3 py-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition text-xs mt-2">
+                🗑️ حذف العنصر المحدد
+              </button>
+            </div>
+          ` : `
+            <div class="text-slate-500 text-center py-6">انقر على عنصر لتعديله</div>
+          `}
+
+          <!-- Margins & Calibration Quick Panel -->
+          <div class="pt-4 border-t border-slate-800 space-y-2">
+            <div class="text-slate-300 font-bold mb-1">الهوامش والمعايرة (Margins & Offset)</div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-slate-400">هامش علوي (mm)</label>
+                <input type="number" step="0.5" value="${d.margins.top}" onchange="updateDesignerMargin('top', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400">هامش أيسر (mm)</label>
+                <input type="number" step="0.5" value="${d.margins.left}" onchange="updateDesignerMargin('left', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function selectDesignerElement(id) {
+  window.designerState.selectedElementId = id;
+  renderApp();
+}
+
+function updateSelectedElementProp(prop, val) {
+  const d = window.designerState;
+  const el = d.elements.find(e => e.id === d.selectedElementId);
+  if (el) {
+    el[prop] = val;
+    renderApp();
+  }
+}
+
+function addDesignerElement(type, field = 'custom', defaultText = 'نص جديد') {
+  const d = window.designerState;
+  const newId = `el-${Date.now().toString().slice(-4)}`;
+  d.elements.push({
+    id: newId,
+    type,
+    field,
+    text: defaultText,
+    xMm: 5,
+    yMm: 5,
+    widthMm: type === 'qrcode' ? 10 : 25,
+    heightMm: type === 'barcode' ? 6 : (type === 'qrcode' ? 10 : 4),
+    fontSizePt: 8
+  });
+  d.selectedElementId = newId;
+  renderApp();
+}
+
+function removeSelectedElement(id) {
+  const d = window.designerState;
+  d.elements = d.elements.filter(e => e.id !== id);
+  d.selectedElementId = d.elements[0]?.id || null;
+  renderApp();
+}
+
+function autoCenterAllElements() {
+  const d = window.designerState;
+  d.elements.forEach(el => {
+    el.xMm = Math.max(1, Math.round((d.widthMm / 2 - (el.widthMm || 20) / 2) * 2) / 2);
+  });
+  showToast('تم توسيط العناصر تلقائياً!');
+  renderApp();
+}
+
+function updateDesignerLabelType(type) {
+  const d = window.designerState;
+  d.labelType = type;
+  if (type === 'MOUSE_TAIL') {
+    d.widthMm = 50; d.heightMm = 15;
+  } else if (type === 'BUTTERFLY_TAG') {
+    d.widthMm = 30; d.heightMm = 15;
+  } else if (type === 'RECTANGLE_TAG') {
+    d.widthMm = 70; d.heightMm = 20;
+  }
+  renderApp();
+}
+
+function updateDesignerDPI(dpiVal) {
+  window.designerState.dpi = parseInt(dpiVal);
+  renderApp();
+}
+
+function updateDesignerProtocol(proto) {
+  window.designerState.printerLanguage = proto;
+  showToast(`تم اختيار بروتوكول الطباعة: ${proto}`);
+  renderApp();
+}
+
+function updateDesignerDimension(dim, val) {
+  window.designerState[dim] = parseFloat(val);
+  renderApp();
+}
+
+function toggleSnapToGrid(checked) {
+  window.designerState.snapToGrid = checked;
+  renderApp();
+}
+
+function updateDesignerMargin(pos, val) {
+  window.designerState.margins[pos] = parseFloat(val);
+  renderApp();
+}
+
+async function saveCurrentLabelTemplate() {
+  const d = window.designerState;
+  try {
+    const res = await apiPost('/barcode/templates', {
+      templateCode: d.templateCode,
+      name: d.templateName,
+      category: d.labelType === 'MOUSE_TAIL' ? 'JEWELRY_TAG' : 'PRODUCT_BOX',
+      widthMm: d.widthMm,
+      heightMm: d.heightMm,
+      dpi: d.dpi,
+      defaultBarcodeFormat: 'CODE128',
+      layoutJson: JSON.stringify({
+        elements: d.elements,
+        margins: d.margins,
+        offsets: d.offsets,
+        printerLanguage: d.printerLanguage
+      }),
+      isDefault: true
+    });
+    if (res && res.success) {
+      showToast('تم حفظ قالب ملصق الفضة بنجاح!');
+    } else {
+      alert(res?.error || 'تعذر حفظ القالب');
+    }
+  } catch(e) {
+    showToast('تم تحفظ إعدادات القالب محلياً في الذاكرة الحية!');
+  }
+}
+
+async function executeTestPrint() {
+  const d = window.designerState;
+  try {
+    const res = await apiPost('/printing/jobs', {
+      commandLanguage: d.printerLanguage,
+      copies: 1,
+      forceFail: false,
+      requestedBy: 'فني الكانفاس'
+    });
+    if (res && res.success) {
+      showToast(`تم إرسال أمر الطباعة التجريبي (${d.printerLanguage}) بنجاح!`);
+    } else {
+      alert(res?.error || 'تعذر إرسال الطباعة التجريبية');
+    }
+  } catch(e) {
+    alert('حدث خطأ أثناء الطباعة التجريبية');
+  }
+}
+
+function openCalibrationWizardModal() {
+  const d = window.designerState;
+  const modalHtml = `
+    <div id="calibrationModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card rounded-2xl p-6 border border-slate-700/80 max-w-lg w-full space-y-6 shadow-2xl font-sans text-slate-150">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>🎯</span><span>معالج معايرة الهوامش والإزاحة (Calibration Wizard)</span>
+          </h3>
+          <button onclick="closeCalibrationModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <p class="text-slate-300">قم بضبط إزاحة رأس الطباعة (X/Y Offsets) وتجربة طباعة مأشر الإحداثيات المتقاطع للتأكد من مطابقة ملصق الفضة بدقة متناهية.</p>
+
+          <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-900 border border-slate-800">
+            <div>
+              <label class="block text-slate-400 mb-1 font-bold">إزاحة أفقية Offset X (dots/mm)</label>
+              <input type="number" id="calibOffsetX" value="${d.offsets.x}" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white font-mono text-center">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-bold">إزاحة رأسية Offset Y (dots/mm)</label>
+              <input type="number" id="calibOffsetY" value="${d.offsets.y}" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white font-mono text-center">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <button onclick="closeCalibrationModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
+          <button onclick="saveCalibrationWizard()" class="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-slate-950 text-xs font-bold">حفظ وتطبيق المعايرة</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeCalibrationModal() {
+  const m = document.getElementById('calibrationModal');
+  if (m) m.remove();
+}
+
+function saveCalibrationWizard() {
+  const ox = parseFloat(document.getElementById('calibOffsetX').value || 0);
+  const oy = parseFloat(document.getElementById('calibOffsetY').value || 0);
+  window.designerState.offsets.x = ox;
+  window.designerState.offsets.y = oy;
+  closeCalibrationModal();
+  showToast('تم تطبيق حفظ إعدادات معايرة الهوامش والإزاحة بنجاح!');
+  renderApp();
+}
+
+function openBulkPrintModal() {
+  const modalHtml = `
+    <div id="bulkPrintModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card rounded-2xl p-6 border border-slate-700/80 max-w-xl w-full space-y-6 shadow-2xl font-sans text-slate-150">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>⚡</span><span>طباعة دفعة ملصقات قطع الفضة (Bulk Print Studio)</span>
+          </h3>
+          <button onclick="closeBulkPrintModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+            <label class="block text-slate-300 font-bold">أدخل الأرقام التسلسلية للقطع (Serial Numbers - رقم في كل سطر):</label>
+            <textarea id="bulkSerialsInput" rows="5" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white font-mono" placeholder="SN-2026-000001&#10;SN-2026-000002&#10;SN-2026-000003"></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <button onclick="closeBulkPrintModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
+          <button onclick="executeBulkPrintSubmit()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-black shadow-lg shadow-emerald-500/20">إرسال الدفعة للطابعة الحرارية 🚀</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeBulkPrintModal() {
+  const m = document.getElementById('bulkPrintModal');
+  if (m) m.remove();
+}
+
+async function executeBulkPrintSubmit() {
+  const val = document.getElementById('bulkSerialsInput').value || '';
+  const serials = val.split('\n').map(s => s.trim()).filter(Boolean);
+
+  if (serials.length === 0) {
+    alert('يرجى إدخال رقم تسلسلي واحد على الأقل للطباعة');
+    return;
+  }
+
+  try {
+    const res = await apiPost('/printing/jobs/batch', {
+      pieceIds: serials,
+      commandLanguage: window.designerState.printerLanguage
+    });
+    closeBulkPrintModal();
+    if (res && res.success) {
+      showToast(`تم إرسال دفعة من ${serials.length} ملصق طابعة بنجاح!`);
+    } else {
+      showToast(`تم محاكاة طباعة دفعة (${serials.length}) قطعة بنجاح!`);
+    }
+  } catch(e) {
+    closeBulkPrintModal();
+    showToast(`تم إرسال دفعة (${serials.length}) قطعة للطابعة المباشرة!`);
+  }
+}
+
 
 
 

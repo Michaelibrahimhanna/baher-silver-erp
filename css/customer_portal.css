@@ -1,0 +1,31 @@
+/* =============================================================================
+   BAHER SILVER — SECURE CUSTOMER PORTAL STYLES
+   ============================================================================= */
+
+:root {
+  --portal-bg: #070b14;
+  --card-bg: rgba(15, 23, 42, 0.90);
+  --card-border: rgba(195, 176, 151, 0.25);
+  --brand-gold: #C3B097;
+  --cyan-accent: #06b6d4;
+  --emerald-pass: #10b981;
+}
+
+body {
+  background-color: var(--portal-bg);
+  color: #f8fafc;
+  font-family: 'Tajawal', 'Cairo', 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.portal-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 0.85rem;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+}
+
+.scope-badge-PUBLIC { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
+.scope-badge-PRIVATE { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #d97706; }
+.scope-badge-SHARED { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid #0891b2; }

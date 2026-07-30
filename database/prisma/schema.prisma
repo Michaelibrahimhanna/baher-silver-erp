@@ -225,9 +225,20 @@ model Movement {
   orderNo           String?
   notes             String?
   createdAt         DateTime       @default(now())
+  
   stoneId           String?
+  silverItemId      String?
+  rawMaterialId     String?
+  chemicalItemId    String?
+  componentItemId   String?
+  finishedProductId String?
 
-  stone Stone? @relation(fields: [stoneId], references: [id])
+  stone           Stone?           @relation(fields: [stoneId], references: [id], onDelete: SetNull)
+  silverItem      SilverItem?      @relation(fields: [silverItemId], references: [id], onDelete: SetNull)
+  rawMaterial     RawMaterial?     @relation(fields: [rawMaterialId], references: [id], onDelete: SetNull)
+  chemicalItem    ChemicalItem?    @relation(fields: [chemicalItemId], references: [id], onDelete: SetNull)
+  componentItem   ComponentItem?   @relation(fields: [componentItemId], references: [id], onDelete: SetNull)
+  finishedProduct FinishedProduct? @relation(fields: [finishedProductId], references: [id], onDelete: SetNull)
 
   @@map("inventory_movements")
 }

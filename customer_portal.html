@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بوابة العملاء المنفصلة وحافظة المنتجات الخاصة — باهر سيلفر ERP</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/baher_logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandgold: '#C3B097',
+            brandsilver: '#CBD5E1',
+            branddark: '#070B14'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/customer_portal.css">
+  <link rel="stylesheet" href="css/dpp_admin.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+
+  <!-- Header / Navigation Bar -->
+  <header class="w-full border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <img src="assets/baher_logo.png" alt="Baher Silver Customer Portal" class="w-9 h-9 object-contain bg-slate-950 p-1 rounded-lg border border-amber-500/40">
+        <div>
+          <h1 class="text-base font-black text-amber-300">بوابة العملاء وحافظة التصنيع الخاصة — باهر سيلفر ERP</h1>
+          <p class="text-xs text-slate-400">Customer Portal & Private Product Platform (Multi-Tenant Isolated Zone)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <button id="langToggleBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition">English 🌐</button>
+        <button id="logoutBtn" class="px-3 py-1.5 bg-red-950 text-red-300 hover:bg-red-900 border border-red-800 rounded-lg text-xs font-bold transition">تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Section (Shown when logged out) -->
+  <section id="loginSection" class="max-w-md mx-auto my-12 p-6 portal-card space-y-4">
+    <div class="text-center space-y-1">
+      <img src="assets/baher_logo.png" alt="Baher Silver Logo" class="w-16 h-16 mx-auto object-contain mb-2">
+      <h2 class="text-lg font-bold text-amber-300">تسجيل الدخول لبوابة العملاء الخاصة</h2>
+      <p class="text-xs text-slate-400">أدخل بيانات الاعتماد للوصول لأوامر تصنيعك وحافظة منتجاتك الخاصة</p>
+    </div>
+
+    <div id="loginErrorBox" class="hidden p-3 bg-red-950/80 border border-red-500/40 text-red-200 text-xs rounded-xl"></div>
+
+    <form id="customerLoginForm" class="space-y-3 text-xs">
+      <div>
+        <label class="block text-slate-400 mb-1">البريد الإلكتروني للعميل</label>
+        <input type="email" id="loginEmail" value="customer@bahersilver.com" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:border-amber-400 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-slate-400 mb-1">كلمة السر الخاصة</label>
+        <input type="password" id="loginPassword" value="password123" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:border-amber-400 outline-none">
+      </div>
+
+      <div class="flex items-center justify-between pt-1">
+        <label class="flex items-center space-x-2 space-x-reverse text-slate-400">
+          <input type="checkbox" id="rememberMeCheckbox" checked class="rounded bg-slate-950 border-slate-800">
+          <span>تذكرني (Remember Me)</span>
+        </label>
+        <a href="#" class="text-amber-400 hover:underline">نسيت كلمة السر؟</a>
+      </div>
+
+      <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition text-sm">تسجيل الدخول الآن 🔒</button>
+    </form>
+  </section>
+
+  <!-- Workspace Section (Shown when logged in) -->
+  <main id="workspaceSection" class="hidden max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Welcome Banner & Customer Profile Summary -->
+    <div class="portal-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-amber-300">أهلاً بك، <span id="customerWelcomeName">العميل الممتاز</span>! 👋</h2>
+        <p class="text-xs text-slate-400">الشركة: <span id="customerCompanyName" class="font-bold text-slate-200">شركة المجوهرات الذهبية والفضية</span> — مساحة عملك الخاصة معزولة ومضمونة 100%.</p>
+      </div>
+      <span class="px-3 py-1 bg-emerald-950 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full">جلسة آمنة (Customer Tenant Isolated)</span>
+    </div>
+
+    <!-- Customer KPI Stat Widgets -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="portal-card p-4 text-center border-amber-500/30">
+        <div class="text-xs text-amber-400 mb-1">أوامر التصنيع النشطة</div>
+        <div id="kpiActiveMos" class="text-2xl font-black text-amber-400 font-mono">0</div>
+      </div>
+      <div class="portal-card p-4 text-center border-cyan-500/30">
+        <div class="text-xs text-cyan-400 mb-1">منتجاتك الخاصة (Private)</div>
+        <div id="kpiPrivateProducts" class="text-2xl font-black text-cyan-400 font-mono">0</div>
+      </div>
+      <div class="portal-card p-4 text-center border-emerald-500/30">
+        <div class="text-xs text-emerald-400 mb-1">القطع المصنعة المكتملة</div>
+        <div id="kpiProducedPieces" class="text-2xl font-black text-emerald-400 font-mono">0</div>
+      </div>
+      <div class="portal-card p-4 text-center border-slate-700">
+        <div class="text-xs text-slate-400 mb-1">جوازات DPP الخاصة بك</div>
+        <div id="kpiDigitalPassports" class="text-2xl font-black text-slate-100 font-mono">0</div>
+      </div>
+    </div>
+
+    <!-- Recent Manufacturing Orders & Private Workspace -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="portal-card p-5 space-y-4">
+        <h3 class="text-sm font-bold text-amber-300 uppercase tracking-wider flex items-center space-x-2 space-x-reverse">
+          <span>🏭</span>
+          <span>أحدث أوامر تصنيعك (Recent Manufacturing Orders)</span>
+        </h3>
+        <div id="recentMosContainer" class="space-y-3"></div>
+      </div>
+
+      <div class="portal-card p-5 space-y-4">
+        <h3 class="text-sm font-bold text-cyan-300 uppercase tracking-wider flex items-center space-x-2 space-x-reverse">
+          <span>💎</span>
+          <span>كتالوج الفضة العام (Public Product Catalog)</span>
+        </h3>
+        <div id="publicCatalogContainer" class="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="js/customer_portal.js"></script>
+</body>
+</html>

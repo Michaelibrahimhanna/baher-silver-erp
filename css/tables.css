@@ -1,0 +1,37 @@
+/* =============================================================================
+   BAHER SILVER ERP — DATA TABLES & GRID SYSTEM
+   ============================================================================= */
+
+.bs-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.bs-table {
+  width: 100%;
+  text-align: right;
+  border-collapse: collapse;
+}
+
+.bs-table th {
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bs-table td {
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bs-table tr:hover td {
+  background: rgba(195, 176, 151, 0.05);
+}

@@ -1,0 +1,71 @@
+/* =============================================================================
+   BAHER SILVER — PUBLIC DIGITAL PRODUCT PASSPORT (DPP) PORTAL STYLES
+   ============================================================================= */
+
+:root {
+  --bg-dark: #070a12;
+  --card-bg: rgba(15, 23, 42, 0.85);
+  --card-border: rgba(195, 176, 151, 0.2);
+  --brand-gold: #c3b097;
+  --brand-silver: #e2e8f0;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+}
+
+body {
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(195, 176, 151, 0.08) 0px, transparent 50%);
+  color: #f1f5f9;
+  font-family: 'Tajawal', 'Cairo', 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  border-radius: 1rem;
+}
+
+.badge-silver {
+  background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #64748b 100%);
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.badge-authentic {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.tab-btn {
+  transition: all 0.3s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+  color: var(--brand-gold);
+  border-bottom-color: var(--brand-gold);
+  background: rgba(195, 176, 151, 0.1);
+}
+
+.gallery-thumbnail {
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.gallery-thumbnail:hover, .gallery-thumbnail.active {
+  transform: scale(1.05);
+  border-color: var(--brand-gold);
+}
+
+/* Modal styling */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}

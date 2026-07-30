@@ -1,0 +1,33 @@
+/* =============================================================================
+   BAHER SILVER ERP — FORMS & INPUT CONTROLS
+   ============================================================================= */
+
+.bs-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.bs-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.bs-input, .bs-select, .bs-textarea {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: var(--motion-fast);
+}
+
+.bs-input:focus, .bs-select:focus, .bs-textarea:focus {
+  border-color: var(--brand-gold-500);
+  box-shadow: 0 0 0 3px rgba(195, 176, 151, 0.2);
+}

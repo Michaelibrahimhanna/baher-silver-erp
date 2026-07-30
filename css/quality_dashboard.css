@@ -1,0 +1,32 @@
+/* =============================================================================
+   BAHER SILVER — QUALITY MANAGEMENT & TRACEABILITY DASHBOARD STYLES
+   ============================================================================= */
+
+:root {
+  --quality-bg: #090d16;
+  --card-bg: rgba(15, 23, 42, 0.90);
+  --card-border: rgba(16, 185, 129, 0.2);
+  --amber-gold: #f59e0b;
+  --cyan-accent: #06b6d4;
+  --emerald-pass: #10b981;
+}
+
+body {
+  background-color: var(--quality-bg);
+  color: #f8fafc;
+  font-family: 'Tajawal', 'Cairo', 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.quality-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 0.85rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.tree-node-active {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+}

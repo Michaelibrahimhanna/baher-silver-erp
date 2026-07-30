@@ -763,4 +763,83 @@ function getColorDot(color) {
   return `<span class="color-dot" style="background:${c}"></span>${color}`;
 }
 
-document.addEventListener('DOMContentLoaded', () => UI.init());
+document.addEventListener('DOMContentLoaded', () => {
+  UI.init();
+
+  // Command Palette Keyboard Shortcut (Ctrl+K or Cmd+K)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal) {
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+          const input = document.getElementById('cmd-palette-input');
+          if (input) input.focus();
+        }
+      }
+    }
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal && !modal.classList.contains('hidden')) modal.classList.add('hidden');
+      const notif = document.getElementById('bs-notification-drawer');
+      if (notif && !notif.classList.contains('hidden')) notif.classList.add('hidden');
+    }
+  });
+
+  // Global Event Delegation for Dynamic UI Components
+  document.addEventListener('click', (e) => {
+    // Open Command Palette
+    if (e.target.closest('#btn-open-command-palette')) {
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('cmd-palette-input');
+        if (input) input.focus();
+      }
+    }
+
+    // Toggle Notifications Drawer
+    if (e.target.closest('#btn-open-notifications') || e.target.closest('#btn-close-notifications')) {
+      const drawer = document.getElementById('bs-notification-drawer');
+      if (drawer) drawer.classList.toggle('hidden');
+    }
+
+    // Command Palette Quick Jump
+    const cmdItem = e.target.closest('[data-cmd-tab]');
+    if (cmdItem) {
+      const targetTab = cmdItem.getAttribute('data-cmd-tab');
+      const modal = document.getElementById('bs-command-palette-modal');
+      if (modal) modal.classList.add('hidden');
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(targetTab);
+      }
+    }
+
+    // Sidebar Navigation Click
+    const navItem = e.target.closest('[data-tab]');
+    if (navItem && !navItem.classList.contains('bs-tab-item')) {
+      const targetTab = navItem.getAttribute('data-tab');
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(targetTab);
+      }
+    }
+
+    // Toggle Theme Mode
+    if (e.target.closest('#btn-toggle-theme')) {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('baher_theme', isDark ? 'dark' : 'light');
+    }
+
+    // Toggle Sidebar Collapse
+    if (e.target.closest('#btn-toggle-sidebar')) {
+      const sidebar = document.getElementById('bs-app-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('w-72');
+        sidebar.classList.toggle('w-20');
+      }
+    }
+  });
+});
+

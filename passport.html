@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جواز المنتج الرقمي — باهر سيلفر للفضة المدموغة</title>
+
+  <!-- OpenGraph & Canonical SEO Meta Tags -->
+  <link rel="canonical" href="https://passport.bahersilver.com/v/SN-2026-000007">
+  <meta property="og:type" content="product">
+  <meta property="og:site_name" content="Baher Silver ERP Passport Engine">
+  <meta property="og:image" content="https://passport.bahersilver.com/assets/og_default_dpp.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/baher_logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandgold: '#C3B097',
+            brandsilver: '#CBD5E1',
+            branddark: '#070A12',
+            cardbg: 'rgba(15, 23, 42, 0.85)'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/dpp_portal.css">
+</head>
+<body class="bg-branddark text-slate-100 font-sans antialiased min-h-screen selection:bg-amber-400 selection:text-slate-950">
+
+  <!-- Header / Navigation Bar -->
+  <header class="w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <img src="assets/baher_logo.png" alt="Baher Silver Emblem" class="w-10 h-10 object-contain rounded-lg bg-slate-900 p-1 border border-amber-500/30">
+        <div>
+          <h1 class="text-lg font-black tracking-tight text-amber-300">باهر سيلفر <span class="text-slate-400 font-normal text-xs">BAHER SILVER</span></h1>
+          <p class="text-xs text-slate-400">جواز سفر المنتج الرقمي المعتمد — Digital Product Passport</p>
+        </div>
+      </div>
+
+      <!-- Language Toggle Switcher -->
+      <div class="flex items-center space-x-2 space-x-reverse bg-slate-900/90 p-1 rounded-xl border border-slate-800" role="region" aria-label="Language selector">
+        <button id="langArBtn" onclick="switchLanguage('ar')" aria-label="Switch to Arabic" class="px-3 py-1 text-xs font-bold rounded-lg bg-amber-500 text-slate-950 transition">العربية</button>
+        <button id="langEnBtn" onclick="switchLanguage('en')" aria-label="Switch to English" class="px-3 py-1 text-xs font-bold rounded-lg text-slate-400 hover:text-slate-100 transition">English</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    
+    <!-- Loading State -->
+    <div id="loadingState" class="flex flex-col items-center justify-center py-20" aria-live="polite">
+      <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p class="text-slate-400 text-sm">جاري تحميل بيانات الجواز الرقمي ورحلة المنتج...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden glass-card p-8 text-center max-w-md mx-auto my-12" role="alert">
+      <div class="text-4xl mb-3">⚠️</div>
+      <h2 class="text-xl font-bold text-red-400 mb-2">تعذر فتح الجواز الرقمي</h2>
+      <p class="text-slate-400 text-sm mb-4">الرقم التسلسلي غير مسجل في قاعدة البيانات.</p>
+    </div>
+
+    <!-- Main Read-Only Public Passport & Journey View -->
+    <div id="mainContent" class="hidden space-y-6">
+
+      <!-- Product Identity Banner Card -->
+      <div class="glass-card p-6 md:p-8 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-amber-400 to-cyan-500"></div>
+
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6 mb-6">
+          <div>
+            <div class="flex items-center space-x-2 space-x-reverse mb-2">
+              <span id="purityBadge" class="badge-silver px-3 py-1 rounded-full text-xs">925 Sterling Silver</span>
+              <span id="weightBadge" class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-bold">16.80 g</span>
+              <span id="viewCountBadge" class="bg-cyan-950 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full text-xs">👁️ 142 views</span>
+            </div>
+            <h2 id="productTitle" class="text-2xl md:text-3xl font-black text-slate-100 mb-1">خاتم فضة إيطالي مرصع بالعقيق الأحمر الملكي</h2>
+            <div class="flex items-center space-x-4 space-x-reverse text-xs text-slate-400 font-mono">
+              <span>SN: <strong id="serialNoBadge" class="text-amber-400">SN-2026-000007</strong></span>
+              <span>•</span>
+              <span id="skuBadge">SKU: BS-RNG-00192</span>
+            </div>
+          </div>
+
+          <!-- Authenticity Seal Badge -->
+          <div class="badge-authentic px-4 py-2 rounded-2xl flex items-center space-x-2 space-x-reverse">
+            <span class="text-xl">✓</span>
+            <div>
+              <div class="font-bold text-xs">منتج فضة أصلي ومعتمد</div>
+              <div class="text-[10px] opacity-90">100% Genuine Certified</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shareable Canonical Link Bar -->
+        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-2 text-xs">
+          <div class="truncate text-slate-400 font-mono flex items-center space-x-2 space-x-reverse">
+            <span class="text-amber-400">🔗 Canonical:</span>
+            <span id="canonicalUrlDisplay" class="truncate">https://passport.bahersilver.com/v/SN-2026-000007</span>
+          </div>
+
+          <div class="flex items-center space-x-2 space-x-reverse shrink-0">
+            <button onclick="copyShareUrl()" aria-label="Copy passport URL" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition font-semibold">نسخ الرابط</button>
+            <button onclick="triggerWebShare()" aria-label="Share passport" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition font-semibold">مشاركة</button>
+            <button onclick="toggleQrModal(true)" aria-label="View QR Code" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg transition font-bold">عرض QR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Accessible ARIA role="tablist") -->
+      <div class="flex border-b border-slate-800 space-x-2 space-x-reverse text-sm font-bold overflow-x-auto" role="tablist" aria-label="Passport Sections">
+        <button id="tabSpecsBtn" role="tab" aria-selected="true" onclick="switchTab('tabSpecs')" class="tab-btn active px-4 py-3 rounded-t-xl shrink-0">المواصفات والدمغة</button>
+        <button id="tabCareBtn" role="tab" aria-selected="false" onclick="switchTab('tabCare')" class="tab-btn px-4 py-3 rounded-t-xl shrink-0">تعليمات العناية</button>
+        <button id="tabWarrantyBtn" role="tab" aria-selected="false" onclick="switchTab('tabWarranty')" class="tab-btn px-4 py-3 rounded-t-xl shrink-0">الضمان الرقمي</button>
+        <button id="tabCertsBtn" role="tab" aria-selected="false" onclick="switchTab('tabCerts')" class="tab-btn px-4 py-3 rounded-t-xl shrink-0">الشهادات والأختام</button>
+        <button id="tabTimelineBtn" role="tab" aria-selected="false" onclick="switchTab('tabTimeline')" class="tab-btn px-4 py-3 rounded-t-xl shrink-0">مسار المنتج والتصنيع</button>
+        <button id="tabAuthBtn" role="tab" aria-selected="false" onclick="switchTab('tabAuth')" class="tab-btn px-4 py-3 rounded-t-xl shrink-0">التحقق من الأصالة</button>
+        <button id="tabGalleryBtn" role="tab" aria-selected="false" onclick="switchTab('tabGallery')" class="tab-btn px-4 py-3 rounded-t-xl shrink-0">معرض الصور و3D</button>
+      </div>
+
+      <!-- TAB 1: Specifications -->
+      <div id="tabSpecsContent" role="tabpanel" class="glass-card p-6">
+        <h3 class="text-lg font-bold text-amber-300 mb-4 flex items-center space-x-2 space-x-reverse">
+          <span>📋</span>
+          <span>جدول المواصفات الفنية والدمغة الرسمية</span>
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-sm">
+            <tbody id="specsTableContent"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: Product Care Instructions (Sprint 03) -->
+      <div id="tabCareContent" role="tabpanel" class="hidden glass-card p-6">
+        <h3 class="text-lg font-bold text-amber-300 mb-4 flex items-center space-x-2 space-x-reverse">
+          <span>✨</span>
+          <span>تعليمات العناية والمحافظة على بريق الفضة</span>
+        </h3>
+        <div id="careContent"></div>
+      </div>
+
+      <!-- TAB 3: Read-Only Warranty Info (Sprint 03) -->
+      <div id="tabWarrantyContent" role="tabpanel" class="hidden glass-card p-6">
+        <h3 class="text-lg font-bold text-amber-300 mb-4 flex items-center space-x-2 space-x-reverse">
+          <span>👑</span>
+          <span>شهادة الضمان الذهبي الرقمي (مدى الحياة)</span>
+        </h3>
+        <div id="warrantyContent"></div>
+      </div>
+
+      <!-- TAB 4: Digital Certificates & Trust Badges (Sprint 03) -->
+      <div id="tabCertsContent" role="tabpanel" class="hidden glass-card p-6">
+        <h3 class="text-lg font-bold text-amber-300 mb-4 flex items-center space-x-2 space-x-reverse">
+          <span>📜</span>
+          <span>الشهادات الرقمية وأختام الاعتماد القياسية</span>
+        </h3>
+        <div id="certificatesContent"></div>
+      </div>
+
+      <!-- TAB 5: Product Lifecycle Timeline (Sprint 03) -->
+      <div id="tabTimelineContent" role="tabpanel" class="hidden glass-card p-6">
+        <h3 class="text-lg font-bold text-amber-300 mb-4 flex items-center space-x-2 space-x-reverse">
+          <span>⏳</span>
+          <span>مسار دورة حياة القطعة (من الصياغة إلى البيع)</span>
+        </h3>
+        <div id="timelineContent"></div>
+      </div>
+
+      <!-- TAB 6: Authenticity Screen -->
+      <div id="tabAuthContent" role="tabpanel" class="hidden glass-card p-6 space-y-4">
+        <h3 class="text-lg font-bold text-emerald-400 mb-2 flex items-center space-x-2 space-x-reverse">
+          <span>🛡️</span>
+          <span>شاشة التوثيق والتحقق التفاعلي من الأصالة</span>
+        </h3>
+        <div id="authStatusBadge"></div>
+      </div>
+
+      <!-- TAB 7: Media Gallery & 3D Preview -->
+      <div id="tabGalleryContent" role="tabpanel" class="hidden glass-card p-6 space-y-6">
+        <h3 class="text-lg font-bold text-cyan-400 mb-4 flex items-center space-x-2 space-x-reverse">
+          <span>🖼️</span>
+          <span>معرض الصور عالية الدقة والعرض ثلاثي الأبعاد</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-center min-h-[300px]">
+            <img id="mainGalleryImage" src="assets/baher_logo.png" alt="Silver Jewelry Main Image" class="max-h-[350px] object-contain rounded-lg">
+          </div>
+
+          <div class="space-y-4">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">الصور المصغرة:</h4>
+            <div id="thumbnailsContainer" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPRINT 03: Related Products Recommendations Engine -->
+      <section id="relatedProductsSection" class="glass-card p-6 space-y-4">
+        <h3 class="text-md font-bold text-amber-300 flex items-center space-x-2 space-x-reverse">
+          <span>💎</span>
+          <span>قطع فضية مميزة ذات صلة (تشكيلة باهر سيلفر)</span>
+        </h3>
+        <div id="relatedProductsContent"></div>
+      </section>
+
+      <!-- SPRINT 03: Customer Contact & Support Channels Section -->
+      <section id="supportChannelsSection" class="glass-card p-6 space-y-4">
+        <h3 class="text-md font-bold text-cyan-300 flex items-center space-x-2 space-x-reverse">
+          <span>💬</span>
+          <span>قنوات الدعم المباشر والتواصل مع المصنع</span>
+        </h3>
+        <div id="supportChannelsContent"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full p-6 text-center space-y-4 border border-amber-500/30">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-md font-bold text-amber-300">رمز QR للجواز الرقمي</h3>
+        <button onclick="toggleQrModal(false)" aria-label="Close QR Modal" class="text-slate-400 hover:text-slate-100 text-lg">✕</button>
+      </div>
+
+      <div id="qrCodeContainer" class="w-48 h-48 mx-auto bg-slate-900 p-2 rounded-xl border border-slate-700 flex items-center justify-center"></div>
+
+      <p class="text-xs text-slate-400">امسح الكود بكاميرا الهاتف للوصول المباشر للجواز المعتمد.</p>
+
+      <div class="flex space-x-2 space-x-reverse justify-center">
+        <button onclick="downloadQrCode()" aria-label="Download Vector QR" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-bold text-xs transition">تحميل كود QR (SVG)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="hidden fixed bottom-6 left-6 z-50 bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl font-bold text-sm shadow-xl"></div>
+
+  <!-- Read-Only Script -->
+  <script src="js/dpp_portal.js"></script>
+</body>
+</html>

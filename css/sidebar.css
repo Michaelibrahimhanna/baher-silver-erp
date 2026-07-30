@@ -1,0 +1,24 @@
+/* =============================================================================
+   BAHER SILVER ERP — SIDEBAR COMPONENT STYLES
+   ============================================================================= */
+
+#bs-app-sidebar {
+  transition: var(--motion-normal);
+}
+
+.bs-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: var(--motion-fast);
+}
+
+.bs-nav-item.active {
+  background: linear-gradient(135deg, rgba(195, 176, 151, 0.2) 0%, rgba(195, 176, 151, 0.05) 100%);
+  color: var(--brand-gold-500);
+  border-right: 3px solid var(--brand-gold-500);
+}

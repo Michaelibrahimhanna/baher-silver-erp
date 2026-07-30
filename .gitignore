@@ -11,7 +11,7 @@ yarn-error.log*
 .env.production
 *.env.local
 
-# Database & SQLite SQLite/Dev Artifacts
+# Database & SQLite Artifacts
 apps/api-backend/prisma/dev.db
 apps/api-backend/prisma/dev.db-journal
 *.db
@@ -25,6 +25,8 @@ coverage/
 .DS_Store
 Thumbs.db
 scratch/
+*.zip
+.vercel
 
 # IDE Configuration
 .vscode/

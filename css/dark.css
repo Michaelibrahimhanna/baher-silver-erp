@@ -1,0 +1,17 @@
+/* =============================================================================
+   BAHER SILVER ERP — DARK THEME TOKENS
+   ============================================================================= */
+
+html.dark {
+  --bg-app: #090D16;
+  --bg-surface: #0F172A;
+  --bg-surface-elevated: #1E293B;
+  --bg-card: rgba(15, 23, 42, 0.85);
+  --border-color: rgba(195, 176, 151, 0.15);
+  --border-color-hover: rgba(195, 176, 151, 0.45);
+  
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #64748B;
+  --text-inverse: #0F172A;
+}

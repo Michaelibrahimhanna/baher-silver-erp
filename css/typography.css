@@ -1,0 +1,22 @@
+/* =============================================================================
+   BAHER SILVER ERP — TYPOGRAPHY SCALE & FONT SYSTEM
+   ============================================================================= */
+
+body {
+  font-family: 'Tajawal', 'Cairo', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: 'Cairo', 'Outfit', sans-serif;
+}
+
+/* Typography Scale */
+.text-xs   { font-size: 0.75rem;   line-height: 1rem; }    /* 12px */
+.text-sm   { font-size: 0.875rem;  line-height: 1.25rem; } /* 14px */
+.text-base { font-size: 1rem;      line-height: 1.5rem; }  /* 16px */
+.text-lg   { font-size: 1.125rem;  line-height: 1.75rem; } /* 18px */
+.text-xl   { font-size: 1.5rem;    line-height: 2rem; }    /* 24px */
+.text-2xl  { font-size: 2rem;      line-height: 2.25rem; } /* 32px */
+.text-3xl  { font-size: 3rem;      line-height: 1; }       /* 48px */

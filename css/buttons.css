@@ -1,0 +1,45 @@
+/* =============================================================================
+   BAHER SILVER ERP — BUTTON COMPONENTS
+   ============================================================================= */
+
+.bs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.55rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--motion-fast);
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.bs-btn-primary {
+  background: linear-gradient(135deg, var(--brand-gold-500) 0%, var(--brand-gold-600) 100%);
+  color: #0F172A;
+  box-shadow: 0 4px 14px rgba(195, 176, 151, 0.3);
+}
+
+.bs-btn-primary:hover {
+  background: linear-gradient(135deg, var(--brand-gold-600) 0%, var(--brand-gold-700) 100%);
+  box-shadow: 0 6px 20px rgba(195, 176, 151, 0.45);
+  transform: translateY(-1px);
+}
+
+.bs-btn-secondary {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.bs-btn-secondary:hover {
+  border-color: var(--border-color-hover);
+}
+
+.bs-btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); }
+.bs-btn-lg { padding: 0.75rem 1.75rem; font-size: 1rem; border-radius: var(--radius-lg); }

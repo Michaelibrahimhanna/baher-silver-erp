@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم وإدارة جوازات المنتج الرقمية — باهر سيلفر ERP</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/baher_logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandgold: '#C3B097',
+            brandsilver: '#CBD5E1',
+            branddark: '#090D16'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/dpp_admin.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+
+  <!-- Header / Navigation Bar -->
+  <header class="w-full border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <img src="assets/baher_logo.png" alt="Baher Silver Admin" class="w-9 h-9 object-contain bg-slate-950 p-1 rounded-lg border border-amber-500/40">
+        <div>
+          <h1 class="text-base font-black text-amber-300">نظام باهر سيلفر لإدارة الفضة — ERP v4.0</h1>
+          <p class="text-xs text-slate-400">لوحة التحكم وإدارة المحتوى والدمغة الرقمية (DPP Content Manager)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <a href="passport.html" target="_blank" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition">استعراض البوابة العامة 🔗</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Admin Dashboard Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- KPI Stats Widgets Row -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="admin-card p-4 text-center">
+        <div class="text-xs text-slate-400 mb-1">إجمالي الجوازات</div>
+        <div id="kpiTotalCount" class="text-2xl font-black text-slate-100 font-mono">0</div>
+      </div>
+      <div class="admin-card p-4 text-center border-emerald-500/30">
+        <div class="text-xs text-emerald-400 mb-1">المطبوعة والمفعلة</div>
+        <div id="kpiPublishedCount" class="text-2xl font-black text-emerald-400 font-mono">0</div>
+      </div>
+      <div class="admin-card p-4 text-center border-amber-500/30">
+        <div class="text-xs text-amber-400 mb-1">قيد المراجعة</div>
+        <div id="kpiReviewCount" class="text-2xl font-black text-amber-400 font-mono">0</div>
+      </div>
+      <div class="admin-card p-4 text-center border-slate-700">
+        <div class="text-xs text-slate-400 mb-1">المسودات (Draft)</div>
+        <div id="kpiDraftCount" class="text-2xl font-black text-slate-300 font-mono">0</div>
+      </div>
+      <div class="admin-card p-4 text-center border-cyan-500/30 col-span-2 md:col-span-1">
+        <div class="text-xs text-cyan-400 mb-1">إجمالي المشاهدات</div>
+        <div id="kpiTotalViews" class="text-2xl font-black text-cyan-400 font-mono">0</div>
+      </div>
+    </div>
+
+    <!-- Analytics Widgets & Top Scanned Products -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="admin-card p-4 space-y-3">
+        <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center space-x-1 space-x-reverse">
+          <span>🔥</span>
+          <span>الأكثر كشفاً ومسحاً (Top 5 Scanned)</span>
+        </h3>
+        <div id="topScannedList" class="space-y-2"></div>
+      </div>
+
+      <div class="admin-card p-4 space-y-3 md:col-span-2">
+        <h3 class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center space-x-1 space-x-reverse">
+          <span>📜</span>
+          <span>سجل النشر والترقيات الأخير (Publishing Audit Trail)</span>
+        </h3>
+        <div id="recentAuditLogList" class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <!-- Passports Content Manager Controls & Filters -->
+    <div class="admin-card p-6 space-y-4">
+
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <!-- Filter Tabs -->
+        <div class="flex border border-slate-800 rounded-xl p-1 bg-slate-950 text-xs font-bold space-x-1 space-x-reverse">
+          <button id="filterTab_ALL" onclick="filterByStatus('ALL')" class="filter-tab-btn px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950">الكل</button>
+          <button id="filterTab_DRAFT" onclick="filterByStatus('DRAFT')" class="filter-tab-btn px-3 py-1.5 rounded-lg text-slate-400">مسودة (Draft)</button>
+          <button id="filterTab_REVIEW" onclick="filterByStatus('REVIEW')" class="filter-tab-btn px-3 py-1.5 rounded-lg text-slate-400">قيد المراجعة</button>
+          <button id="filterTab_PUBLISHED" onclick="filterByStatus('PUBLISHED')" class="filter-tab-btn px-3 py-1.5 rounded-lg text-slate-400">منشور ومفعل</button>
+          <button id="filterTab_ARCHIVED" onclick="filterByStatus('ARCHIVED')" class="filter-tab-btn px-3 py-1.5 rounded-lg text-slate-400">مؤرشف</button>
+        </div>
+
+        <!-- Search input -->
+        <div class="w-full md:w-72">
+          <input type="text" id="searchInput" placeholder="بحث بالسيريال، SKU أو كود DPP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 focus:border-amber-400 outline-none">
+        </div>
+      </div>
+
+      <!-- Bulk Action Bar -->
+      <div id="bulkActionBar" class="hidden bg-amber-950/40 p-3 rounded-xl border border-amber-500/30 flex items-center justify-between text-xs">
+        <span id="selectedCountLabel" class="font-bold text-amber-300">0 قطع محددة</span>
+        <div class="flex space-x-2 space-x-reverse">
+          <button onclick="executeBulkStatusChange('PUBLISHED')" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg transition">نشر جماعي (Bulk Publish)</button>
+          <button onclick="executeBulkStatusChange('ARCHIVED')" class="px-3 py-1 bg-red-600 hover:bg-red-500 text-slate-100 font-bold rounded-lg transition">أرشفة جماعية (Bulk Archive)</button>
+        </div>
+      </div>
+
+      <!-- Main Passports Data Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-sm">
+          <thead class="bg-slate-950 text-slate-400 text-xs uppercase border-b border-slate-800">
+            <tr>
+              <th class="py-3 px-4 text-center">تحديد</th>
+              <th class="py-3 px-4">السيريال الفريد</th>
+              <th class="py-3 px-4">رمز SKU</th>
+              <th class="py-3 px-4">الحالة بالحالي</th>
+              <th class="py-3 px-4 text-center">الإصدار</th>
+              <th class="py-3 px-4 text-center">المشاهدات</th>
+              <th class="py-3 px-4 text-left">إجراءات الإدارة</th>
+            </tr>
+          </thead>
+          <tbody id="passportsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Certificate Template Manager & Live Preview -->
+    <div class="admin-card p-6 space-y-4">
+      <h3 class="text-md font-bold text-amber-300 flex items-center space-x-2 space-x-reverse">
+        <span>📜</span>
+        <span>مدير قوالب الشهادات والعرض الحي (Live Certificate Template Manager)</span>
+      </h3>
+      <div id="certificateTemplatesList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+    </div>
+
+  </main>
+
+  <!-- Edit Passport Modal -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="admin-card max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-md font-bold text-amber-300">محرر المحتوى والترجمة والتحديث الرقمي</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-100 text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">الرقم التسلسلي (غير قابل للتعديل)</label>
+          <input type="text" id="editSerialNo" disabled class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-amber-400">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">العنوان بالعربية (Arabic Title)</label>
+            <input type="text" id="editTitleAr" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">العنوان بالإنجليزية (English Title)</label>
+            <input type="text" id="editTitleEn" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">رابط الصورة الرئيسية (Primary Image URL)</label>
+          <input type="text" id="editPrimaryImage" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-cyan-400">
+        </div>
+
+        <!-- Version Rollback & Audit Diff Viewer Pane -->
+        <div class="border-t border-slate-800 pt-4 space-y-2">
+          <h4 class="font-bold text-amber-400 text-xs">سجل الإصدارات السابقة وتاريخ التعديلات (Version Rollback):</h4>
+          <div id="versionHistoryList" class="space-y-2 max-h-36 overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 space-x-reverse pt-3 border-t border-slate-800">
+        <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold">إلغاء</button>
+        <button onclick="savePassportChanges()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold">حفظ وإنشاء إصدار جديد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="hidden fixed bottom-6 left-6 z-50 bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl font-bold text-sm shadow-xl"></div>
+
+  <!-- Admin Script -->
+  <script src="js/dpp_admin.js"></script>
+</body>
+</html>
