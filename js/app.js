@@ -1665,7 +1665,10 @@ const state = {
   currency: 'EGP',
   currencySymbol: 'ج.م',
   activeTab: 'wh_dashboard',
+  isSidebarCollapsed: false,
+  isMobileSidebarOpen: false,
   selectedMasterCategory: 'STONE_CATEGORY',
+
   pendingColorHex: '#EF4444',
   pendingColorRequests: [],
   stoneColorFilter: '',
@@ -2100,13 +2103,17 @@ async function initApp() {
   await loadAllDatabaseData();
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  initApp();
-} else {
-  document.addEventListener('DOMContentLoaded', initApp);
-}
+window.toggleMobileSidebar = function(forceState) {
+  if (typeof forceState === 'boolean') {
+    state.isMobileSidebarOpen = forceState;
+  } else {
+    state.isMobileSidebarOpen = !state.isMobileSidebarOpen;
+  }
+  renderApp();
+};
 
 function renderApp() {
+
   const root = document.getElementById('app');
   if (!root) return;
 

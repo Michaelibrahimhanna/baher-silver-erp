@@ -47,6 +47,47 @@ const UIComponents = {
       },
       {
         group: 'التحليلات والنظام (Enterprise)',
+  renderSidebar(activeTab = 'dashboard', collapsed = false) {
+    const isMobileOpen = typeof state !== 'undefined' && state.isMobileSidebarOpen;
+
+    const modules = [
+      {
+        group: 'الرئيسية (Core)',
+        items: [
+          { id: 'wh_dashboard', icon: '📊', nameAr: 'لوحة القيادة التنفيذية', nameEn: 'Executive Dashboard', badge: 'v4.0' },
+          { id: 'stones', icon: '💎', nameAr: 'مخزون الأحجار الكريمة', nameEn: 'Gemstone Inventory' },
+          { id: 'raw_materials', icon: '🧪', nameAr: 'الخامات والكيماويات', nameEn: 'Raw & Chemicals' },
+          { id: 'silver_inventory', icon: '🪙', nameAr: 'خزينة الفضة والسبائك (925/999)', nameEn: 'Silver Bullion 925/999', badge: 'g/ct' },
+          { id: 'inventory_movements', icon: '🔄', nameAr: 'حركات وسجل المخزون', nameEn: 'Stock Movements' }
+        ]
+      },
+      {
+        group: 'التصنيع والهندسة (Engineering)',
+        items: [
+          { id: 'products', icon: '💍', nameAr: 'هندسة المنتجات والموديلات', nameEn: 'Product Engineering' },
+          { id: 'bom', icon: '🌲', nameAr: 'قوائم المواد ومسارات التصنيع', nameEn: 'BOM & Routings' },
+          { id: 'mo_kanban', icon: '🏭', nameAr: 'أوامر التصنيع ورش المصنع MO', nameEn: 'Manufacturing Orders' }
+        ]
+      },
+      {
+        group: 'التجارية والمشتريات (Commercial)',
+        items: [
+          { id: 'suppliers', icon: '🤝', nameAr: 'إدارة الموردين SRM', nameEn: 'Supplier Portal' },
+          { id: 'purchasing', icon: '📦', nameAr: 'أوامر الشراء والاستلام', nameEn: 'Purchasing & GRN' },
+          { id: 'customer_orders', icon: '🛒', nameAr: 'طلبات العملاء والتصاميم', nameEn: 'Customer Orders' }
+        ]
+      },
+      {
+        group: 'بوابة العملاء والخدمات (Portal & DPP)',
+        items: [
+          { id: 'customer_portal', icon: '🏛️', nameAr: 'بوابة العملاء الخاصة', nameEn: 'Customer Portal' },
+          { id: 'dpp_admin', icon: '🛡️', nameAr: 'جواز السفر الرقمي DPP & QR', nameEn: 'Digital Product Passport', badge: 'HMAC' },
+          { id: 'customer_service', icon: '🛠️', nameAr: 'مركز خدمة العملاء والإصلاح', nameEn: 'Customer Service Center' },
+          { id: 'warranty_center', icon: '📜', nameAr: 'مركز الضمانات والعيار 25 سنة', nameEn: 'Warranty Center' }
+        ]
+      },
+      {
+        group: 'التحليلات والنظام (Enterprise)',
         items: [
           { id: 'reports_analytics', icon: '📈', nameAr: 'التقارير والتحليلات المتقدمة', nameEn: 'Reports & BI Analytics' },
           { id: 'system_health', icon: '⚡', nameAr: 'صحة النظام والأجهزة HAL', nameEn: 'System Health & HAL' },
@@ -57,9 +98,19 @@ const UIComponents = {
     ];
 
     const collapsedClass = collapsed ? 'w-20' : 'w-72';
+    const mobileVisibilityClass = isMobileOpen 
+      ? 'fixed inset-y-0 right-0 z-50 flex w-72 shadow-2xl' 
+      : 'hidden md:flex';
 
-    let html = `
-      <aside id="bs-app-sidebar" class="bg-slate-900/95 border-l border-slate-800 flex flex-col transition-all duration-300 z-30 select-none ${collapsedClass}">
+    let html = '';
+
+    // Render Dark Backdrop Overlay for Mobile Drawer
+    if (isMobileOpen) {
+      html += `<div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 md:hidden animate-fade-in"></div>`;
+    }
+
+    html += `
+      <aside id="bs-app-sidebar" class="bg-slate-900/95 border-l border-slate-800 flex-col transition-all duration-300 select-none ${collapsedClass} ${mobileVisibilityClass}">
         <!-- Sidebar Brand Header -->
         <div class="h-16 px-4 flex items-center justify-between border-b border-slate-800">
           <div class="flex items-center gap-3 overflow-hidden">
@@ -71,9 +122,14 @@ const UIComponents = {
               <span class="text-[10px] text-amber-400 font-bold">ENTERPRISE v4.0</span>
             </div>
           </div>
-          <button id="btn-toggle-sidebar" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
-            <span class="text-sm">${collapsed ? '⏩' : '⏪'}</span>
-          </button>
+          <div class="flex items-center gap-1">
+            <button id="btn-toggle-sidebar" class="hidden md:block text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+              <span class="text-sm">${collapsed ? '⏩' : '⏪'}</span>
+            </button>
+            <button onclick="toggleMobileSidebar(false)" class="md:hidden text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition-colors font-bold text-sm" title="إغلاق القائمة">
+              ✕
+            </button>
+          </div>
         </div>
 
         <!-- Sidebar Navigation Menu -->
@@ -94,7 +150,7 @@ const UIComponents = {
           : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200';
 
         html += `
-          <button data-tab="${item.id}" class="bs-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all ${activeClass}">
+          <button data-tab="${item.id}" onclick="if(window.innerWidth < 768) toggleMobileSidebar(false);" class="bs-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all ${activeClass}">
             <span class="text-base flex-shrink-0">${item.icon}</span>
             <span class="truncate ${collapsed ? 'hidden' : 'block'}">${item.nameAr}</span>
             ${item.badge && !collapsed ? `<span class="mr-auto px-1.5 py-0.5 text-[9px] font-black rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">${item.badge}</span>` : ''}
@@ -129,38 +185,44 @@ const UIComponents = {
    */
   renderHeader(currentTitle = 'لوحة القيادة التنفيذية', activeTab = 'dashboard') {
     return `
-      <header class="h-16 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 flex items-center justify-between z-20">
-        <!-- Left Section: Breadcrumbs & Quick Search Trigger -->
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
-            <span class="hover:text-slate-200 cursor-pointer">باهر سيلفر ERP</span>
-            <span>/</span>
-            <span class="text-amber-400 font-bold">${currentTitle}</span>
+      <header class="h-16 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-3 md:px-6 flex items-center justify-between z-20 font-sans">
+        <!-- Left Section: Mobile Menu Toggle & Breadcrumbs -->
+        <div class="flex items-center gap-2 md:gap-4">
+          <!-- Mobile Hamburger Toggle Button -->
+          <button id="btn-mobile-menu" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-base font-bold transition-colors shadow" title="فتح القائمة الرئيسية">
+            ☰
+          </button>
+
+          <div class="flex items-center gap-1.5 text-[11px] md:text-xs text-slate-400 font-medium truncate max-w-[160px] sm:max-w-none">
+            <span class="hidden sm:inline hover:text-slate-200 cursor-pointer">باهر سيلفر ERP</span>
+            <span class="hidden sm:inline">/</span>
+            <span class="text-amber-400 font-bold truncate">${currentTitle}</span>
           </div>
         </div>
 
         <!-- Center Section: Command Palette Trigger -->
-        <div class="flex-1 max-w-md mx-6">
-          <button id="btn-open-command-palette" class="w-full flex items-center justify-between bg-slate-950/60 border border-slate-800 hover:border-slate-700 rounded-xl px-4 py-2 text-xs text-slate-400 transition-all shadow-inner">
-            <div class="flex items-center gap-2">
+        <div class="flex-1 max-w-md mx-2 md:mx-6">
+          <button id="btn-open-command-palette" class="w-full flex items-center justify-between bg-slate-950/60 border border-slate-800 hover:border-slate-700 rounded-xl px-2.5 md:px-4 py-2 text-xs text-slate-400 transition-all shadow-inner">
+            <div class="flex items-center gap-1.5 truncate">
               <span>🔍</span>
-              <span>البحث السريع في النظام والقطاع...</span>
+              <span class="hidden sm:inline truncate">البحث السريع في النظام والقطاع...</span>
+              <span class="sm:hidden text-[11px]">البحث...</span>
             </div>
-            <kbd class="px-2 py-0.5 text-[10px] font-mono font-bold bg-slate-800 text-slate-300 rounded border border-slate-700">Ctrl + K</kbd>
+            <kbd class="hidden md:inline-block px-2 py-0.5 text-[10px] font-mono font-bold bg-slate-800 text-slate-300 rounded border border-slate-700">Ctrl + K</kbd>
           </button>
         </div>
 
         <!-- Right Section: Actions, Notifications, Theme & Profile -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 md:gap-3">
           <!-- Quick Add Action Button -->
-          <button id="btn-quick-action" class="bs-btn bs-btn-primary bs-btn-sm shadow-md">
+          <button id="btn-quick-action" class="bs-btn bs-btn-primary bs-btn-sm shadow-md text-xs px-2.5 py-1.5">
             <span>➕</span>
-            <span>إضافة جديدة</span>
+            <span class="hidden sm:inline">إضافة جديدة</span>
           </button>
 
           <!-- Language Switcher -->
           <button id="btn-toggle-lang" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors">
-            🌐 AR
+            🌐 <span class="hidden sm:inline">AR</span>
           </button>
 
           <!-- Theme Mode Switcher -->
@@ -177,6 +239,7 @@ const UIComponents = {
       </header>
     `;
   },
+
 
   /**
    * 3. MULTI-TAB NAVIGATION BAR
