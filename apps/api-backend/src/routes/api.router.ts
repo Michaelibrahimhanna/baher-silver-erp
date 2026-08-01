@@ -248,6 +248,26 @@ router.put('/products/:id/routing', RoutingController.upsertRouting);
 router.get('/products/:id/cost', CostingController.getCost);
 router.post('/products/:id/cost/calculate', CostingController.calculateCost);
 
+// Phase 24: Enterprise Manufacturing Engine Endpoints
+import { ManufacturingController } from '../controllers/manufacturing.controller';
+
+router.get('/production/work-centers', ManufacturingController.getWorkCenters);
+router.post('/production/boms', ManufacturingController.upsertBOM);
+router.post('/production/orders', ManufacturingController.createMO);
+router.patch('/production/orders/:id/state', ManufacturingController.updateMOState);
+router.get('/production/orders/:moId/reservations', ManufacturingController.getReservations);
+router.post('/production/orders/:moId/consumption', ManufacturingController.recordConsumption);
+router.post('/production/returns', ManufacturingController.recordReturn);
+router.post('/production/scrap', ManufacturingController.recordScrap);
+router.post('/production/finished-goods/receive', ManufacturingController.receiveFinishedGoods);
+router.get('/production/orders/:moId/cost-rollup', ManufacturingController.getCostRollup);
+router.get('/production/dashboard/kpis', ManufacturingController.getDashboardKPIs);
+router.get('/production/events', ManufacturingController.getEventLogs);
+router.get('/production/orders/:moId/genealogy', ManufacturingController.getGenealogy);
+router.get('/production/orders/:moId/passport', ManufacturingController.getPassport);
+router.get('/production/work-centers/:id/calendar', ManufacturingController.getCalendar);
+router.get('/production/scheduler/recommendations', ManufacturingController.getScheduleRecommendation);
+
 export default router;
 
 
