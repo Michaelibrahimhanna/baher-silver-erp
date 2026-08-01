@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { RBACService } from '../services/rbac.service';
+import { SecurityHardeningService } from '../services/security_hardening.service';
 
 export class RBACController {
   static async listPermissionGroups(req: Request, res: Response) {
@@ -33,6 +34,26 @@ export class RBACController {
     try {
       const { permissionCodes } = req.body;
       const data = await RBACService.updateRolePermissions(req.params.id, permissionCodes || []);
+      res.json({ success: true, data });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  }
+
+  static async simulatePermissions(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const data = await SecurityHardeningService.simulateUserPermissions(userId);
+      res.json({ success: true, data });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  }
+
+  static async getPermissionDiff(req: Request, res: Response) {
+    try {
+      const { roleId, userId, proposedPermissionCodes } = req.body;
+      const data = await SecurityHardeningService.calculatePermissionDiff({ roleId, userId, proposedPermissionCodes });
       res.json({ success: true, data });
     } catch (err: any) {
       res.status(400).json({ success: false, error: err.message });

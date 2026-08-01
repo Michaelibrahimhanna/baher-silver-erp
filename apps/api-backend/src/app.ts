@@ -3,9 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import apiRouter from './routes/api.router';
+import { enforceHttpSecurityHeaders } from './middleware/http_security.middleware';
 
 const app = express();
 
+app.use(enforceHttpSecurityHeaders);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -20,10 +22,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+// API Routes (Mounted under /api/v1 and /api for backward compatibility)
 app.use('/api/v1', apiRouter);
+app.use('/api', apiRouter);
 
-// Serve Frontend Static Web App (index.html, customer_portal.html, passport.html, assets, css, js)
+// Serve Frontend Static Web App
 app.use(express.static(path.join(__dirname, '../../../')));
 
 // Fallback to index.html for SPA routing

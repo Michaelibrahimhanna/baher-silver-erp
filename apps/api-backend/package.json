@@ -7,6 +7,10 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "seed:dev": "ts-node src/scripts/seed_dev.ts",
+    "seed:demo": "ts-node src/scripts/seed_demo.ts",
+    "seed:production": "ts-node src/scripts/seed_production.ts",
+    "test:auth": "ts-node src/scripts/run_auth_acceptance_tests.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"

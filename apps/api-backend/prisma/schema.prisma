@@ -125,6 +125,8 @@ model User {
   isSystemUser         Boolean           @default(false)
   isTwoFactorEnabled   Boolean           @default(false)
   twoFactorSecret      String?
+  mustChangePassword   Boolean           @default(false)
+  isBreakGlassAccount  Boolean           @default(false)
   failedLoginCount     Int               @default(0)
   lockoutUntil         DateTime?
   lastLoginAt          DateTime?
@@ -137,6 +139,8 @@ model User {
   sessions             UserSession[]
   loginHistory         LoginHistory[]
   auditLogs            AuthAuditLog[]
+  passwordHistory      PasswordHistory[]
+  recoveryCodes        UserTwoFactorRecoveryCode[]
 }
 
 // -----------------------------------------------------------------------------
@@ -678,25 +682,27 @@ model UserPermissionOverride {
 }
 
 model UserSession {
-  id               String   @id @default(uuid())
-  userId           String
-  refreshTokenHash String   @unique
-  device           String?
-  browser          String?
-  os               String?
-  ipAddress        String?
-  lastActiveAt     DateTime @default(now())
-  isRevoked        Boolean  @default(false)
-  expiresAt        DateTime
+  id                   String   @id @default(uuid())
+  userId               String
+  refreshTokenHash     String   @unique
+  device               String?
+  browser              String?
+  os                   String?
+  ipAddress            String?
+  lastActiveAt         DateTime @default(now())
+  isRevoked            Boolean  @default(false)
+  terminationReason    String?
+  terminatedByUserId   String?
+  expiresAt            DateTime
 
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model LoginHistory {
   id         String   @id @default(uuid())
   userId     String?
   username   String
-  status     String   // SUCCESS | FAILED_PASSWORD | LOCKED | LOGOUT
+  status     String   // SUCCESS | FAILED_PASSWORD | LOCKED | LOGOUT | SUSPICIOUS
   ipAddress  String?
   browser    String?
   device     String?
@@ -709,17 +715,72 @@ model LoginHistory {
 }
 
 model AuthAuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  action    String   // LOGIN, LOGOUT, CREATE_USER, UPDATE_PERMISSIONS, DELETE_ROLE, EXPORT_DATA
-  entity    String?
-  ipAddress String?
-  userAgent String?
-  status    String   @default("SUCCESS")
-  details   String?
-  timestamp DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String?
+  action       String   // LOGIN, LOGOUT, CREATE_USER, UPDATE_PERMISSIONS, DELETE_ROLE, IMPERSONATE, BREAK_GLASS, EXPORT_DATA
+  entity       String?
+  ipAddress    String?
+  userAgent    String?
+  status       String   @default("SUCCESS")
+  details      String?
+  previousHash String?  // Cryptographic hash chaining
+  currentHash  String?  // Cryptographic hash chaining
+  timestamp    DateTime @default(now())
 
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model PasswordHistory {
+  id           String   @id @default(uuid())
+  userId       String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model SecurityPolicyConfig {
+  id                      String   @id @default("default-security-policy")
+  minLength               Int      @default(8)
+  requireUppercase        Boolean  @default(true)
+  requireLowercase        Boolean  @default(true)
+  requireNumbers          Boolean  @default(true)
+  requireSpecialChars     Boolean  @default(true)
+  maxAgeDays              Int      @default(90)
+  preventReuseCount       Int      @default(5)
+  lockoutThreshold        Int      @default(5)
+  lockoutDurationMinutes  Int      @default(15)
+  securityHealthMinimumScore Int   @default(95)
+  featureSaasMultiTenant  Boolean  @default(false)
+  updatedAt               DateTime @updatedAt
+}
+
+model SecurityApprovalRequest {
+  id            String   @id @default(uuid())
+  requestType   String   // ROLE_CREATE | ROLE_UPDATE | ROLE_DELETE | PERMISSION_OVERRIDE
+  targetId      String   // Role ID or User ID
+  requestedBy   String
+  approvedBy    String?
+  payloadJson   String   // JSON string of proposed change
+  status        String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  rejectionNote String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model UserTwoFactorRecoveryCode {
+  id        String   @id @default(uuid())
+  userId    String
+  codeHash  String   @unique
+  isUsed    Boolean  @default(false)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // -----------------------------------------------------------------------------
