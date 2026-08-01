@@ -2310,6 +2310,56 @@ model DataRetentionPolicy {
   @@index([companyId])
 }
 
+// -----------------------------------------------------------------------------
+// PHASE 24.5: ENTERPRISE INTEGRATION LAYER MODELS (Outbox, DLQ & Idempotency)
+// -----------------------------------------------------------------------------
+
+model OutboxEvent {
+  id            String    @id @default(uuid())
+  correlationId String    @default(uuid())
+  eventType     String
+  aggregateType String    @default("MANUFACTURING")
+  aggregateId   String?
+  payload       String    // JSON string
+  status        String    @default("PENDING") // PENDING | PUBLISHED | FAILED
+  retryCount    Int       @default(0)
+  errorLog      String?
+  createdAt     DateTime  @default(now())
+  publishedAt   DateTime?
+
+  @@index([status])
+  @@index([correlationId])
+  @@index([createdAt])
+}
+
+model DeadLetterEvent {
+  id            String   @id @default(uuid())
+  outboxEventId String
+  correlationId String
+  eventType     String
+  payload       String   // JSON string
+  errorReason   String?
+  retryCount    Int      @default(3)
+  status        String   @default("UNRESOLVED") // UNRESOLVED | REPLAYED | DISCARDED
+  createdAt     DateTime @default(now())
+  replayedAt    DateTime?
+
+  @@index([status])
+  @@index([correlationId])
+}
+
+model IdempotencyRecord {
+  id             String   @id @default(uuid())
+  idempotencyKey String   @unique
+  targetEndpoint String
+  requestHash    String?
+  responseStatus Int      @default(200)
+  responseBody   String   // JSON response string
+  createdAt      DateTime @default(now())
+
+  @@index([idempotencyKey])
+}
+
 
 
 

@@ -268,6 +268,16 @@ router.get('/production/orders/:moId/passport', ManufacturingController.getPassp
 router.get('/production/work-centers/:id/calendar', ManufacturingController.getCalendar);
 router.get('/production/scheduler/recommendations', ManufacturingController.getScheduleRecommendation);
 
+// Phase 24.5: Enterprise Integration Layer Endpoints
+import { IntegrationController } from '../controllers/integration.controller';
+
+router.get('/integration/health-check', IntegrationController.getHealthDiagnostics);
+router.get('/integration/consistency-check', IntegrationController.getConsistencyCheck);
+router.post('/integration/events/publish', IntegrationController.publishEvent);
+router.post('/integration/outbox/process', IntegrationController.processOutbox);
+router.get('/integration/dlq', IntegrationController.getDLQ);
+router.post('/integration/dlq/:id/replay', IntegrationController.replayDLQ);
+
 export default router;
 
 

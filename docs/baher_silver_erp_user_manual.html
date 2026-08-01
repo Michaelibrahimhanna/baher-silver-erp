@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل المستخدم والتشغيل الشامل — مصنع باهر سيلفر ERP v4.0</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --primary: #0f172a;
+      --accent: #d97706;
+      --brand: #10b981;
+      --dark-card: #1e293b;
+      --light-text: #f8fafc;
+      --muted-text: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+      background-color: #090d16;
+      color: #e2e8f0;
+      line-height: 1.7;
+      padding: 40px;
+    }
+
+    .manual-container {
+      max-w: 1000px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Header & Cover */
+    .cover-page {
+      text-align: center;
+      padding: 40px 20px;
+      border-bottom: 2px solid #334155;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .cover-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 20px;
+      border: 2px solid #d97706;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(217, 119, 6, 0.3);
+      object-fit: cover;
+      background: #c3b097;
+    }
+
+    .cover-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .cover-subtitle {
+      font-size: 18px;
+      color: #d97706;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .badge-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      margin-top: 16px;
+    }
+
+    .badge {
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-amber { background: rgba(217, 119, 6, 0.15); color: #fbbf24; border: 1px solid rgba(217, 119, 6, 0.3); }
+    .badge-blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+    /* Table of Contents */
+    .toc {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .toc-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f59e0b;
+      margin-bottom: 16px;
+      display: flex;
+      items-center;
+      gap: 8px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .toc-list a {
+      color: #cbd5e1;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc-list a:hover {
+      color: #38bdf8;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-header {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      border-right: 4px solid #d97706;
+      padding-right: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .feature-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+    }
+
+    /* Feature Lists & Tables */
+    ul.feature-bullets {
+      list-style: none;
+      padding-right: 0;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    ul.feature-bullets li {
+      position: relative;
+      padding-right: 20px;
+      margin-bottom: 8px;
+    }
+
+    ul.feature-bullets li::before {
+      content: "✦";
+      position: absolute;
+      right: 0;
+      color: #d97706;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    table.data-table th {
+      background: #0f172a;
+      color: #f59e0b;
+      padding: 12px;
+      border: 1px solid #334155;
+      font-weight: 700;
+    }
+
+    table.data-table td {
+      padding: 12px;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+    }
+
+    table.data-table tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .code-snippet {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px;
+      color: #10b981;
+      margin-top: 8px;
+      direction: ltr;
+      text-align: left;
+      overflow-x: auto;
+    }
+
+    /* Print Optimizations */
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        padding: 0;
+      }
+      .manual-container {
+        border: none;
+        box-shadow: none;
+        background: #ffffff;
+        color: #000000;
+        padding: 0;
+      }
+      .cover-title, .section-header, .feature-title {
+        color: #000000 !important;
+      }
+      .feature-card, .toc {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+      }
+      .feature-desc, ul.feature-bullets li, table.data-table td {
+        color: #1e293b !important;
+      }
+      table.data-table th {
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .badge-green, .badge-amber, .badge-blue {
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="manual-container">
+  <!-- Cover Page -->
+  <div class="cover-page">
+    <img src="../assets/baher_logo.png" alt="Baher Silver ERP Logo" class="cover-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100%\' height=\'100%\' fill=\'%23c3b097\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'40\'>👑</text></svg>'">
+    <h1 class="cover-title">مصنع باهر سيلفر للفضة — BAHER SILVER ERP</h1>
+    <div class="cover-subtitle">دليل الإستخدام التشغيلي والكتالوج الشامل لمميزات النظام المؤسسي v4.0</div>
+    <p style="font-size: 13px; color: #94a3b8;">إصدار التثبيت المعتمد حتى المرحلة 24 (Enterprise Auth & Manufacturing Engine Release)</p>
+    
+    <div class="badge-container">
+      <span class="badge badge-green">AUTH v0.2.0-beta (APPROVED)</span>
+      <span class="badge badge-amber">MFG v0.3.0-mfg (APPROVED)</span>
+      <span class="badge badge-blue">ENTERPRISE SYSTEM RELEASE</span>
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <div class="toc-title">📌 فهرس أقسام وشاشات النظام</div>
+    <ul class="toc-list">
+      <li><a href="#sec-1">1. نظرة عامة والبنية التحتية الهندسية</a></li>
+      <li><a href="#sec-2">2. نظام الأمان والهوية ومنع الاختراق (Phase 23A.2+)</a></li>
+      <li><a href="#sec-3">3. محرك وأقسام التصنيع الثمانية (Phase 24 Engine)</a></li>
+      <li><a href="#sec-4">4. إدارة شجرة المواد BOM ومتغيرات المنتجات</a></li>
+      <li><a href="#sec-5">5. التتبع التراجعي والنسب الرقمي (Digital Genealogy)</a></li>
+      <li><a href="#sec-6">6. جواز السفر الرقمي DPP والضمان 25 سنة</a></li>
+      <li><a href="#sec-7">7. إدارة الهدر والكسر وتكرير الفضة النظيفة</a></li>
+      <li><a href="#sec-8">8. استوديو طباعة باركود ملصقات المجوهرات ZPL/TSPL</a></li>
+    </ul>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section" id="sec-1">
+    <div class="section-header">
+      <span>1. نظرة عامة والبنية التحتية الهندسية للنظام</span>
+      <span style="font-size: 12px; color: #94a3b8; font-family: monospace;">CORE ARCHITECTURE</span>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-title">⚙️ بنية تحتية فائقة الأداء وتصميم المؤسسات</div>
+      <div class="feature-desc">
+        تم بناء نظام **Baher Silver ERP v4.0** ليدير مصنع باهر سيلفر للفضة بكافة خطوط إنتاجه ومخازنه السبعة ومعارضه. يتميز النظام بالخصائص الهندسية التالية:
+      </div>
+      <ul class="feature-bullets">
+        <li><strong>واجهة مستخدم عربية كاملة RTL:</strong> مصممة بأسلوب Glassmorphism العصري مع دعم الشاشات المظلمة والمقاسات التفاعلية.</li>
+        <li><strong>معمارية خلفية عصرية Node.js Express & TypeScript:</strong> تضمن سرعة معالجة عالية وثبات في الأداء تحت الضغط التشغيلي.</li>
+        <li><strong>قواعد بيانات Prisma ORM:</strong> دعم SQLite للتطوير والتجربة مع إمكانية التحول الفوري لـ PostgreSQL للمصانع الكبرى.</li>
+        <li><strong>تكامل الموديلات بالنسق التكاملي 100%:</strong> ربط كامل بين شجرة المنتجات، المخازن السبعة، خطوط التصنيع، وسجلات التدقيق المحمية.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section id="sec-2" style="page-break-before: always;">
+    <div class="section-header">
+      <span>2. نظام الهوية والأمان وتحديد الصلاحيات المؤسسي (Security System)</span>
+      <span style="font-size: 12px; color: #10b981; font-family: monospace;">PASSED (95/100)</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">🛡️ مركز اختبارات الأمان والاعتماد التلقائي (Auth Test Center)</div>
+      <div class="feature-desc">
+        يحتوي النظام على مركز اختبارات أمني شامل ينفذ 25 حالة اختبار حتمية للتأكد من حماية حسابات الموظفين ومنع التسريب أو التلاعب:
+      </div>
+      <ul class="feature-bullets">
+        <li><strong>آلية الحظر التلقائي عند المحاولات الخاطئة:</strong> حظر الحساب فوراً لمدة 15 دقيقة عند تكرار إدخال كلمة المرور الخاطئة 5 مرات متتالية.</li>
+        <li><strong>محرك سياسات كلمات السر وتتبع التاريخ:</strong> منع استخدام آخر 5 كلمات سر سابقة وتطبيق شروط التعقيد (رموز، أرقام، أحرف كبيرة وصغيرة).</li>
+        <li><strong>إدارة الجلسات والأجهزة (Session Monitor):</strong> مراقبة الأجهزة والـ IP النشطة لكل موظف مع إمكانية إنهاء الجلسة فوراً مع إدخال سبب الإنهاء الإجباري.</li>
+        <li><strong>أداة تقمص حسابات الموظفين (User Impersonation):</strong> يتيح لمدير النظام الفائق الدخول باسم أي موظف لمعاينة صلاحياته دون معرفة كلمة السر، مع تسجيل حدث أمني إجباري.</li>
+        <li><strong>سلسلة السجلات التشفيرية (Cryptographic Hash-Chain Audit Trail):</strong> ربط سجلات التدقيق بآلية SHA-256 لمنع التعديل أو المسح من قاعدة البيانات.</li>
+        <li><strong>حساب الطوارئ المعزول (Break Glass Emergency Protocol):</strong> حساب طوارئ مغلق افتراضياً لا يتفعل إلا بطلب مسبب مع إجبار تغيير كلمة السر فور الدخول.</li>
+        <li><strong>واجهة منع الوصول الودية (RTL 403 Access Denied Shield):</strong> استبدال الشاشات البيضاء أو الخام بواجهة أمان فاخرة توضح رمز الصلاحية المطلوبة وزر "طلب صلاحية من الأدمن".</li>
+      </ul>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>الدوار المؤسسي (System Role)</th>
+          <th>وصف المسئولية والنطاق التشغيلي</th>
+          <th>مستوى الصلاحية</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color: #fbbf24;">SUPER_ADMIN</strong></td>
+          <td>مدير النظام الفائق — تحكم كامل بكافة الشاشات والصلاحيات وإلغاء الحظر وتفعيل الطوارئ</td>
+          <td>تخطي كامل (*)</td>
+        </tr>
+        <tr>
+          <td><strong style="color: #38bdf8;">FACTORY_MANAGER</strong></td>
+          <td>مدير المصنع — إدارة أمر العمل وتعيين الفنيين وتتبع خطوط الإنتاج والتقارير</td>
+          <td>إداري مصنع</td>
+        </tr>
+        <tr>
+          <td><strong style="color: #a855f7;">WAREHOUSE_MANAGER</strong></td>
+          <td>أمناء المخازن — استلام الخامات، صرف مستلزمات التشغيل، واستلام المنتج التام بالخزينة</td>
+          <td>تشغيلي مخازن</td>
+        </tr>
+        <tr>
+          <td><strong style="color: #10b981;">CASHIER / SALES</strong></td>
+          <td>موظفو المبيعات والمعرض — تسجيل الطلبات ومعاينة المخزون والقطع المتاحة</td>
+          <td>عرض ومبيعات</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section" id="sec-3" style="page-break-before: always;">
+    <div class="section-header">
+      <span>3. محرك وأقسام التصنيع المتكامل (Phase 24 Manufacturing Engine)</span>
+      <span style="font-size: 12px; color: #f59e0b; font-family: monospace;">APPROVED (25/25)</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">🏭 المحطات الثمانية المتخصصة لتصنيع الفضة (8 Work Centers)</div>
+      <div class="feature-desc">
+        يتميز محرك التصنيع بالربط الدقيق بين 8 أقسام متخصصة داخل المصنع لضمان جودة القطع وتسلسليتها:
+      </div>
+      
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>كود المحطة</th>
+            <th>اسم القسم والمركز التشغيلي</th>
+            <th>الطاقة الانتاجية</th>
+            <th>معدل التكلفة (ج.م/ساعة)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>WC-CASTING</code></td>
+            <td>قسم السباكة والصب الأولي لسبائك الفضة الشجرة</td>
+            <td>15 قطعة / ساعة</td>
+            <td>120.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-CLEANING</code></td>
+            <td>قسم الكحت والغسيل الكيميائي والموجات فوق الصوتية</td>
+            <td>25 قطعة / ساعة</td>
+            <td>70.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-SETTING</code></td>
+            <td>قسم تركيب وحشو الأحجار الكريمة والزركون الدقيق</td>
+            <td>8 قطعة / ساعة</td>
+            <td>150.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-POLISHING</code></td>
+            <td>قسم الصقل والتلميع عالي الجودة والبرادة</td>
+            <td>12 قطعة / ساعة</td>
+            <td>90.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-RHODIUM</code></td>
+            <td>قسم الطلاء بالروديوم وحماية الفضة من الأكسدة</td>
+            <td>20 قطعة / ساعة</td>
+            <td>180.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-HALLMARK</code></td>
+            <td>قسم الختم الحكومي والطباعة بالليزر عيار 925</td>
+            <td>30 قطعة / ساعة</td>
+            <td>60.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-QC</code></td>
+            <td>مختبر فحص ومراقبة الجودة البصرية والأبعاد</td>
+            <td>40 قطعة / ساعة</td>
+            <td>100.00 ج.م</td>
+          </tr>
+          <tr>
+            <td><code>WC-PACKAGING</code></td>
+            <td>قسم التغليف وإصدار بطاقة الجواز الرقمي QR</td>
+            <td>50 قطعة / ساعة</td>
+            <td>50.00 ج.م</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">🔄 دورة حياة أوامر التصنيع وتتبع الفنيين (MO State Machine)</div>
+      <div class="feature-desc">
+        تنتقل أوامر التصنيع عبر خط تشغيل صارم لمنع التداخل مع حساب دقيق لوقت التشغيل والإيقاف:
+      </div>
+      <div class="code-snippet">
+        [PLANNED] ➔ [CONFIRMED] ➔ [IN_PROGRESS] ⇄ [PAUSED] ➔ [QUALITY_CHECK] ➔ [COMPLETED]
+      </div>
+      <ul class="feature-bullets" style="margin-top: 12px;">
+        <li><strong>تعيين الفنيين على مستوى القطعة:</strong> ربط كل أمر عمل بفني صياغة محدد لحساب الإنتاجية الفردية.</li>
+        <li><strong>تتبع وقت العمل الدقيق:</strong> تسجيل وقت بدء التشغيل، فترات التوقف المؤقت، وإجمالي ساعات العمل الفعالة.</li>
+        <li><strong>السجل التاريخي المقاوم للتعديل:</strong> تسجيل كل حركة وتغيير حالة في جدول <code>ManufacturingOrderTimeline</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 4 & 5 -->
+  <div class="section" id="sec-4" style="page-break-before: always;">
+    <div class="section-header">
+      <span>4. شجرة المواد BOM وتكلفة المنتج الثمانية (8-Factor Rollup)</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">🧪 شجرة المواد الشاملة للموديلات والمتغيرات (BOM Engine)</div>
+      <div class="feature-desc">
+        يدعم النظام إعداد شجرة مكونات مستقلة لكل موديل ولكل مقاس/متغير (Variant) تشمل 5 أنواع من الخامات:
+      </div>
+      <ul class="feature-bullets">
+        <li><strong>SILVER:</strong> الفضة الخام والسبائك عيار 925 / 999 وزيادة هدر الصب.</li>
+        <li><strong>STONE:</strong> الأحجار الكريمة (زركون، زفير، فيروز) بالعدد والوزن.</li>
+        <li><strong>COMPONENT:</strong> المكونات المعدنية (برائم، شناكل، قفول).</li>
+        <li><strong>CHEMICAL:</strong> الكيماويات ومحاليل أحواض طلاء الروديوم.</li>
+        <li><strong>CONSUMABLE:</strong> مستهلكات الورشة (معجون تلميع، أقراص صنفرة، قوالب مطاط).</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">💰 حاسبة التكلفة الثمانية (8-Factor Production Cost Rollup)</div>
+      <div class="feature-desc">
+        يتم حساب تكلفة القطعة التامة بدقة محاسبية متناهية وفق المعادلة الرياضية التالية:
+      </div>
+      <div class="code-snippet">
+        تكلفة القطعة = (تكلفة الفضة + العمالة + الآلات + الكيماويات + الكهرباء + المصاريف الإدارية + تكلفة الهدر - قيمة الفضة المسترجعة) ÷ عدد القطع التامة
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6 & 7 -->
+  <div class="section" id="sec-6">
+    <div class="section-header">
+      <span>5. التتبع الرقمي والنسب وجواز السفر الرقمي (DPP & Genealogy)</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">📜 التتبع التاريخي العكسي (Digital Product Genealogy)</div>
+      <div class="feature-desc">
+        يمكن لأي مشغّل أو عميل تتبع التاريخ الكامل لإنتاج القطعة بدءاً من رقم شجرة الفضة الخام وحتى الختم النهائي:
+      </div>
+      <ul class="feature-bullets">
+        <li>معرفة رقم تشغيلة الفضة (Silver Lot) ونسبة النقاء.</li>
+        <li>أرقام تشغيلات الأحجار والمكونات والكيماويات المستخدمة.</li>
+        <li>أسماء جميع الفنيين الذين عملوا على القطعة والمحطات الثمانية التي مرت بها.</li>
+        <li>نتائج فحص الجودة QC وسجل الختم الحكومي.</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">💎 جواز السفر الرقمي للمنتج وضمان الـ 25 سنة (Digital Product Passport)</div>
+      <div class="feature-desc">
+        توليد تلقائي لبطاقة جواز سفر رقمي لكل قطعة مجوهرات تامة تحتوي على:
+      </div>
+      <ul class="feature-bullets">
+        <li>رمز باركود و كود QR فريد للتحقق الذكي من الهاتف.</li>
+        <li>تأكيد العيار الفضي 925 والوزن الصافي القائم.</li>
+        <li>شهادة ضمان المصنع المعتمدة لمدة 25 سنة ضد تغيير اللون أو عيوب التصنيع.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 8 -->
+  <div class="section" id="sec-8" style="page-break-before: always;">
+    <div class="section-header">
+      <span>6. استوديو طباعة باركود ملصقات المجوهرات (Jewelry Label Studio)</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-title">🏷️ تصميم وطباعة ملصقات قماش الفضة والباركود الحراري</div>
+      <div class="feature-desc">
+        استوديو متكامل مخصص لطباعة ملصقات الفضة والمجوهرات الحرارية ذات الذيل (Rat-tail / Butterfly Labels):
+      </div>
+      <ul class="feature-bullets">
+        <li><strong>دعم لغات الطابعات الحرارية المباشرة:</strong> ZPL II (Zebra), TSPL (TSC), EPL.</li>
+        <li><strong>طباعة دفعية سريعة (Bulk Print Studio):</strong> إدخال الأرقام التسلسلية وطباعة مئات الملصقات بنقرة واحدة.</li>
+        <li><strong>عرض بيانات القطعة على الملصق:</strong> كود SKU، اسم الموديل، الوزن الصافي بالجرام، العيار، وسعر البيع.</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #334155; font-size: 12px; color: #94a3b8;">
+      تم استخراج هذا الدليل الآلي بواسطة نظام **Baher Silver ERP Engine v4.0** — جميع الحقوق محفوظة لمصنع باهر سيلفر © 2026
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
