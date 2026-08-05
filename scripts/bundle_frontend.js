@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('Building self-contained production bundle for Hostinger deployment...');
+console.log('Building self-contained production bundle for Baher Silver ERP...');
 
 const rootDir = path.join(__dirname, '..');
 
@@ -30,12 +30,13 @@ for (const file of cssFiles) {
   }
 }
 fs.writeFileSync(path.join(cssDir, 'main.css'), bundledCss, 'utf8');
-console.log('✓ Successfully bundled 12 CSS files into css/main.css');
+console.log(`✓ Successfully bundled ${cssFiles.length} CSS files into css/main.css`);
 
-// 2. Bundle JS components into js/app.js
+// 2. Bundle JS components and app core into js/app.js in correct dependency order
 const jsDir = path.join(rootDir, 'js');
 const jsFiles = [
-  path.join(jsDir, 'ui_components.js'),
+  path.join(jsDir, 'components', 'Navigation.js'),
+  path.join(jsDir, 'components', 'Drawer.js'),
   path.join(jsDir, 'components', 'Sidebar.js'),
   path.join(jsDir, 'components', 'Header.js'),
   path.join(jsDir, 'components', 'Tabs.js'),
@@ -45,25 +46,20 @@ const jsFiles = [
   path.join(jsDir, 'components', 'CommandPalette.js'),
   path.join(jsDir, 'components', 'Notifications.js'),
   path.join(jsDir, 'components', 'Toast.js'),
-  path.join(jsDir, 'ui.js')
+  path.join(jsDir, 'ui_components.js'),
+  path.join(jsDir, 'ui.js'),
+  path.join(jsDir, 'app_core.js')
 ];
-
-const appJsPath = path.join(jsDir, 'app.js');
-const rawAppJs = fs.readFileSync(appJsPath, 'utf8');
 
 let bundledJs = `/* BAHER SILVER ERP v4.0 ENTERPRISE SELF-CONTAINED JS BUNDLE */\n`;
 for (const filePath of jsFiles) {
   if (fs.existsSync(filePath)) {
     bundledJs += `\n/* --- ${path.basename(filePath)} --- */\n` + fs.readFileSync(filePath, 'utf8');
+  } else {
+    console.warn(`⚠️ Warning: file not found: ${filePath}`);
   }
 }
 
-// Only append rawAppJs if it's not already bundled
-if (!rawAppJs.includes('/* BAHER SILVER ERP v4.0 ENTERPRISE SELF-CONTAINED JS BUNDLE */')) {
-  bundledJs += `\n/* --- app.js --- */\n` + rawAppJs;
-} else {
-  bundledJs = rawAppJs;
-}
-
+const appJsPath = path.join(jsDir, 'app.js');
 fs.writeFileSync(appJsPath, bundledJs, 'utf8');
-console.log('✓ Successfully bundled 11 JS components into self-contained js/app.js');
+console.log(`✓ Successfully bundled ${jsFiles.length} JS components into self-contained js/app.js`);

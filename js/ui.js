@@ -4,6 +4,11 @@
  * Does NOT touch app.js data logic
  */
 
+const Modal = {
+  open(id) { const el = document.getElementById(id); if (el) el.classList.remove('hidden'); },
+  close(id) { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }
+};
+
 /* ═══════════════════════════════════════════════════════════════
    TRANSLATIONS — Full AR/EN coverage
    ═══════════════════════════════════════════════════════════════ */
