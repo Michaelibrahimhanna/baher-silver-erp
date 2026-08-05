@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticateJWT, requirePermission, enforceRLS } from '../middleware/auth';
 import { WarehouseController } from '../controllers/warehouse.controller';
 import { StoneController } from '../controllers/stone.controller';
 import { RawMaterialController } from '../controllers/raw_material.controller';
@@ -249,8 +250,6 @@ router.get('/products/:id/cost', CostingController.getCost);
 router.post('/products/:id/cost/calculate', CostingController.calculateCost);
 
 // Phase 24: Enterprise Manufacturing Engine Endpoints
-import { ManufacturingController } from '../controllers/manufacturing.controller';
-
 router.get('/production/work-centers', ManufacturingController.getWorkCenters);
 router.post('/production/boms', ManufacturingController.upsertBOM);
 router.post('/production/orders', ManufacturingController.createMO);
